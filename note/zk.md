@@ -1,0 +1,12 @@
+- Paxos 算法
+- 角色：Leader Follower Observer
+- Leader 选举 超过半数
+- Leader 接受增删改的请求 发起proposal
+Follower和Leader进行投票 超过半数commit确认成功
+- 最终一致性、可靠性、原子性、顺序性（增删改都发给Leader节点）
+- 集群为什么奇数好：偶数也可以！从容错角度和偶数是一样的，可以少一台。奇数可以防脑裂。
+- 为什么要过半数：选leader和更新操作。容错。全部更完美，提高效率。
+- Watcher 注册一个只会通知一次。
+- 数据据保存在内存 定期落地磁盘
+- zookeeper 恢复模式-选主 广播模式（Zab 原子广播）
+- ZNode 临时和持久化
