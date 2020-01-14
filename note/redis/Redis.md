@@ -64,7 +64,7 @@ Redis全程使用hash结构，读取速度快，还有一些特殊的数据结�
 ## Redis持久化
 持久化是最简单的高可用方法（有时甚至不归为高可用的手段），主要作用是数据备份，即将数据存储在硬盘，保证数据不会因进程退出而丢失。
 #### RDB
-将当前数据生成快照保存到硬盘。RDB文件是经过压缩的二进制文件。压缩不是针对整个文件，而是对数据库中的字符串达到一定长度（20字节）时才会进行。
+将当前数据生成快照保存到硬盘，默认方式。RDB文件是经过压缩的二进制文件。压缩不是针对整个文件，而是对数据库中的字符串达到一定长度（20字节）时才会进行。
 1. 手动触发
     1. save命令会阻塞Redis服务器进程，直到RDB文件创建完毕，基本被废弃。
     2. bgsave命令会创建一个子进程去创建RDB文件，主进程继续处理请求。只有fork子进程时会阻塞服务器。
@@ -78,13 +78,15 @@ Redis全程使用hash结构，读取速度快，还有一些特殊的数据结�
 
 > 主从复制场景，从节点执行全量复制操作，则主节点会执行bgsave，并将rdb文件发送给从节点。执行shutdown命令会自动执行rdb持久化。
 
-- bgsave执行流程
-    1. Redis父进程首先判断当前是否在执行save/bgsave/bgrewriteaof的子进程，如果在执行则bgsave命令直接返回。  
-    bgsave/bgrewriteaof子进程不能同时执行，主要是性能方面考虑：两个并发的子进程同时执行大量的磁盘写操作，可能引起严重的性能问题。
-    2. 父进程执行fork操作创建子进程，这个过程中父进程是阻塞的，Redis不能执行来自客户端的任何命令。
-    3. 父进程fork后，bgsave命令返回Background saving started信息并不再阻塞父进程，并可以相应其他命令。
-    4. 子进程创建rdb文件，根据父进程内存快照生成临时快照文件，完成后对原有文件进行原子替换。
-    5. 子进程发送信号给父进程表示完成，父进程更新统计信息。
+- bgsave 执行流程
+
+![](img/bgsave.png)
+1. Redis父进程首先判断当前是否在执行save/bgsave/bgrewriteaof的子进程，如果在执行则bgsave命令直接返回。  
+bgsave/bgrewriteaof子进程不能同时执行，主要是性能方面考虑：两个并发的子进程同时执行大量的磁盘写操作，可能引起严重的性能问题。
+2. 父进程执行fork操作创建子进程，这个过程中父进程是阻塞的，Redis不能执行来自客户端的任何命令。
+3. 父进程fork后，bgsave命令返回Background saving started信息并不再阻塞父进程，并可以相应其他命令。
+4. 子进程创建rdb文件，根据父进程内存快照生成临时快照文件，完成后对原有文件进行原子替换。
+5. 子进程发送信号给父进程表示完成，父进程更新统计信息。
 - 启动时加载
 RDB文件的载入工作是在服务器启动时自动执行的，没有专门的命令。AOF开启时，会优先载入AOF文件来恢复数据；AOF关闭时才会在服务器启动时检测RDB文件并自动载入。  
 服务器载入期间处于阻塞状态，直到载入完成为止。如果文件损坏，日志中打印错误，Redis启动失败。
@@ -97,7 +99,31 @@ AOF记录每条写命令，因此不需要触发；执行流程如下
     2. no: 命令写入aof_buf后调用系统write操作，不对AOF文件做fsync同步；同步由操作系统负责，通常同步周期为30秒。
     文件同步时间不可控，且缓冲区中堆积的数据会很多，数据安全性无法保证。
     3. everysec: 命令写入后aof_buf后调用系统write操作，write完成后线程返回。fsync同步文件操作由专门的线程每秒调用一次。性能和数据安全的平衡；默认配置。
-3. 文件重写：定期重写AOF文件，达到压缩的目的
+3. 文件重写：定期重写AOF文件，达到压缩的目的。把进程内的数据转化为写命令同步到新的AOF文件。文件重写不是必须的。
+    1. 过期的数据不再写入文件
+    2. 无效的命令不再写入文件：重复设值、删除了的数据
+    3. 多条命令可以合并为一个。为了防止单条命令过大造成客户端缓冲区溢出，对于list、set、hash、zset类型的key，  
+    并不一定只使用一条命令；而是常量 REDIS_AOF_REWRITE_ITEMS_PER_CMD 为界将命令拆分多条。
+    - 手动触发：直接调用bgrewriteaof命令，该命令的执行与bgsave有些类似；都是fork子进程进行具体的工作，在fork时阻塞。
+    - 自动触发：两个条件同时满足时会触发bgrewriteaof命令
+        1. auto-aof-rewrite-min-size：执行AOF重写时，文件的最小体积，默认64MB。
+        2. auto-aof-rewrite-percentage: 执行AOF重写时，当前AOF大小（aof_current_size）和上一次重写时AOF大小（aof_base_size）的比值。
+- bgrewriteaof 执行流程 重写由父进程fork子进程进行；重写期间执行的写命令需要追加到新的AOF文件中，引入了aof_rewrite_buf缓存。
+
+![](img/bgrewriteaof.png)
+1. 父进程首先判断是否正在执行bgsave/bgrewriteaof的子进程，如果存在bgrewriteaof则直接返回，存在bgsave命令则等bgsave执行完成后再执行。
+2. 父进程执行fork操作创建子进程，这个过程父进程是阻塞的。
+3. 
+    1. 父进程fork后，bgrewriteaof命令返回 Background append only file rewrite started 信息并不再阻塞父进程，响应其他命令。Redis的所有写命令依然写入AOF缓存区，并根据appendfsync策略同步到硬盘保证原有AOF机制的正确。
+    2. fork操作使用写时复制技术，子进程只能共享fork操作操作时的内存数据。由于父进程依然在响应命令，因此Redis使用AOF重写缓存区（aof_rewrite_buf）保存这部分数据，防止新AOF文件生成期间丢失这部分数据。bgrewriteaof执行期间，Redis的写命令同时追加到aof_buf和aof_rewirte_buf两个缓冲区。
+4. 子进程根据内存快照，按照命令合并规则写入到新的AOF文件。
+5. 
+    1. 子进程写完新的AOF文件后，向父进程发信号，父进程更新统计信息。
+    2. 父进程把AOF文件重写缓冲区的数据写入到新的AOF文件，保证了新AOF文件所保存的数据库状态和服务器当前状态一致。
+    3. 使用新的AOF文件替换老文件，完成AOF重写。
+- 启动时加载：当AOF开启，但AOF文件不存在时，即使RDB文件存在也不会加载。  
+aof-load-truncated 默认开启，AOF文件结尾不完整，日志警告，忽略掉文件的尾部，服务器启动成功。  
+因为Redis的命令只能在客户端上下文中执行，载入AOF文件之前，服务器会创建一个没有网路连接的客户端，执行AOF文件命令。
 
 | 配置 | 默认值 | 说明
 |---|---|---|
@@ -107,6 +133,17 @@ AOF记录每条写命令，因此不需要触发；执行流程如下
 | rebchecksum | yes | 是否开启RDB文件验证；关闭大文件可以提升10%性能
 | dbfilename | dump.rdb | RDB文件名
 | dir | ./ | RDB文件和AOF文件所在目录
+| appendonly | no | 是否开启AOF
+| appendfilename | appendonly.aof | AOF文件名
+| appendfsync | everysec | fsync持久化策略
+| no-appendfsync-on-rewrite | no | AOF重写期间是否禁止fsync
+| auto-aof-rewrite-percentage | 100 | 文件重写触发条件之一
+| auto-aof-rewrite-min-size | 64MB | 文件重写触发条件之一
+| aof-load-truncated | yes | AOF文件结尾损坏，Redistribution启动时是否仍载入AOF文件
+
+RDB方式的优点是文件紧凑，体积小，网络传输快，适合全量复制；恢复速度比AOF快很多。对性能的影响相对较小。缺点是数据快照的持久化方式做不到实时，兼容性差。  
+AOF方式的优点是在于支持秒级持久化、兼容性好。缺点是文件大、恢复速度慢，对性能影响大。  
+在统一Redis实例中同时开启AOF和RDB方式的数据持久化方案也是可以的。重启时AOF文件将用于重建原始数据，因为AOF方式能最大限度保证数据的完整性。
 
 ## Redis部署
 #### 复制

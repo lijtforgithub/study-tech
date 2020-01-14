@@ -5,6 +5,9 @@
 获取全部配置项：config get *
 获取指定配置项：config get CONFIG_SETTING_NAME （config get port）
 设置配置项：config set CONFIG_SETTING_NAME NEW_CONFIG_VALUE（config SET loglevel "notice"）
+info memory
+info persistence
+
 ```
 ```
 auth password：验证密码是否正确
