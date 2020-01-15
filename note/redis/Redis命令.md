@@ -7,7 +7,7 @@
 设置配置项：config set CONFIG_SETTING_NAME NEW_CONFIG_VALUE（config SET loglevel "notice"）
 info memory
 info persistence
-
+info replication
 ```
 ```
 auth password：验证密码是否正确
