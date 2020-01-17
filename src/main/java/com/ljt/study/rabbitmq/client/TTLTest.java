@@ -2,10 +2,12 @@ package com.ljt.study.rabbitmq.client;
 
 
 import com.google.common.collect.Maps;
+import com.ljt.study.rabbitmq.delay.DelayConfig;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,40 +20,81 @@ public class TTLTest {
         TTLQueue.send();
         TTLMessage.send();
 
+        TTLQueueX.declare();
+
         TimeUnit.SECONDS.sleep(30);
         RabbitMQUtils.closeConnection();
     }
 
 
-    private static final String KEY = "x-message-ttl";
-    private static final String QUEUE_TTL = "test.client.ttl";
-    private static final String QUEUE_TTL_MSG = "test.client.ttl.message";
-
+    /**
+     * 队列上设置消息过期时间
+     */
     private static class TTLQueue {
+
+        private static final String QUEUE = "test.client.ttl";
 
         static void send() throws Exception {
             try (Channel channel = RabbitMQUtils.getChannel()) {
-                Map<String, Object> args = Maps.newHashMapWithExpectedSize(1);
-                args.put(KEY, 10000);
+                if (Objects.isNull(channel)) {
+                    System.out.println("Channel is null.");
+                    System.exit(-1);
+                }
 
-                channel.queueDeclare(QUEUE_TTL, false, true, true, args);
+                Map<String, Object> args = Maps.newHashMapWithExpectedSize(1);
+                args.put(DelayConfig.KEY_TTL, 10000);
+
+                channel.queueDeclare(QUEUE, false, true, true, args);
                 String message = "Hello TTL queue";
-                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE_TTL, null, message.getBytes());
+                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE, null, message.getBytes());
             }
         }
     }
 
+    /**
+     * 消息设置过期时间
+     */
     private static class TTLMessage {
+
+        private static final String QUEUE = "test.client.ttl.message";
 
         static void send() throws Exception {
             try (Channel channel = RabbitMQUtils.getChannel()) {
-                channel.queueDeclare(QUEUE_TTL_MSG, true, false, false, null);
+                if (Objects.isNull(channel)) {
+                    System.out.println("Channel is null.");
+                    System.exit(-1);
+                }
+
+                channel.queueDeclare(QUEUE, false, false, false, null);
                 String message = "Hello TTL message";
                 AMQP.BasicProperties properties =
                         new AMQP.BasicProperties().builder().deliveryMode(2).expiration("10000").build();
 
-                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE_TTL_MSG, properties,
+                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE, properties,
                         message.getBytes());
+            }
+        }
+    }
+
+    /**
+     * 队列过期时间
+     */
+    private static class TTLQueueX {
+
+        private static final String KEY = "x-expires";
+        private static final String QUEUE = "test.client.ttl.temp";
+
+        static void declare() throws Exception {
+            try (Channel channel = RabbitMQUtils.getChannel()) {
+                if (Objects.isNull(channel)) {
+                    System.out.println("Channel is null.");
+                    System.exit(-1);
+                }
+
+                Map<String, Object> args = Maps.newHashMapWithExpectedSize(1);
+                args.put(KEY, 10000);
+
+                channel.queueDeclare(QUEUE, true, false, false, args);
             }
         }
     }

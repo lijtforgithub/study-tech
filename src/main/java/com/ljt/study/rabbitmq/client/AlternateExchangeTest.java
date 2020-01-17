@@ -24,7 +24,7 @@ public class AlternateExchangeTest {
         RabbitMQUtils.closeConnection();
     }
 
-    private static final String AE_QUEUE = "test.client.ae.unrouted";
+    private static final String QUEUE_AE = "test.client.ae.unrouted";
 
     private static class Producer {
 
@@ -36,6 +36,11 @@ public class AlternateExchangeTest {
 
         static void send() throws Exception {
             try (Channel channel = RabbitMQUtils.getChannel()) {
+                if (Objects.isNull(channel)) {
+                    System.out.println("Channel is null.");
+                    System.exit(-1);
+                }
+
                 Map<String, Object> args = Maps.newHashMapWithExpectedSize(1);
                 args.put(KEY, EXCHANGE_FANOUT);
 
@@ -44,8 +49,8 @@ public class AlternateExchangeTest {
                 channel.queueBind(QUEUE, EXCHANGE_DIRECT, QUEUE);
 
                 channel.exchangeDeclare(EXCHANGE_FANOUT, BuiltinExchangeType.FANOUT, false);
-                channel.queueDeclare(AE_QUEUE, false, true, true, null);
-                channel.queueBind(AE_QUEUE, EXCHANGE_FANOUT, "");
+                channel.queueDeclare(QUEUE_AE, false, true, true, null);
+                channel.queueBind(QUEUE_AE, EXCHANGE_FANOUT, "");
 
                 String message = "备用交换机";
                 channel.basicPublish(EXCHANGE_DIRECT, "unbind-key", null, message.getBytes());
@@ -63,7 +68,7 @@ public class AlternateExchangeTest {
                 System.exit(-1);
             }
 
-            channel.basicConsume(AE_QUEUE, true, (consumerTag, delivery) -> {
+            channel.basicConsume(QUEUE_AE, true, (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                 System.out.println("Received " + message + " | RoutingKey = " + delivery.getEnvelope().getRoutingKey());
             }, consumerTag -> {

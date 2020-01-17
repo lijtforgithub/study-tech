@@ -26,9 +26,9 @@ public class DelayConfig {
         SpringApplication.run(DelayConfig.class);
     }
 
-    private static final String KEY_DLRK = "x-dead-letter-routing-key";
-    private static final String KEY_DLX = "x-dead-letter-exchange";
-    private static final String KEY_TTL = "x-message-ttl";
+    public static final String KEY_DLK = "x-dead-letter-routing-key";
+    public static final String KEY_DLX = "x-dead-letter-exchange";
+    public static final String KEY_TTL = "x-message-ttl";
 
     /**
      * TTL配置在消息上的缓冲队列
@@ -66,7 +66,7 @@ public class DelayConfig {
     public Queue ttlMessageQueue(RabbitAdmin rabbitAdmin) {
         Map<String, Object> args = Maps.newHashMapWithExpectedSize(2);
         args.put(KEY_DLX, EXCHANGE_DLX);
-        args.put(KEY_DLRK, QUEUE_DELAY);
+        args.put(KEY_DLK, QUEUE_DELAY);
         Queue queue = new Queue(QUEUE_TTL_MSG, true, false, false, args);
         rabbitAdmin.declareQueue(queue);
         return queue;
@@ -79,7 +79,7 @@ public class DelayConfig {
     public Queue ttlQueue() {
         return QueueBuilder.durable(QUEUE_TTL)
                 .withArgument(KEY_DLX, EXCHANGE_DLX) // DLX，dead letter发送到的exchange
-                .withArgument(KEY_DLRK, QUEUE_DELAY) // dead letter携带的routing key
+                .withArgument(KEY_DLK, QUEUE_DELAY) // dead letter携带的routing key
                 .withArgument(KEY_TTL, TTL_SED * 1000L) // 设置队列的过期时间
                 .build();
     }
