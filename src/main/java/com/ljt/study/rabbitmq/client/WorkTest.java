@@ -28,7 +28,7 @@ public class WorkTest {
     }
 
 
-    private static final String QUEUE_NAME = "test.client.work";
+    private static final String QUEUE = "test.client.work";
     private static final List<String[]> MSG_LIST = new ArrayList<>(3);
 
     private static class Producer {
@@ -41,12 +41,12 @@ public class WorkTest {
                     System.exit(-1);
                 }
 
-                channel.queueDeclare(QUEUE_NAME, true, false, false, null);
+                channel.queueDeclare(QUEUE, true, false, false, null);
 
                 for (String[] array : MSG_LIST) {
                     String message = getMessage(array);
                     // 将队列设置为持久化之后，还需要将消息也设为可持久化的，MessageProperties.PERSISTENT_TEXT_PLAIN
-                    channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+                    channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
                     System.out.println("Sent " + message);
                 }
             }
@@ -70,14 +70,14 @@ public class WorkTest {
                 System.exit(-1);
             }
 
-            channel.queueDeclare(QUEUE_NAME, true, false, false, null);
+            channel.queueDeclare(QUEUE, true, false, false, null);
             System.out.println("Waiting for messages ...");
 
             int prefetchCount = 1;
             channel.basicQos(prefetchCount);
             boolean autoAck = false;
 
-            channel.basicConsume(QUEUE_NAME, autoAck, new DefaultConsumer(channel) {
+            channel.basicConsume(QUEUE, autoAck, new DefaultConsumer(channel) {
 
                 @Override
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {

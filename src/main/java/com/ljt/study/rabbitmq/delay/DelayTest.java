@@ -32,7 +32,7 @@ public class DelayTest {
 
         int t = 1 * 30;
         String message = MessageFormat.format("我是一个延迟【{0, number, #}】秒消费的消息", t);
-        rabbitTemplate.convertAndSend(DelayConfig.TTL_MSG_QUEUE, message, msg -> {
+        rabbitTemplate.convertAndSend(DelayConfig.QUEUE_TTL_MSG, message, msg -> {
             msg.getMessageProperties().setExpiration(String.valueOf(t * 1000));
             return msg;
         });
@@ -54,7 +54,7 @@ public class DelayTest {
         for (int i = count; i > 0; i--) {
             int t = i * 10;
             String message = MessageFormat.format("我是一个设置延迟【{0, number, #}】秒消费的消息", t);
-            rabbitTemplate.convertAndSend(DelayConfig.TTL_MSG_QUEUE, message, msg -> {
+            rabbitTemplate.convertAndSend(DelayConfig.QUEUE_TTL_MSG, message, msg -> {
                 msg.getMessageProperties().setExpiration(String.valueOf(t * 1000));
                 return msg;
             });
@@ -71,8 +71,8 @@ public class DelayTest {
     public void testTTLQueue() throws InterruptedException {
         ConsumerListener.cdLatch = new CountDownLatch(1);
 
-        String message = MessageFormat.format("我是一个延迟【{0, number, #}】秒队列上的消息", DelayConfig.TTL_QUEUE_SED);
-        rabbitTemplate.convertAndSend(DelayConfig.TTL_QUEUE, message);
+        String message = MessageFormat.format("我是一个延迟【{0, number, #}】秒队列上的消息", DelayConfig.TTL_SED);
+        rabbitTemplate.convertAndSend(DelayConfig.QUEUE_TTL, message);
         log.info("发送消息：{}", message);
 
         ConsumerListener.cdLatch.await();
@@ -87,18 +87,18 @@ public class DelayTest {
         ConsumerListener.cdLatch = new CountDownLatch(2);
 
         String content = "我是一个延迟【{0, number, #}】秒队列上设置了延迟【{1, number, #}】秒消费的消息";
-        int t1 = (int) (DelayConfig.TTL_QUEUE_SED * 0.5);
-        String message = MessageFormat.format(content, DelayConfig.TTL_QUEUE_SED, t1);
-        rabbitTemplate.convertAndSend(DelayConfig.TTL_QUEUE, message, msg -> {
+        int t1 = (int) (DelayConfig.TTL_SED * 0.5);
+        String message = MessageFormat.format(content, DelayConfig.TTL_SED, t1);
+        rabbitTemplate.convertAndSend(DelayConfig.QUEUE_TTL, message, msg -> {
             msg.getMessageProperties().setExpiration(String.valueOf(t1 * 1000));
             return msg;
         });
         log.info("发送消息：{}", message);
 
 
-        int t2 = (int) (DelayConfig.TTL_QUEUE_SED * 1.5);
-        message = MessageFormat.format(content, DelayConfig.TTL_QUEUE_SED, t2);
-        rabbitTemplate.convertAndSend(DelayConfig.TTL_QUEUE, message, msg -> {
+        int t2 = (int) (DelayConfig.TTL_SED * 1.5);
+        message = MessageFormat.format(content, DelayConfig.TTL_SED, t2);
+        rabbitTemplate.convertAndSend(DelayConfig.QUEUE_TTL, message, msg -> {
             msg.getMessageProperties().setExpiration(String.valueOf(t2 * 1000));
             return msg;
         });

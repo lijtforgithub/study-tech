@@ -22,8 +22,8 @@ public class RoutingTest {
     }
 
 
-    private static final String[] LOG_QUEUE_NAME = {"test.client.log.debug", "test.client.log.info", "test.client.log.error"};
-    private static final String[] LOG_ROUTING_KEY = {"key.log.debug", "key.log.info", "key.log.error"};
+    private static final String[] QUEUE = {"test.client.log.debug", "test.client.log.info", "test.client.log.error"};
+    private static final String[] ROUTING_KEY = {"key.log.debug", "key.log.info", "key.log.error"};
 
     private static class Producer {
 
@@ -37,21 +37,21 @@ public class RoutingTest {
                 channel.exchangeDeclare(RabbitMQUtils.getDirectExchangeName(), BuiltinExchangeType.DIRECT);
 
                 for (int i = 0; i < 3; i++) {
-                    channel.queueDeclare(LOG_QUEUE_NAME[i], false, false, false, null);
+                    channel.queueDeclare(QUEUE[i], false, false, false, null);
                 }
 
                 for (int i = 0; i < 3; i++) {
-                    channel.queueBind(LOG_QUEUE_NAME[0], RabbitMQUtils.getDirectExchangeName(), LOG_ROUTING_KEY[i]);
+                    channel.queueBind(QUEUE[0], RabbitMQUtils.getDirectExchangeName(), ROUTING_KEY[i]);
                 }
                 for (int i = 1; i < 3; i++) {
-                    channel.queueBind(LOG_QUEUE_NAME[1], RabbitMQUtils.getDirectExchangeName(), LOG_ROUTING_KEY[i]);
+                    channel.queueBind(QUEUE[1], RabbitMQUtils.getDirectExchangeName(), ROUTING_KEY[i]);
                 }
 
-                channel.queueBind(LOG_QUEUE_NAME[2], RabbitMQUtils.getDirectExchangeName(), LOG_ROUTING_KEY[2]);
+                channel.queueBind(QUEUE[2], RabbitMQUtils.getDirectExchangeName(), ROUTING_KEY[2]);
                 String[] messages = {"debug.log", "info.log", "error.log"};
 
                 for (int i = 0; i < 3; i++) {
-                    channel.basicPublish(RabbitMQUtils.getDirectExchangeName(), LOG_ROUTING_KEY[i], null, messages[i].getBytes());
+                    channel.basicPublish(RabbitMQUtils.getDirectExchangeName(), ROUTING_KEY[i], null, messages[i].getBytes());
                     System.out.println("Sent " + messages[i]);
                 }
             }
@@ -72,7 +72,7 @@ public class RoutingTest {
             System.out.println("Waiting for messages ...");
 
             for (int i = 0; i < 3; i++) {
-                final String queueName = LOG_QUEUE_NAME[i];
+                final String queueName = QUEUE[i];
                 channel.basicConsume(queueName, true, new DefaultConsumer(channel) {
 
                     @Override

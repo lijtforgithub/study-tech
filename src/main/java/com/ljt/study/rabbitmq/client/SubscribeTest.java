@@ -46,7 +46,7 @@ public class SubscribeTest {
 
     private static class Consumer {
 
-        private static final String QUEUE_NAME = "test.client.subscribe";
+        private static final String QUEUE = "test.client.subscribe";
 
         static void receive() throws IOException {
             Channel channel = RabbitMQUtils.getChannel();
@@ -57,11 +57,11 @@ public class SubscribeTest {
             }
 
             channel.exchangeDeclare(RabbitMQUtils.getFanoutExchangeName(), BuiltinExchangeType.FANOUT);
-            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-            channel.queueBind(QUEUE_NAME, RabbitMQUtils.getFanoutExchangeName(), "");
+            channel.queueDeclare(QUEUE, false, false, false, null);
+            channel.queueBind(QUEUE, RabbitMQUtils.getFanoutExchangeName(), "");
             System.out.println("Waiting for messages ...");
 
-            channel.basicConsume(QUEUE_NAME, true, (consumerTag, delivery) -> {
+            channel.basicConsume(QUEUE, true, (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                 System.out.println("Received " + message);
             }, consumerTag -> {});

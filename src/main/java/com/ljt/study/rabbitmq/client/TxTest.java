@@ -25,7 +25,7 @@ public class TxTest {
     }
 
 
-    private static final String QUEUE_NAME = "test.client.tx";
+    private static final String QUEUE = "test.client.tx";
 
     private static class Producer {
 
@@ -39,12 +39,12 @@ public class TxTest {
 
             try {
 
-                channel.queueDeclare(QUEUE_NAME, false, false, true, null);
+                channel.queueDeclare(QUEUE, false, false, true, null);
                 String message = "Hello World";
 
                 // 声明事务
                 channel.txSelect();
-                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE_NAME, null, message.getBytes());
+                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE, null, message.getBytes());
 
                 if ((System.currentTimeMillis() & 1) == 0) {
                     throw new UnsupportedOperationException();
@@ -71,7 +71,7 @@ public class TxTest {
                 System.exit(-1);
             }
 
-            channel.basicConsume(QUEUE_NAME, true, (consumerTag, delivery) -> {
+            channel.basicConsume(QUEUE, true, (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                 System.out.println("Received " + message);
             }, consumerTag -> {

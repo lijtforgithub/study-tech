@@ -22,24 +22,25 @@ public class MandatoryTest {
     }
 
 
-    private static final String EXCHANGE_NAME = "test.direct.mandatory";
+    private static final String EXCHANGE = "test.direct.mandatory";
 
     private static class Producer {
 
         static void send() throws Exception {
+            // channel 不能提前关闭 不然没效果
             Channel channel = RabbitMQUtils.getChannel();
             if (Objects.isNull(channel)) {
                 System.out.println("Channel is null.");
                 System.exit(-1);
             }
 
-            channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
+            channel.exchangeDeclare(EXCHANGE, BuiltinExchangeType.DIRECT, false);
 
             String message = "Hello World!";
             channel.addReturnListener((replyCode, replyText, exchange, routingKey, properties, body) ->
                     System.out.println(new String(body, StandardCharsets.UTF_8) + "未投递成功 routingKey=" + routingKey));
 
-            channel.basicPublish(EXCHANGE_NAME, "unbind-key", true, MessageProperties.PERSISTENT_TEXT_PLAIN,
+            channel.basicPublish(EXCHANGE, "unbind-key", true, MessageProperties.PERSISTENT_TEXT_PLAIN,
                     message.getBytes());
         }
     }

@@ -28,19 +28,20 @@ public class DelayConfig {
 
     private static final String KEY_DLRK = "x-dead-letter-routing-key";
     private static final String KEY_DLX = "x-dead-letter-exchange";
+    private static final String KEY_TTL = "x-message-ttl";
 
     /**
      * TTL配置在消息上的缓冲队列
      */
-    static final String TTL_MSG_QUEUE = "test.delay.queue.message.ttl";
+    static final String QUEUE_TTL_MSG = "test.delay.ttl.message";
     /**
      * TTL配置在队列上的缓冲队列
      */
-    static final String TTL_QUEUE = "test.delay.queue.ttl";
+    static final String QUEUE_TTL = "test.delay.ttl.queue";
     /**
      * 队列TTL时间 单位秒
      */
-    static final int TTL_QUEUE_SED = 1 * 60;
+    static final int TTL_SED = 1 * 60;
     /**
      * DLX exchange
      */
@@ -66,7 +67,7 @@ public class DelayConfig {
         Map<String, Object> args = Maps.newHashMapWithExpectedSize(2);
         args.put(KEY_DLX, DLX_EXCHANGE);
         args.put(KEY_DLRK, DELAY_QUEUE);
-        Queue queue = new Queue(TTL_MSG_QUEUE, true, false, false, args);
+        Queue queue = new Queue(QUEUE_TTL_MSG, true, false, false, args);
         rabbitAdmin.declareQueue(queue);
         return queue;
     }
@@ -76,10 +77,10 @@ public class DelayConfig {
      */
     @Bean
     public Queue ttlQueue() {
-        return QueueBuilder.durable(TTL_QUEUE)
+        return QueueBuilder.durable(QUEUE_TTL)
                 .withArgument(KEY_DLX, DLX_EXCHANGE) // DLX，dead letter发送到的exchange
                 .withArgument(KEY_DLRK, DELAY_QUEUE) // dead letter携带的routing key
-                .withArgument("x-message-ttl", TTL_QUEUE_SED * 1000L) // 设置队列的过期时间
+                .withArgument(KEY_TTL, TTL_SED * 1000L) // 设置队列的过期时间
                 .build();
     }
 

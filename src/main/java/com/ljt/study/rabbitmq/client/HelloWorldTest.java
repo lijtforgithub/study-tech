@@ -24,7 +24,7 @@ public class HelloWorldTest {
     }
 
 
-    private static final String QUEUE_NAME = "test.client.helloworld";
+    private static final String QUEUE = "test.client.helloworld";
 
     private static final boolean durable = false; // 持久化 服务器重启后队列还在
     private static final boolean exclusive = true; // 独占队列 仅限于此连接 连接关闭自动删除（有消息也会）
@@ -40,10 +40,10 @@ public class HelloWorldTest {
                 }
 
 //                channel.queueDeclare(); 默认值 false true true
-                channel.queueDeclare(QUEUE_NAME, durable, exclusive, autoDelete, null);
+                channel.queueDeclare(QUEUE, durable, exclusive, autoDelete, null);
                 String message = "Hello World!";
 
-                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE_NAME, null, message.getBytes());
+                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE, null, message.getBytes());
                 System.out.println("Sent " + message);
             }
         }
@@ -59,10 +59,10 @@ public class HelloWorldTest {
                 System.exit(-1);
             }
 
-            channel.queueDeclare(QUEUE_NAME, durable, exclusive, autoDelete, null);
+            channel.queueDeclare(QUEUE, durable, exclusive, autoDelete, null);
             System.out.println("Waiting for messages ...");
 
-            channel.basicConsume(QUEUE_NAME, true, new DefaultConsumer(channel) {
+            channel.basicConsume(QUEUE, true, new DefaultConsumer(channel) {
 
                 @Override
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {

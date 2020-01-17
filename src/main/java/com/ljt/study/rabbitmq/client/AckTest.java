@@ -28,11 +28,11 @@ public class AckTest {
     }
 
 
-    private static final String QUEUE_NAME = "test.client.ack";
+    private static final String QUEUE = "test.client.ack";
 
     private static class Producer {
 
-        private static final String EXCHANGE_NAME = "test.direct.ack";
+        private static final String EXCHANGE = "test.direct.ack";
         private static final ConcurrentNavigableMap<Long, String> CONFIRM_MAP = new ConcurrentSkipListMap<>();
 
         static void send() throws Exception {
@@ -43,8 +43,8 @@ public class AckTest {
                     System.exit(-1);
                 }
 
-                channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.DIRECT);
-                channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+                channel.exchangeDeclare(EXCHANGE, BuiltinExchangeType.DIRECT);
+                channel.queueDeclare(QUEUE, false, false, false, null);
                 String message = "Hello World";
 
                 // confirmSelect方法将当前信道设置成了confirm模式
@@ -82,9 +82,9 @@ public class AckTest {
                 });
 
                 CONFIRM_MAP.put(channel.getNextPublishSeqNo(), message);
-                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE_NAME, null, message.getBytes());
+                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE, null, message.getBytes());
                 CONFIRM_MAP.put(channel.getNextPublishSeqNo(), message);
-                channel.basicPublish(EXCHANGE_NAME, QUEUE_NAME, null, message.getBytes());
+                channel.basicPublish(EXCHANGE, QUEUE, null, message.getBytes());
                 System.out.println(CONFIRM_MAP);
 
                 // 同步消息确认 方法阻塞
@@ -108,11 +108,11 @@ public class AckTest {
                 System.exit(-1);
             }
 
-            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+            channel.queueDeclare(QUEUE, false, false, false, null);
             System.out.println("Waiting for messages ...");
 
             channel.basicQos(1); // 限制有未确认的消息不能再消费
-            channel.basicConsume(QUEUE_NAME, false, (consumerTag, delivery) -> {
+            channel.basicConsume(QUEUE, false, (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                 System.out.println("Received " + message);
 //                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), true); // 消息确认
