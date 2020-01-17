@@ -14,6 +14,7 @@ connection TCP连接 创建多个 channel 虚拟连接（线程私有）
 - durable = false;  持久化 服务器重启后队列还在
 - exclusive = true;  独占队列 仅限于此连接 连接关闭自动删除（有消息也会）
 - autoDelete = true;  自动删除队列 服务器不再使用是自动删除（消息消费完）
+- deliveryMode=2 投递模式 消息会持久化
 
 1. channel.waitForConfirms() 普通发送方确认模式
 2. channel.waitForConfirmsOrDie() 批量确认模式

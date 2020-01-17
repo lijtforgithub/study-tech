@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class MandatoryTest {
 
     public static void main(String[] args) throws Exception {
-        new Producer().send();
+        Producer.send();
 
         TimeUnit.SECONDS.sleep(10);
         RabbitMQUtils.closeConnection();

@@ -16,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 public class TxTest {
 
     public static void main(String[] args) throws Exception {
-        new Producer().send();
-        new Consumer().receive();
+        Producer.send();
+        Consumer.receive();
 
         TimeUnit.SECONDS.sleep(20);
         RabbitMQUtils.closeConnection();

@@ -20,8 +20,8 @@ public class WorkTest {
         MSG_LIST.add(new String[]{"Second message.."});
         MSG_LIST.add(new String[]{"Third message..."});
 
-        new Producer().send();
-        new Consumer().receive();
+        Producer.send();
+        Consumer.receive();
 
         TimeUnit.SECONDS.sleep(10);
         RabbitMQUtils.closeConnection();

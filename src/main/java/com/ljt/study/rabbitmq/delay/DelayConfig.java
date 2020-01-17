@@ -45,11 +45,11 @@ public class DelayConfig {
     /**
      * DLX exchange
      */
-    private static final String DLX_EXCHANGE = "test.delay.exchange.ddl";
+    private static final String EXCHANGE_DLX = "test.delay.exchange.ddl";
     /**
      * 实际消费队列 DLX转发队列
      */
-    private static final String DELAY_QUEUE = "test.delay.queue.consumer";
+    private static final String QUEUE_DELAY = "test.delay.queue.consumer";
 
     @Autowired
     private CachingConnectionFactory connectionFactory;
@@ -65,8 +65,8 @@ public class DelayConfig {
     @Bean
     public Queue ttlMessageQueue(RabbitAdmin rabbitAdmin) {
         Map<String, Object> args = Maps.newHashMapWithExpectedSize(2);
-        args.put(KEY_DLX, DLX_EXCHANGE);
-        args.put(KEY_DLRK, DELAY_QUEUE);
+        args.put(KEY_DLX, EXCHANGE_DLX);
+        args.put(KEY_DLRK, QUEUE_DELAY);
         Queue queue = new Queue(QUEUE_TTL_MSG, true, false, false, args);
         rabbitAdmin.declareQueue(queue);
         return queue;
@@ -78,8 +78,8 @@ public class DelayConfig {
     @Bean
     public Queue ttlQueue() {
         return QueueBuilder.durable(QUEUE_TTL)
-                .withArgument(KEY_DLX, DLX_EXCHANGE) // DLX，dead letter发送到的exchange
-                .withArgument(KEY_DLRK, DELAY_QUEUE) // dead letter携带的routing key
+                .withArgument(KEY_DLX, EXCHANGE_DLX) // DLX，dead letter发送到的exchange
+                .withArgument(KEY_DLRK, QUEUE_DELAY) // dead letter携带的routing key
                 .withArgument(KEY_TTL, TTL_SED * 1000L) // 设置队列的过期时间
                 .build();
     }
@@ -89,7 +89,7 @@ public class DelayConfig {
      */
     @Bean
     public Queue consumerQueue(RabbitAdmin rabbitAdmin) {
-        return new Queue(DELAY_QUEUE);
+        return new Queue(QUEUE_DELAY);
     }
 
     /**
@@ -97,7 +97,7 @@ public class DelayConfig {
      */
     @Bean
     public DirectExchange delayExchange() {
-        return new DirectExchange(DLX_EXCHANGE);
+        return new DirectExchange(EXCHANGE_DLX);
     }
 
     /**
@@ -107,7 +107,7 @@ public class DelayConfig {
     public Binding dlxBinding(Queue consumerQueue, DirectExchange delayExchange) {
         return BindingBuilder.bind(consumerQueue)
                 .to(delayExchange)
-                .with(DELAY_QUEUE);
+                .with(QUEUE_DELAY);
     }
 
     @Bean

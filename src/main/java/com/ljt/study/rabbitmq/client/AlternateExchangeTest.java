@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 public class AlternateExchangeTest {
 
     public static void main(String[] args) throws Exception {
-        new Producer().send();
-        new Consumer().receive();
+        Producer.send();
+        Consumer.receive();
 
         TimeUnit.SECONDS.sleep(20);
         RabbitMQUtils.closeConnection();
@@ -29,26 +29,26 @@ public class AlternateExchangeTest {
     private static class Producer {
 
         private static final String KEY = "alternate-exchange";
-        private static final String DIRECT_EXCHANGE = "test.direct.ae";
-        private static final String FANOUT_EXCHANGE = "test.fanout.ae";
+        private static final String EXCHANGE_DIRECT = "test.direct.ae";
+        private static final String EXCHANGE_FANOUT = "test.fanout.ae";
 
         private static final String QUEUE = "test.client.ae.normal";
 
         static void send() throws Exception {
             try (Channel channel = RabbitMQUtils.getChannel()) {
                 Map<String, Object> args = Maps.newHashMapWithExpectedSize(1);
-                args.put(KEY, FANOUT_EXCHANGE);
+                args.put(KEY, EXCHANGE_FANOUT);
 
-                channel.exchangeDeclare(DIRECT_EXCHANGE, BuiltinExchangeType.DIRECT, false, true, args);
+                channel.exchangeDeclare(EXCHANGE_DIRECT, BuiltinExchangeType.DIRECT, false, true, args);
                 channel.queueDeclare(QUEUE, false, true, true, null);
-                channel.queueBind(QUEUE, DIRECT_EXCHANGE, QUEUE);
+                channel.queueBind(QUEUE, EXCHANGE_DIRECT, QUEUE);
 
-                channel.exchangeDeclare(FANOUT_EXCHANGE, BuiltinExchangeType.FANOUT, false);
+                channel.exchangeDeclare(EXCHANGE_FANOUT, BuiltinExchangeType.FANOUT, false);
                 channel.queueDeclare(AE_QUEUE, false, true, true, null);
-                channel.queueBind(AE_QUEUE, FANOUT_EXCHANGE, "");
+                channel.queueBind(AE_QUEUE, EXCHANGE_FANOUT, "");
 
                 String message = "备用交换机";
-                channel.basicPublish(DIRECT_EXCHANGE, "unbind-key", null, message.getBytes());
+                channel.basicPublish(EXCHANGE_DIRECT, "unbind-key", null, message.getBytes());
             }
         }
     }

@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 public class SubscribeTest {
 
     public static void main(String[] args) throws Exception {
-        new Consumer().receive();
-        new Producer().send();
+        Consumer.receive();
+        Producer.send();
 
         TimeUnit.SECONDS.sleep(5);
         RabbitMQUtils.closeConnection();

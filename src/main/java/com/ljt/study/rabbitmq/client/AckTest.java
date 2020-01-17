@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 public class AckTest {
 
     public static void main(String[] args) throws Exception {
-//        new Producer().send();
-        new Consumer().receive();
+        Producer.send();
+        Consumer.receive();
 
         TimeUnit.SECONDS.sleep(5);
         RabbitMQUtils.closeConnection();
