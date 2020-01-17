@@ -19,7 +19,7 @@ import java.util.Map;
  * @date 2020-01-04 12:54
  */
 @SpringBootApplication
-@PropertySource(value = "classpath:rabbitmq.yml", factory = YamlPropertySourceFactory.class)
+@PropertySource(value = "classpath:rabbitmq/mq.yml", factory = YamlPropertySourceFactory.class)
 public class DelayConfig {
 
     public static void main(String[] args) {
