@@ -1,12 +1,16 @@
 package com.ljt.study.rabbitmq.delay;
 
 import com.google.common.collect.Maps;
+import com.ljt.study.YamlPropertySourceFactory;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
 
 import java.util.Map;
 
@@ -14,7 +18,13 @@ import java.util.Map;
  * @author LiJingTang
  * @date 2020-01-04 12:54
  */
+@SpringBootApplication
+@PropertySource(value = "classpath:rabbitmq.yml", factory = YamlPropertySourceFactory.class)
 public class DelayConfig {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DelayConfig.class);
+    }
 
     private static final String KEY_DLRK = "x-dead-letter-routing-key";
     private static final String KEY_DLX = "x-dead-letter-exchange";

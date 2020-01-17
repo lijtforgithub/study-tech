@@ -1,7 +1,7 @@
 package com.ljt.study.rabbitmq.delay;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
  */
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = DelayConfig.class)
+@SpringBootTest
 public class DelayTest {
 
     @Autowired
