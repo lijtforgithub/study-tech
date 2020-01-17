@@ -17,7 +17,7 @@ public class MandatoryTest {
     public static void main(String[] args) throws Exception {
         new Producer().send();
 
-        TimeUnit.SECONDS.sleep(1000);
+        TimeUnit.SECONDS.sleep(10);
         RabbitMQUtils.closeConnection();
     }
 
