@@ -8,6 +8,10 @@
 - exclusive = true;  独占队列 仅限于此连接 连接关闭自动删除（有消息也会）
 - autoDelete = true;  自动删除队列 服务器不再使用是自动删除（消息消费完）
 
+1. channel.waitForConfirms() 普通发送方确认模式
+2. channel.waitForConfirmsOrDie() 批量确认模式
+3. channel.addConfirmListener() 异步监听发送方确认模式
+
 ## 路由
 Producer 只能发送消息到Exchange，它是不能直接发送到Queue的。如果Exchange不存在，会抛异常  
 Producer 发送的消息进入了Exchange。接着通过 RouteKey，RabbitMQ会找到应该把这个消息放到哪个队列里。队列也是通过这个RouteKey来绑定路由。
