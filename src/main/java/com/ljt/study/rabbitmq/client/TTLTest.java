@@ -67,10 +67,10 @@ public class TTLTest {
 
                 channel.queueDeclare(QUEUE, false, false, false, null);
                 String message = "Hello TTL message";
-                AMQP.BasicProperties properties =
+                AMQP.BasicProperties prop =
                         new AMQP.BasicProperties().builder().deliveryMode(2).expiration("10000").build();
 
-                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE, properties,
+                channel.basicPublish(RabbitMQUtils.getDefaultExchangeName(), QUEUE, prop,
                         message.getBytes());
             }
         }

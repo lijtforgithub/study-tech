@@ -53,7 +53,6 @@ public class HelloWorldTest {
 
         static void receive() throws Exception {
             Channel channel = RabbitMQUtils.getChannel(); // 不能关闭 消息处理是异步
-
             if (Objects.isNull(channel)) {
                 System.out.println("Channel is null.");
                 System.exit(-1);

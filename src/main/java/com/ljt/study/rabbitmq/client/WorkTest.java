@@ -35,7 +35,6 @@ public class WorkTest {
 
         static void send() throws Exception {
             try (Channel channel = RabbitMQUtils.getChannel()) {
-
                 if (Objects.isNull(channel)) {
                     System.out.println("Channel is null.");
                     System.exit(-1);
@@ -64,7 +63,6 @@ public class WorkTest {
 
         static void receive() throws IOException {
             Channel channel = RabbitMQUtils.getChannel();
-
             if (Objects.isNull(channel)) {
                 System.out.println("Channel is null.");
                 System.exit(-1);

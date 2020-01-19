@@ -31,7 +31,6 @@ public class TxTest {
 
         static void send() throws Exception {
             Channel channel = RabbitMQUtils.getChannel();
-
             if (Objects.isNull(channel)) {
                 System.out.println("Channel is null.");
                 System.exit(-1);
@@ -65,7 +64,6 @@ public class TxTest {
 
         static void receive() throws IOException {
             Channel channel = RabbitMQUtils.getChannel();
-
             if (Objects.isNull(channel)) {
                 System.out.println("Channel is null.");
                 System.exit(-1);

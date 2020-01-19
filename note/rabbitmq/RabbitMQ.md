@@ -38,7 +38,7 @@ It it not possible to explicitly bind to, or unbind from the default exchange. I
 
 对于多个Consumer来说，RabbitMQ 使用循环的方式（round-robin）的方式均衡的发送给不同的Consumer。  
 默认状态下，RabbitMQ将第n个Message分发给第n个Consumer。当然n是取余后的。它不管Consumer是否还有unacked Message，只是按照这个默认机制进行分发。  
-channel.basicQos(1);这样RabbitMQ就会使得每个Consumer在同一个时间点最多处理一个Message。换句话说，在接收到该Consumer的ack前，他它不会将新的Message分发给它。  
+channel.basicQos(1) 设置客户端能保持最大消息未确认的个数;这样RabbitMQ就会使得每个Consumer在同一个时间点最多处理一个Message。换句话说，在接收到该Consumer的ack前，他它不会将新的Message分发给它。  
 这种方法可能会导致queue满。这种情况下你可能需要添加更多的Consumer，或者创建更多的virtualHost来细化。
 
 如果服务器一直没有收到消费者的确认信号，并且消费此消息的消费者已经断开连接，则RabbitMQ会安排该消息重新进入队列，等待投递给下一个消费者，当然可能还是原来的那个消费者。不会为未确认的消息设置过期时间，唯一依据是消费者是否断开连接。
