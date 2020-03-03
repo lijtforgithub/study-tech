@@ -1,3 +1,32 @@
+## 安装
+```
+1. yum install wget
+2. cd /
+   mkdir soft
+   cd soft
+3. wget http://download.redis.io/releases/redis-5.0.5.tar.gz
+4. tar -xf redis-5.0.5.tar.gz
+5. cd redis-5.0.5
+6. README.md
+7. make 报错后
+   yum install gcc
+   make distclean
+8. cd src 生成了可执行程序
+9. cd ..
+10. make install PREFIX=/opt/redis5
+11. vi /etc/profile 文件加入
+    export REDIS_HOME=/opt/redis5
+    export PATH=$PATH:$REDIS_HOME/bin
+12. source /etc/profile
+13. cd utils
+14. ./install_server.sh 可执行一次或多次
+    一个物理机中可以有多个redis实例，通过port区分。
+    可执行程序就一份在目录，但是内存中存在未来的多个实例需要各自的配置文件，持久化目录等资源。
+    service redis_6379 start/stop/status 服务目录 /etc/init.d/
+15. ps -ef | grep redis
+```
+
+## 命令
 #### 启动&配置
 ```
 启动服务：redis-server.exe redis.windows.conf
@@ -36,6 +65,8 @@ rename KEY NEW_KEY | 修改 key 的名称
 renamenx KEY NEW_KEY | 仅当 newkey 不存在时，将 key 改名为 newkey
 type KEY | 返回 key 所储存的值的类型
 #### string
+1. 二进制安全
+
 命令 | 描述
 ---|---
 set KEY VALUE | 设置指定 key 的值
@@ -75,6 +106,11 @@ hdel KEY field1 [field2 ...] | 删除一个或多个哈希表字段
 hincrby KEY field increment | 为哈希表 key 中的指定字段的整数值加上增量 increment
 hincrbyfloat KEY field increment | 为哈希表 key 中的指定字段的浮点数值加上增量 increment
 #### list
+1. 栈 同向命令
+2. 队列 反向命令
+3. 数组
+4. 阻塞 单播队列 FIFO
+
 命令 | 描述
 ---|---
 lpush KEY value1 [value2 ...] | 将一个或多个值插入到列表头部
@@ -95,6 +131,8 @@ brpop KEY1 [KEY2 ...] timeout | 移出并获取列表的最后一个元素， �
 brpoplpush source destination timeout | 从列表中弹出一个值，将弹出的元素插入到另外一个列表中并返回它； 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止
 rpoplpush source destination | 移除列表的最后一个元素，并将该元素添加到另一个列表并返回
 #### set
+1. srandmember：count 为正数返回不重复、不会超过已有集合的数据；为负数返回会重复、满足指定数量的数据。
+
 命令 | 描述
 ---|---
 sadd KEY value1 [value2 ...] | 向集合添加一个或多个成员
@@ -113,6 +151,8 @@ sunion KEY1 [KEY2] | 返回所有给定集合的并集
 sunionstore destination KEY1 [KEY2]  | 所有给定集合的并集存储在 destination 集合中
 sscan KEY cursor [match pattern] [count count] | 迭代集合中的元素，match 可使用正则
 #### zset
+1. 物理内存存储按照score左小右大
+
 命令 | 描述
 ---|---
 zadd KEY score1 value1 [score2 value2] | 向有序集合添加一个或多个成员，或者更新已存在成员的分数
