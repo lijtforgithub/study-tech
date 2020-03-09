@@ -9,7 +9,7 @@ REmote DIctionary Server 基于内存的数据库(Key-Value)，并且提供一�
 3. Redis支持数据的备份，即master-slave模式的数据备份。
 #### 优势
 1. 性能极高 – Redis能读的速度是110000次/s,写的速度是81000次/s 。
-2. 丰富的数据类型 – Redis支持二进制案例的 Strings, Lists, Hashes, Sets 及 Ordered Sets 数据类型操作。
+2. 丰富的数据类型 – Redis支持二进制安全的 Strings, Lists, Hashes, Sets 及 Ordered Sets 数据类型操作。
 3. 原子 – Redis的所有操作都是原子性的，意思就是要么成功执行要么失败完全不执行。单个操作是原子性的。多个操作也支持事务，即原子性，通过MULTI和EXEC指令包起来。
 4. 丰富的特性 – Redis还支持 publish/subscribe, 通知, key 过期等等特性。
 #### Redis常见性能问题和解决方案
