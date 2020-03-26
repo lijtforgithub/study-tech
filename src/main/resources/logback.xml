@@ -7,8 +7,8 @@
 	</appender>
 	
 	<logger name="com.ljt" level="DEBUG" />
-	
-	<root level="ERROR">
+
+	<root level="INFO">
 		<appender-ref ref="console" />
 	</root>
 </configuration>

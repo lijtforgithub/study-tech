@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
+import static com.ljt.study.Constant.ZK_SERVER_IP;
+import static com.ljt.study.Constant.ZK_TIMEOUT;
+
 /**
  * @author LiJingTang
  * @date 2019-11-28 15:12
@@ -15,9 +18,6 @@ import java.util.concurrent.CountDownLatch;
 public class ZKFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(ZKFactory.class);
-
-    private static final String ZK_SERVER_IP = "192.168.100.201:2181,192.168.100.202:2181,192.168.100.203:2181";
-    private static final int ZK_TIMEOUT = 5000;
 
     private static final CountDownLatch latch = new CountDownLatch(1);
     private static volatile ZooKeeper zk = null;

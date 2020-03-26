@@ -53,9 +53,16 @@ public class LockTest {
         try {
             latch.await();
             logger.info("所有线程运行结束！GAME OVER");
-        } catch (
-                InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static class DistributedLockReactive implements Watcher {
+
+        @Override
+        public void process(WatchedEvent event) {
+
         }
     }
 
@@ -65,7 +72,7 @@ public class LockTest {
         private static final Logger logger = LoggerFactory.getLogger(DistributedLock.class);
 
         private static final String LOCK_PATH = "/disLocks";
-        private static final String LOCK_SUB_PATH = "/disLocks/sub";
+        private static final String LOCK_SUB_PATH = LOCK_PATH + "/sub";
 
         private String client;
         private ZooKeeper zk;
@@ -178,12 +185,6 @@ public class LockTest {
                 }
             }
         }
-    }
-
-    private interface ToDoService {
-
-        void dodo();
-
     }
 
 }
