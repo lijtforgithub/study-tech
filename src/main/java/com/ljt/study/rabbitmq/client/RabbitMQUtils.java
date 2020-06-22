@@ -23,12 +23,15 @@ public class RabbitMQUtils {
     public static String getDefaultExchangeName() {
         return DEFAULT_EXCHANGE_NAME;
     }
+
     public static String getDirectExchangeName() {
         return DIRECT_EXCHANGE_NAME;
     }
+
     public static String getFanoutExchangeName() {
         return FANOUT_EXCHANGE_NAME;
     }
+
     public static String getTopicExchangeName() {
         return TOPIC_EXCHANGE_NAME;
     }

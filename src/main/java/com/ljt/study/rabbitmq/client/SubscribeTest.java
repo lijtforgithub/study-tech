@@ -62,7 +62,8 @@ public class SubscribeTest {
             channel.basicConsume(QUEUE, true, (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                 System.out.println("Received " + message);
-            }, consumerTag -> {});
+            }, consumerTag -> {
+            });
         }
     }
 

@@ -5,9 +5,10 @@ package com.ljt.study;
  * @date 2020-01-03 20:49
  */
 public class Constant {
-    
-    private Constant() {}
-    
+
+    private Constant() {
+    }
+
     public static final String LOCAL_HOST = "localhost";
 
     /**
