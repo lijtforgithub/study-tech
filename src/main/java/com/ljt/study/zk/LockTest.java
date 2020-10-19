@@ -58,12 +58,10 @@ public class LockTest {
         }
     }
 
-    private static class DistributedLockReactive implements Watcher {
+    private interface ToDoService {
 
-        @Override
-        public void process(WatchedEvent event) {
+        void dodo();
 
-        }
     }
 
 
