@@ -10,9 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -26,6 +24,7 @@ import java.util.stream.IntStream;
 import static com.alibaba.excel.EasyExcelFactory.write;
 import static com.alibaba.excel.EasyExcelFactory.writerSheet;
 import static com.ljt.study.Constant.DESKTOP;
+import static com.ljt.study.Constant.XLSX;
 
 /**
  * 导出
@@ -35,8 +34,6 @@ import static com.ljt.study.Constant.DESKTOP;
  */
 @Slf4j
 public class TemplateTest {
-
-    private static final String SUFFIX = ".xlsx";
 
     @Test
     public void testSimpleFill() throws IOException {
@@ -169,22 +166,14 @@ public class TemplateTest {
 
 
     private static ClassPathResource getResource(String fileName) {
-        return new ClassPathResource("/tools/easyexcel/" + fileName + SUFFIX);
-    }
-
-    @After
-    public void after() {
-        log.info("方法执行结束");
+        return new ClassPathResource("/tools/easyexcel/" + fileName + XLSX);
     }
 
     @Data
-    @NoArgsConstructor
     @AllArgsConstructor
-    public static class FillData {
-
+    static class FillData {
         private String name;
         private double number;
-
     }
 
 }
