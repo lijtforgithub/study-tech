@@ -44,20 +44,6 @@ public class PeiPei {
         data.addAll(readKaoQin("大理泰悦", 4));
         data.addAll(readKaoQin("乌当支行", 2));
 
-//        Map<String, Map<String, List<RowData>>> nameMap = new TreeMap<>();
-//        data.forEach(row -> {
-//            Map<String, List<RowData>> monthMap = nameMap.get(row.getName());
-//            if (Objects.isNull(monthMap)) {
-//                monthMap = new TreeMap<>();
-//                nameMap.put(row.getName(), monthMap);
-//            }
-//            List<RowData> list = monthMap.get(row.getMonth());
-//            if (Objects.isNull(list)) {
-//                list = new ArrayList<>();
-//                monthMap.put(row.getMonth(), list);
-//            }
-//            list.add(row);
-//        });
         data.sort(new Comparator<RowData>() {
             @Override
             public int compare(RowData o1, RowData o2) {
