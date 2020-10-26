@@ -44,19 +44,7 @@ public class PeiPei {
         data.addAll(readKaoQin("大理泰悦", 4));
         data.addAll(readKaoQin("乌当支行", 2));
 
-        data.sort(new Comparator<RowData>() {
-            @Override
-            public int compare(RowData o1, RowData o2) {
-                int i = o1.getName().compareTo(o2.getName());
-                if (i == 0) {
-                    i = o1.getMonth().compareTo(o2.getMonth());
-                }
-                if (i == 0) {
-                    i = o1.getProjectName().compareTo(o2.getProjectName());
-                }
-                return i;
-            }
-        });
+        data.sort(Comparator.comparing(RowData::getName).thenComparing(RowData::getMonth).thenComparing(RowData::getProjectName));
 
         String templatePath = PATH + "汇总模板" + XLSX;
         write(PATH + "汇总" + XLSX).withTemplate(templatePath).sheet().doFill(data);
