@@ -29,7 +29,7 @@ public class PeiPei {
 
     private static final String PATH = "D:/培培/";
     private static final String ZERO = "0";
-    private static final BigDecimal ONE = BigDecimal.valueOf(7);
+    private static final BigDecimal ONE_DAY = BigDecimal.valueOf(7);
     private static final Pattern NUM_REG = Pattern.compile("\\d{1,2}\\.\\d{1,2}|\\d{1,2}");
 
 
@@ -112,7 +112,7 @@ public class PeiPei {
         public void setWork(String work) {
             String temp = getNum(work);
             if (!ZERO.equals(temp)) {
-                this.work = new BigDecimal(temp).divide(ONE, 2, RoundingMode.HALF_UP).toString();
+                this.work = new BigDecimal(temp).divide(ONE_DAY, 2, RoundingMode.HALF_UP).toString();
             }
         }
 
