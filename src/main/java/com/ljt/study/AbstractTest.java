@@ -26,7 +26,7 @@ public abstract class AbstractTest {
 
         Stream.of(applicationContext.getBeanDefinitionNames())
                 .filter(name -> !name.startsWith(SPRING_BEAN))
-                .forEach(System.out::println);
+                .forEach(log::info);
 
         log.info("打印IoC容器里自定义的BeanDefinitionName结束");
     }
@@ -35,7 +35,7 @@ public abstract class AbstractTest {
 
     protected void setApplicationContext(String fileName) {
         String pckSuffix = this.getClass().getPackage().getName().substring(PCK_PREFIX.length());
-        String configLocations = pckSuffix.replaceAll("\\.", "/") + "/" + fileName + SUFFIX;
+        String configLocations = pckSuffix.replace("\\.", "/") + "/" + fileName + SUFFIX;
         applicationContext = new ClassPathXmlApplicationContext(configLocations);
 
         log.info("【{}】IoC容器初始化完成", configLocations);

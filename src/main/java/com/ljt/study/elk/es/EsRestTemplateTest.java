@@ -22,7 +22,7 @@ public class EsRestTemplateTest {
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Test
-    public void test() {
+    public void testCreateIndex() {
         elasticsearchRestTemplate.indexOps(SaleGoods.class).create();
     }
 
