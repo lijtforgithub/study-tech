@@ -1,11 +1,12 @@
 ## 基础概念
-- 倒排索引：根据关键字建索引 **空间换时间**
-    1. 包含这个关键词的doc list
-    2. 关键词在每个doc中出现的次数 TF term frequency
-    3. 关键词在整个索引中出现的次数 IDF inverse doc frequency **IDF越高 相关度越低**
-    4. 关键词在当前doc中出现的次数
-    5. 每个doc的长度，越长相关度越低
-    6. 包含这个关键词的所有doc的平均长度
+#### 倒排索引
+- 根据关键字建索引 **空间换时间**
+1. 包含这个关键词的doc list
+2. 关键词在每个doc中出现的次数 TF term frequency
+3. 关键词在整个索引中出现的次数 IDF inverse doc frequency **IDF越高 相关度越低**
+4. 关键词在当前doc中出现的次数
+5. 每个doc的长度，越长相关度越低
+6. 包含这个关键词的所有doc的平均长度
 #### 优点
 - Lucene：jar包，创建倒排索引，提供了复杂的API。单点
 - ES 分布式、高性能、高可用、可伸缩、易维护
@@ -39,7 +40,7 @@ node.voting_only = true 仅投票节点，即使配置了data.master = true，�
 - Data node（数据节点）
 - Ingest node
 - Machine learning node（机器学习节点）
-#### 配置node.master和node.data
+#### node.master和node.data
 1. node.master = true node.data = true  
 这是ES节点默认配置，既作为候选节点又作为数据节点，这样的节点一旦被选举为Master，压力是比较大的，通常来说Master节点应该只承担较为轻量级的任务，比如创建删除索引，分片均衡等。
 2. node.master = true node.data = false  
@@ -59,27 +60,26 @@ node.voting_only = true 仅投票节点，即使配置了data.master = true，�
 8. 为确保群集仍然可用，集群不能同时停止投票配置中的一半或更多节点。只要有一半以上的投票节点可用，群集仍可以正常工作。这意味着，如果存在三个或四个主节点合格的节点，则群集可以容忍其中一个节点不可用。如果有两个或更少的主机资格节点，则它们必须都保持可用
 
 ## 语法
-- 健康检查
-    1. GET /_cluster/health
-    2. GET /_cat/health?v
-    3. GET /_cat/shards?v
+#### 健康检查
+- GET /_cluster/health
+- GET /_cat/health?v
+- GET /_cat/shards?v
 #### 索引
 - 查询  
-    GET /index?pretty
+GET /index?pretty
 - 创建索引  
-    PUT /index?pretty  
-    GET /_cat/indices?v
+PUT /index?pretty  
+GET /_cat/indices?v
 - 删除索引  
-    DELETE /test01?pretty
+DELETE /test01?pretty
 #### 数据
 - 查询  
-    GET /product/_search  
-    GET /index/_doc/id  
-    `/product/_search?from=0&size=2&sort=price:asc`
-    > 设置了sort，相关度score=null
-
-    `/product/_search?timeout=1ms`
-    > 默认没有timeout，如果设置了timeout，那么会执行timeout机制。Timeout机制：假设用户查询结果有1W条数据，但是需要10s才能查询完毕，但是用户设置了1s的timeout，那么不管当前一共查询到了多少数据，都会在1s后ES讲停止查询，并返回当前数据。
+GET /product/_search  
+GET /index/_doc/id  
+`/product/_search?from=0&size=2&sort=price:asc`  
+设置了sort，相关度score=null  
+`/product/_search?timeout=1ms`  
+默认没有timeout，如果设置了timeout，那么会执行timeout机制。Timeout机制：假设用户查询结果有1W条数据，但是需要10s才能查询完毕，但是用户设置了1s的timeout，那么不管当前一共查询到了多少数据，都会在1s后ES讲停止查询，并返回当前数据。
 - 插入数据  
     PUT /index/_doc/id
     ```
@@ -122,14 +122,14 @@ node.voting_only = true 仅投票节点，即使配置了data.master = true，�
 - 更新数据
     1. 部分字段更新  
     POST /index/_doc/id/_update 或 /index/id/_update/id
-    ```
-    POST /product/_update/4
-    {
-      "doc": {
-        "price": 2999
-      }
-    }
-    ```
+        ```
+        POST /product/_update/4
+        {
+          "doc": {
+            "price": 2999
+          }
+        }
+        ```
     2. 全量更新  
     PUT /index/_doc/id
 - 删除数据`延迟删除 删除后立即插入当前id 版本号为删除前+1`  
@@ -219,54 +219,6 @@ node.voting_only = true 仅投票节点，即使配置了data.master = true，�
       }
     }
     ```
-- bool（组合查询）  
-也是采用more_matches_is_better的机制，因此满足must和should子句的文档将会合并起来计算分值。
-    1. must：必须满足  
-    子句（查询）必须出现在匹配的文档中，并将有助于得分。
-    2. filter：过滤器 不计算相关度分数，`cache`  
-    子句（查询）必须出现在匹配的文档中。但是不像 must查询的分数将被忽略。filter子句在filter上下文中执行，这意味着计分被忽略，并且子句被考虑用于缓存。
-    3. should：可能满足 or  
-    子句（查询）应出现在匹配的文档中。
-    4. must_not：必须不满足 不计算相关度分数 not  
-    子句（查询）不得出现在匹配的文档中。子句在过滤器上下文中执行，这意味着计分被忽略，并且子句被视为用于缓存。由于忽略计分，因此将不返回所有文档的分数。
-    5. minimum_should_match  
-    指定should返回的文档必须匹配的子句的数量或百分比。如果bool查询包含至少一个should子句，而没有must或 filter子句，则默认值为1。否则，默认值为0
-
-    ```
-    GET /product/_search
-    {
-      "query": {
-        "bool": {
-          "must": [
-            {
-              "match": {
-                "name": "xiaomi"
-              }
-            },
-            {
-              "match": {
-                "desc": "shouji"
-              }
-            }
-          ],
-          "filter": [
-            {
-              "match_phrase": {
-                "name": "xiaomi phone"
-              }
-            },
-            {
-              "range": {
-                "price": {
-                  "gt": 1999
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
-    ```
 - constant_score
     ```
     GET /product/_search
@@ -338,7 +290,163 @@ node.voting_only = true 仅投票节点，即使配置了data.master = true，�
       "scroll_id":""
     }
     ```
+
+###### 组合查询
+采用more_matches_is_better的机制，因此满足must和should子句的文档将会合并起来计算分值。
+- must：必须满足  
+子句（查询）必须出现在匹配的文档中，并将有助于得分。
+- filter：过滤器 不计算相关度分数，`cache`  
+子句（查询）必须出现在匹配的文档中。但是不像 must查询的分数将被忽略。filter子句在filter上下文中执行，这意味着计分被忽略，并且子句被考虑用于缓存。
+- should：可能满足 or  
+子句（查询）应出现在匹配的文档中。
+- must_not：必须不满足 不计算相关度分数 not  
+子句（查询）不得出现在匹配的文档中。子句在过滤器上下文中执行，这意味着计分被忽略，并且子句被视为用于缓存。由于忽略计分，因此将不返回所有文档的分数。
+- minimum_should_match  
+指定should返回的文档必须匹配的子句的数量或百分比。如果bool查询包含至少一个should子句，而没有must或 filter子句，则默认值为1。否则，默认值为0
+
+
+```
+GET /product/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": "xiaomi"
+          }
+        },
+        {
+          "match": {
+            "desc": "shouji"
+          }
+        }
+      ],
+      "filter": [
+        {
+          "match_phrase": {
+            "name": "xiaomi phone"
+          }
+        },
+        {
+          "range": {
+            "price": {
+              "gt": 1999
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
 ![](img/filter缓存.png)
 #### 聚合查询
-## mapping
-1. 查询 GET /index/_mappings
+## mapping（GET /index/_mappings）
+mapping就是ES数据字段field的type元数据，ES在创建索引的时候，dynamic mapping会自动为不同的数据指定相应mapping，mapping中包含了字段的类型、搜索方式（exact value或者full text）、分词器等。
+#### Dynamic mapping
+Es的mapping_type是由JSON分析器检测数据类型，而Json没有隐式类型转换（integer=>long or float=> double）,所以dynamic mapping会选择一个比较宽的数据类型。
+#### 搜索方式
+1. exact value 精确匹配：在倒排索引过程中，分词器会将field作为一个整体创建到索引中
+2. full text全文检索：分词、近义词同义词、混淆词、大小写、词性、过滤、时态转换等（normaliztion）
+#### ES数据类型
+- 数字类型：
+    1. long, integer, short, byte, double, float, half_float, scaled_float
+    2. 在满足需求的情况下，尽可能选择范围小的数据类型
+- 字符串
+    1. keyword：适用于索引结构化的字段，可以用于过滤、排序、聚合。keyword类型的字段只能通过精确值（exact value）搜索到。Id应该用keyword  
+    text：当一个字段是要被全文搜索的，比如Email内容、产品描述，这些字段应该使用text类型。设置text类型以后，字段内容会被分析，在生成倒排索引以前，字符串会被分析器分成一个一个词项。  
+    text类型的字段不用于排序，很少用于聚合。（字段数据会占用大量堆空间，尤其是在加载text字段时。字段数据一旦加载到堆中，就在该段的生命周期内保持在那里。同样，加载字段数据是一个昂贵的过程，可能导致用户遇到延迟问题。这就是默认情况下禁用字段数据的原因）
+    2. 有时同一字段中同时具有全文本（text）和关键字（keyword）版本会很有用：一个用于全文本搜索，另一个用于聚合和排序。
+- date（时间类型）：exact value
+- boolean（布尔类型）
+- binary（二进制）：binary
+- range（区间类型）：integer_range、float_range、long_range、double_range、date_range
+- object：用于单个JSON对象
+- nested：用于JSON对象数组
+- Geo-point：纬度/经度积分
+- Geo-shape：用于多边形等复杂形状
+#### 创建mapping
+```
+PUT /index {
+    "mappings": {
+        "properties": {
+            "field": {
+                "mapping_parameter": "parameter_value"
+        }
+      }
+    }
+}
+```
+###### Mapping parameters
+- index：是否对创建对当前字段创建索引，默认true，如果不创建索引，该字段不会通过索引被搜索到,但是仍然会在source元数据中展示
+- analyzer：指定分析器（character filter、tokenizer、Token filters）
+- boost：对当前字段相关度的评分权重，默认1
+- coerce：是否允许强制类型转换  true "1" => 1   false "1"=< 1
+- copy_to：
+    ```
+    "field": {
+        "type": "text",
+        "copy_to": "other_field_name"
+    }
+    ```
+- doc_values：为了提升排序和聚合效率，默认true，如果确定不需要对字段进行排序或聚合，也不需要通过脚本访问字段值，则可以禁用doc值以节省磁盘空间（不支持text和annotated_text）
+- dynamic：控制是否可以动态添加新字段
+    1. true 新检测到的字段将添加到映射中。（默认）
+    2. false 新检测到的字段将被忽略。这些字段将不会被索引，因此将无法搜索，但仍会出现在_source返回的匹配项中。这些字段不会添加到映射中，必须显式添加新字段。
+    3. strict 如果检测到新字段，则会引发异常并拒绝文档。必须将新字段显式添加到映射中
+- eager_global_ordinals：用于聚合的字段上，优化聚合性能。  
+Frozen indices（冻结索引）：有些索引使用率很高，会被保存在内存中，有些使用率特别低，宁愿在使用的时候重新创建，在使用完毕后丢弃数据，Frozen indices的数据命中频率小，不适用于高搜索负载，数据不会被保存在内存中，堆空间占用比普通索引少得多，Frozen indices是只读的，请求可能是秒级或者分钟级。eager_global_ordinals不适用于Frozen indices
+- enable：是否创建倒排索引，可以对字段操作，也可以对索引操作，如果不创建索引，让然可以检索并在_source元数据中展示，谨慎使用，该状态无法修改。
+    ```
+    PUT index {
+        "mappings": {
+            "enabled": false
+        }
+    }
+    PUT index {
+        "mappings": {
+            "properties": {
+                "session_data": {
+                    "type": "object",
+                    "enabled": false
+                }
+            }
+        }
+    }
+    ```
+- fielddata：查询时内存数据结构，在首次用当前字段聚合、排序或者在脚本中使用时，需要字段为fielddata数据结构，并且创建倒排索引保存到堆中
+- fields：给field创建多字段，用于不同目的（全文检索或者聚合分析排序）
+- format：格式化
+    ```
+    "date": {
+        "type": "date",
+        "format": "yyyy-MM-dd"
+    }
+    ```
+- ignore_above：超过长度将被忽略
+- ignore_malformed：忽略类型错误
+- index_options：控制将哪些信息添加到反向索引中以进行搜索和突出显示。仅用于text字段
+- Index_phrases：提升exact_value查询速度，但是要消耗更多磁盘空间
+- Index_prefixes：前缀搜索
+    1. min_chars：前缀最小长度，>0，默认2（包含）
+    2.  max_chars：前缀最大长度，<20，默认5（包含）
+    ```
+    "index_prefixes": {
+        "min_chars" : 1,
+        "max_chars" : 10
+    }
+    ```
+- meta：附加元数据
+- normalizer
+- norms：是否禁用评分（在filter和聚合字段上应该禁用）。
+- null_value：为null值设置默认值
+- position_increment_gap
+- properties：除了mapping还可用于object的属性设置
+- search_analyzer：设置单独的查询时分析器：
+- similarity：为字段设置相关度算法，支持BM25、claassic（TF-IDF）、boolean
+- store：设置字段是否仅查询
+- term_vector
+
+
+
