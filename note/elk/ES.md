@@ -303,8 +303,6 @@ GET /index/_doc/id
 子句（查询）不得出现在匹配的文档中。子句在过滤器上下文中执行，这意味着计分被忽略，并且子句被视为用于缓存。由于忽略计分，因此将不返回所有文档的分数。
 - minimum_should_match  
 指定should返回的文档必须匹配的子句的数量或百分比。如果bool查询包含至少一个should子句，而没有must或 filter子句，则默认值为1。否则，默认值为0
-
-
 ```
 GET /product/_search
 {
@@ -342,7 +340,10 @@ GET /product/_search
 ```
 ![](img/filter缓存.png)
 #### 聚合查询
-## mapping（GET /index/_mappings）
+## mapping
+- GET /index/_mappings
+- GET /index/_mapping/field/fieldName
+
 mapping就是ES数据字段field的type元数据，ES在创建索引的时候，dynamic mapping会自动为不同的数据指定相应mapping，mapping中包含了字段的类型、搜索方式（exact value或者full text）、分词器等。
 #### Dynamic mapping
 Es的mapping_type是由JSON分析器检测数据类型，而Json没有隐式类型转换（integer=>long or float=> double）,所以dynamic mapping会选择一个比较宽的数据类型。
@@ -366,15 +367,26 @@ Es的mapping_type是由JSON分析器检测数据类型，而Json没有隐式类�
 - nested：用于JSON对象数组
 - Geo-point：纬度/经度积分
 - Geo-shape：用于多边形等复杂形状
-#### 创建mapping
+#### 创建索引mapping
 ```
-PUT /index {
+// 和索引一起创建
+PUT /index 
+{
     "mappings": {
         "properties": {
             "field": {
                 "mapping_parameter": "parameter_value"
         }
       }
+    }
+}
+// 先有空索引 再添加mapping 已存在的字段有的属性可修改 有的不可以
+PUT /index/_mappings 
+{
+    "properties": {
+        "field": {
+            "mapping_parameter": "parameter_value"
+        }
     }
 }
 ```
@@ -399,12 +411,14 @@ PUT /index {
 Frozen indices（冻结索引）：有些索引使用率很高，会被保存在内存中，有些使用率特别低，宁愿在使用的时候重新创建，在使用完毕后丢弃数据，Frozen indices的数据命中频率小，不适用于高搜索负载，数据不会被保存在内存中，堆空间占用比普通索引少得多，Frozen indices是只读的，请求可能是秒级或者分钟级。eager_global_ordinals不适用于Frozen indices
 - enable：是否创建倒排索引，可以对字段操作，也可以对索引操作，如果不创建索引，让然可以检索并在_source元数据中展示，谨慎使用，该状态无法修改。
     ```
-    PUT index {
+    PUT /index 
+    {
         "mappings": {
             "enabled": false
         }
     }
-    PUT index {
+    PUT /index 
+    {
         "mappings": {
             "properties": {
                 "session_data": {
@@ -447,6 +461,6 @@ Frozen indices（冻结索引）：有些索引使用率很高，会被保存在
 - similarity：为字段设置相关度算法，支持BM25、claassic（TF-IDF）、boolean
 - store：设置字段是否仅查询
 - term_vector
-
-
-
+## API
+- public interface TestDocMapper extends ElasticsearchRepository<TestDoc, Long> 这种声明的Doc会在容器启动时创建索引
+- Doc 创建mapping时类型为auto的不能创建
