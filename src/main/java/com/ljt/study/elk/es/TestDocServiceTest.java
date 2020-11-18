@@ -1,5 +1,6 @@
 package com.ljt.study.elk.es;
 
+import com.alibaba.fastjson.JSON;
 import com.ljt.study.elk.es.doc.TestDoc;
 import com.ljt.study.elk.es.service.TestDocService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +25,28 @@ public class TestDocServiceTest {
     @Test
     public void testSave() {
         TestDoc doc = new TestDoc();
-        doc.setId(1L);
-        doc.setName("mobile");
-        doc.setDesc("apple phone");
-        doc.setTags("智能手机");
-        doc.setPrice(5999);
-        doc.setCreateDate("2020-11-17");
+        doc.setId(4L);
+        doc.setName("小米");
+        doc.setDesc("HuaWei phone");
+        doc.setTags("为发烧而生");
+        doc.setPrice(2999);
+        doc.setCreateDate("2020-11-18");
         testDocService.save(doc);
+    }
+
+    @Test
+    public void testFindAll() {
+        log.info(JSON.toJSONString(testDocService.findAll()));
+    }
+
+    @Test
+    public void testFindByName() {
+        log.info(JSON.toJSONString(testDocService.findByName("filter")));
+    }
+
+    @Test
+    public void testFindByCreateDate() {
+        log.info(JSON.toJSONString(testDocService.findByCreateDate("2020-11-18")));
     }
 
 }
