@@ -1,6 +1,6 @@
-package com.ljt.study.elk.es;
+package com.ljt.study.es;
 
-import com.ljt.study.elk.es.doc.TestCreateDoc;
+import com.ljt.study.es.doc.TestCreateDoc;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;

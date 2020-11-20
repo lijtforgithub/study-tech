@@ -339,7 +339,116 @@ GET /product/_search
 }
 ```
 ![](img/filter缓存.png)
+#### 批量操作
+- _mget
+    ```
+    GET /_mget
+    {
+      "docs": [
+        {
+          "_index": "product",
+          "_id": 1
+        },
+        {
+          "_index": "product",
+          "_id": 2
+        }
+      ]
+    }
+    GET /product/_mget
+    {
+      "docs": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        }
+      ]
+    }
+    GET /product/_mget
+    {
+      "ids": [1,2]
+    }
+    ```
+- bulk：批量增删改
+ 1. POST /_bulk
+ 2. POST /index/_bulk
+    {"action": {"metadata"}}
+    {"data"}
+ 3. Operate：
+    1. create：PUT /index/_create/id/，强制创建（是否指定id）
+    2. delete：删除（lazy delete原理）
+    3. index：可以是创建，也可以是全量替换
+    4. update：执行partial update（全量替换，部分替换）
 #### 聚合查询
+```
+GET /product/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "price": {
+              "gte": 1000
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "group_by_tags": {
+      "terms": {
+        "field": "tags.keyword",
+        "order": {
+          "avg_price": "desc"
+        }
+      },
+      "aggs": {
+        "avg_price": {
+          "avg": {
+            "field": "price"
+          }
+        }
+      }
+    }
+  },
+  "size": 0
+}
+GET /product/_search
+{
+  "aggs": {
+    "group_by_range_price": {
+      "range": {
+        "field": "price",
+        "ranges": [
+          {
+            "from": 100,
+            "to": 1000
+          },
+          {
+            "from": 1000,
+            "to": 3000
+          },
+          {
+            "from": 3000
+          }
+        ]
+      },
+      "aggs": {
+        "avg_price": {
+          "avg": {
+            "field": "price"
+          }
+        }
+      }
+    }
+  },
+  "size": 0
+}
+```
 ## mapping
 - GET /index/_mappings
 - GET /index/_mapping/field/fieldName
@@ -391,7 +500,13 @@ PUT /index/_mappings
 }
 ```
 ###### Mapping parameters
+- dynamic：控制是否可以动态添加新字段
+    1. true 新检测到的字段将添加到映射中。（默认）
+    2. false 新检测到的字段将被忽略。这些字段将不会被索引，因此将无法搜索，但仍会出现在_source返回的匹配项中。这些字段不会添加到映射中，必须显式添加新字段。
+    3. strict 如果检测到新字段，则会引发异常并拒绝文档。必须将新字段显式添加到映射中
 - index：是否对创建对当前字段创建索引，默认true，如果不创建索引，该字段不会通过索引被搜索到,但是仍然会在source元数据中展示
+- **doc_values**：为了提升排序和聚合效率，默认true，如果确定不需要对字段进行排序或聚合，也不需要通过脚本访问字段值，则可以禁用doc值以节省磁盘空间（不支持text和annotated_text）
+- **fielddata**：查询时内存数据结构，在首次用当前字段聚合、排序或者在脚本中使用时，需要字段为fielddata数据结构，并且创建正排索引保存到JVM堆中
 - analyzer：指定分析器（character filter、tokenizer、Token filters）
 - boost：对当前字段相关度的评分权重，默认1
 - coerce：是否允许强制类型转换  true "1" => 1   false "1"=< 1
@@ -402,11 +517,6 @@ PUT /index/_mappings
         "copy_to": "other_field_name"
     }
     ```
-- doc_values：为了提升排序和聚合效率，默认true，如果确定不需要对字段进行排序或聚合，也不需要通过脚本访问字段值，则可以禁用doc值以节省磁盘空间（不支持text和annotated_text）
-- dynamic：控制是否可以动态添加新字段
-    1. true 新检测到的字段将添加到映射中。（默认）
-    2. false 新检测到的字段将被忽略。这些字段将不会被索引，因此将无法搜索，但仍会出现在_source返回的匹配项中。这些字段不会添加到映射中，必须显式添加新字段。
-    3. strict 如果检测到新字段，则会引发异常并拒绝文档。必须将新字段显式添加到映射中
 - eager_global_ordinals：用于聚合的字段上，优化聚合性能。  
 Frozen indices（冻结索引）：有些索引使用率很高，会被保存在内存中，有些使用率特别低，宁愿在使用的时候重新创建，在使用完毕后丢弃数据，Frozen indices的数据命中频率小，不适用于高搜索负载，数据不会被保存在内存中，堆空间占用比普通索引少得多，Frozen indices是只读的，请求可能是秒级或者分钟级。eager_global_ordinals不适用于Frozen indices
 - enable：是否创建倒排索引，可以对字段操作，也可以对索引操作，如果不创建索引，让然可以检索并在_source元数据中展示，谨慎使用，该状态无法修改。
@@ -429,7 +539,6 @@ Frozen indices（冻结索引）：有些索引使用率很高，会被保存在
         }
     }
     ```
-- fielddata：查询时内存数据结构，在首次用当前字段聚合、排序或者在脚本中使用时，需要字段为fielddata数据结构，并且创建倒排索引保存到堆中
 - fields：给field创建多字段，用于不同目的（全文检索或者聚合分析排序）
 - format：格式化
     ```
@@ -441,8 +550,8 @@ Frozen indices（冻结索引）：有些索引使用率很高，会被保存在
 - ignore_above：超过长度将被忽略
 - ignore_malformed：忽略类型错误
 - index_options：控制将哪些信息添加到反向索引中以进行搜索和突出显示。仅用于text字段
-- Index_phrases：提升exact_value查询速度，但是要消耗更多磁盘空间
-- Index_prefixes：前缀搜索
+- index_phrases：提升exact_value查询速度，但是要消耗更多磁盘空间
+- index_prefixes：前缀搜索
     1. min_chars：前缀最小长度，>0，默认2（包含）
     2.  max_chars：前缀最大长度，<20，默认5（包含）
     ```
@@ -461,6 +570,15 @@ Frozen indices（冻结索引）：有些索引使用率很高，会被保存在
 - similarity：为字段设置相关度算法，支持BM25、claassic（TF-IDF）、boolean
 - store：设置字段是否仅查询
 - term_vector
+###### 正向索引
+- 正向索引（doc values ）VS倒排索引：
+    1. 概念：从广义来说，doc values 本质上是一个序列化的 列式存储 。列式存储 适用于聚合、排序、脚本等操作，所有的数字、地理坐标、日期、IP 和不分析（ not_analyzed ）字符类型都会默认开启。
+    2. 特点：倒排索引的优势 在于查找包含某个项的文档，相反，如果用它确定哪些项是否存在单个文档里。
+    3. 优化：es官方是建议，es大量是基于os cache来进行缓存和提升性能的，不建议用jvm内存来进行缓存，那样会导致一定的gc开销和oom问题，给jvm更少的内存，给os cache更大的内存。比如64g服务器，给jvm最多4~16g（1/16~1/4），os cache可以提升doc value和倒排索引的缓存和查询效率。
+![](img/正向索引.png)
+- fielddata：查询时内存数据结构
+
+![](img/fielddata.png)
 ## API
 - public interface TestDocMapper extends ElasticsearchRepository<TestDoc, Long> 这种声明的Doc会在容器启动时创建索引
 - Doc 创建mapping时类型为auto的不能创建

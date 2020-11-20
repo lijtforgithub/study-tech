@@ -1,8 +1,8 @@
-package com.ljt.study.elk.es.service;
+package com.ljt.study.es.service;
 
 import com.alibaba.fastjson.JSON;
-import com.ljt.study.elk.es.doc.TestDoc;
-import com.ljt.study.elk.es.mapper.TestDocMapper;
+import com.ljt.study.es.doc.TestDoc;
+import com.ljt.study.es.mapper.TestDocMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,16 @@ public class TestDocService {
 
     public void save(TestDoc doc) {
         testDocMapper.save(doc);
+    }
+
+    public void saveList(List<TestDoc> docList) {
+        List<IndexQuery> queries = docList.stream().map(doc -> {
+            IndexQuery query = new IndexQuery();
+            query.setId(doc.getId().toString());
+            query.setSource(JSON.toJSONString(doc));
+            return query;
+        }).collect(Collectors.toList());
+        elasticsearchRestTemplate.bulkIndex(queries, IndexCoordinates.of("test_doc"));
     }
 
     public List<TestDoc> findAll() {

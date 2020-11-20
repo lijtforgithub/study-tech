@@ -1,6 +1,6 @@
-package com.ljt.study.elk.es.mapper;
+package com.ljt.study.es.mapper;
 
-import com.ljt.study.elk.es.doc.TestDoc;
+import com.ljt.study.es.doc.TestDoc;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 /**

@@ -1,4 +1,4 @@
-package com.ljt.study.elk.es;
+package com.ljt.study.es;
 
 import com.ljt.study.YamlPropertySourceFactory;
 import org.springframework.boot.SpringApplication;
