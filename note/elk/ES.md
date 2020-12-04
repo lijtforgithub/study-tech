@@ -579,6 +579,14 @@ Frozen indices（冻结索引）：有些索引使用率很高，会被保存在
 - fielddata：查询时内存数据结构
 
 ![](img/fielddata.png)
+#### 模糊搜索
+- 前缀搜索（大型项目用词库）
+- 通配符搜索
+- 正则搜索
+- fuzzy 模糊搜索
 ## API
 - public interface TestDocMapper extends ElasticsearchRepository<TestDoc, Long> 这种声明的Doc会在容器启动时创建索引
 - Doc 创建mapping时类型为auto的不能创建
+
+
+![](img/ES写入原理.jpg)

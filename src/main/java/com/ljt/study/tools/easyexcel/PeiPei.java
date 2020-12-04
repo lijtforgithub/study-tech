@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,14 +34,20 @@ public class PeiPei {
 
     public static void main(String[] args) {
         List<RowData> data = new ArrayList<>();
-        data.addAll(readKaoQin("百色百东分院", 6));
-        data.addAll(readKaoQin("苍山小院", 1));
-        data.addAll(readKaoQin("富政储出", 2));
-        data.addAll(readKaoQin("会展城家装", 1));
-        data.addAll(readKaoQin("南明区媒体中心", 2));
-        data.addAll(readKaoQin("深圳技术大学", 1));
-        data.addAll(readKaoQin("大理泰悦", 4));
-        data.addAll(readKaoQin("乌当支行", 2));
+        data.addAll(readKaoQin("成都", 5));
+//        data.addAll(readKaoQin("苍山小院", 2));
+//        data.addAll(readKaoQin("富政储出", 1));
+//        data.addAll(readKaoQin("华夏银行", 2));
+//        data.addAll(readKaoQin("会展城家装", 1));
+//        data.addAll(readKaoQin("丽江束河秘境", 4));
+//        data.addAll(readKaoQin("茅台医院", 2));
+//        data.addAll(readKaoQin("仁怀家装", 1));
+//        data.addAll(readKaoQin("三亚工地", 1));
+//        data.addAll(readKaoQin("深圳技术大学", 2));
+//        data.addAll(readKaoQin("泰州金融城", 1));
+//        data.addAll(readKaoQin("乌当支行", 1));
+//        data.addAll(readKaoQin("新世界家装", 2));
+//        data.addAll(readKaoQin("修文农商银行", 6));
 
         data.sort(Comparator.comparing(RowData::getName).thenComparing(RowData::getMonth).thenComparing(RowData::getProjectName));
 
@@ -110,10 +115,10 @@ public class PeiPei {
             this.sum = getNum(sum);
         }
         public void setWork(String work) {
-            String temp = getNum(work);
-            if (!ZERO.equals(temp)) {
-                this.work = new BigDecimal(temp).divide(ONE_DAY, 2, RoundingMode.HALF_UP).toString();
-            }
+            this.work = getNum(work);
+//            if (!ZERO.equals(temp)) {
+//                this.work = new BigDecimal(temp).divide(ONE_DAY, 2, RoundingMode.HALF_UP).toString();
+//            }
         }
 
         public String getTotal() {

@@ -11,10 +11,10 @@ import org.springframework.context.annotation.PropertySource;
  */
 @SpringBootApplication
 @PropertySource(value = "classpath:elk/es.yml", factory = YamlPropertySourceFactory.class)
-public class EsConfig {
+public class EsApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(EsConfig.class);
+        SpringApplication.run(EsApplication.class);
     }
 
 }
