@@ -337,7 +337,7 @@ public class WriteTest {
                 Sheet sheet = writeSheetHolder.getSheet();
                 Drawing<?> drawingPatriarch = sheet.createDrawingPatriarch();
                 // 在第一行 第二列创建一个批注
-                Comment comment = drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 0, 0, (short)1, 0, (short)2, 1));
+                Comment comment = drawingPatriarch.createCellComment(new XSSFClientAnchor(0, 0, 0, 0, (short) 1, 0, (short) 2, 1));
                 // 输入批注信息
                 comment.setString(new XSSFRichTextString("创建批注!"));
                 // 将批注添加到单元格对象中
@@ -401,7 +401,7 @@ public class WriteTest {
             // 区间设置 第一列第一行和第二行的数据。由于第一行是头，所以第一、二行的数据实际上是第二三行
             CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(1, 2, 0, 0);
             DataValidationHelper helper = writeSheetHolder.getSheet().getDataValidationHelper();
-            DataValidationConstraint constraint = helper.createExplicitListConstraint(new String[] {"测试1", "测试2"});
+            DataValidationConstraint constraint = helper.createExplicitListConstraint(new String[]{"测试1", "测试2"});
             DataValidation dataValidation = helper.createValidation(constraint, cellRangeAddressList);
             writeSheetHolder.getSheet().addValidationData(dataValidation);
         }

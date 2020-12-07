@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,20 +35,21 @@ public class PeiPei {
 
     public static void main(String[] args) {
         List<RowData> data = new ArrayList<>();
-        data.addAll(readKaoQin("成都", 5));
-//        data.addAll(readKaoQin("苍山小院", 2));
-//        data.addAll(readKaoQin("富政储出", 1));
-//        data.addAll(readKaoQin("华夏银行", 2));
-//        data.addAll(readKaoQin("会展城家装", 1));
-//        data.addAll(readKaoQin("丽江束河秘境", 4));
-//        data.addAll(readKaoQin("茅台医院", 2));
+        data.addAll(readKaoQin("百色百东分院", 1));
+        data.addAll(readKaoQin("苍山小院", 1));
+        data.addAll(readKaoQin("富政储出", 1));
+        data.addAll(readKaoQin("中天金融中心", 1));
+        data.addAll(readKaoQin("丽江束河秘境", 1));
+        data.addAll(readKaoQin("修文农商银行", 1));
+        data.addAll(readKaoQin("深圳技术大学", 1));
+        data.addAll(readKaoQin("深圳万丽酒店", 2));
+//        data.addAll(readKaoQin("成都", 1));
 //        data.addAll(readKaoQin("仁怀家装", 1));
-//        data.addAll(readKaoQin("三亚工地", 1));
-//        data.addAll(readKaoQin("深圳技术大学", 2));
+//        data.addAll(readKaoQin("茅台医院", 2));
 //        data.addAll(readKaoQin("泰州金融城", 1));
 //        data.addAll(readKaoQin("乌当支行", 1));
+//        data.addAll(readKaoQin("会展城家装", 1));
 //        data.addAll(readKaoQin("新世界家装", 2));
-//        data.addAll(readKaoQin("修文农商银行", 6));
 
         data.sort(Comparator.comparing(RowData::getName).thenComparing(RowData::getMonth).thenComparing(RowData::getProjectName));
 
@@ -56,7 +58,7 @@ public class PeiPei {
     }
 
 
-    private static List<RowData> readKaoQin(String projectName, int maxIndex) {
+    private static List<RowData> readKaoQin(String projectName, int count) {
         List<RowData> list = new ArrayList<>();
         Set<String> set = new HashSet<>();
 
@@ -68,7 +70,7 @@ public class PeiPei {
                     DefaultXlsxReadContext readContext = (DefaultXlsxReadContext) context;
                     String sheetName = readContext.getCurrentSheet().getSheetName();
                     String key = data.getName() + sheetName;
-                    Assert.isTrue(!set.contains(key), "key重复");
+                    Assert.isTrue(!set.contains(key), "key重复：" + projectName + key);
                     set.add(key);
 
                     data.setMonth(sheetName);
@@ -84,7 +86,7 @@ public class PeiPei {
             }).build();
 
             ExcelReader finalExcelReader = excelReader;
-            IntStream.rangeClosed(0, maxIndex).forEach(i -> {
+            IntStream.rangeClosed(0, count - 1).forEach(i -> {
                 ReadSheet readSheet = readSheet(i).build();
                 finalExcelReader.read(readSheet);
             });
@@ -114,11 +116,12 @@ public class PeiPei {
         public void setSum(String sum) {
             this.sum = getNum(sum);
         }
+
         public void setWork(String work) {
-            this.work = getNum(work);
-//            if (!ZERO.equals(temp)) {
-//                this.work = new BigDecimal(temp).divide(ONE_DAY, 2, RoundingMode.HALF_UP).toString();
-//            }
+            String temp = getNum(work);
+            if (!ZERO.equals(temp)) {
+                this.work = new BigDecimal(temp).divide(ONE_DAY, 2, RoundingMode.HALF_UP).toString();
+            }
         }
 
         public String getTotal() {

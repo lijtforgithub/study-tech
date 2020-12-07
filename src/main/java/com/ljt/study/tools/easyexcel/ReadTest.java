@@ -101,6 +101,7 @@ public class ReadTest {
                 list.clear();
             }
         }
+
         /**
          * 所有数据解析完成了 都会来调用
          */
