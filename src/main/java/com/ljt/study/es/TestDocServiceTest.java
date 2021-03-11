@@ -5,18 +5,15 @@ import com.ljt.study.es.doc.TestDoc;
 import com.ljt.study.es.service.TestDocService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author LiJingTang
  * @date 2020-11-17 09:59
  */
 @Slf4j
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class TestDocServiceTest {
 
