@@ -1,7 +1,7 @@
 spring:
   rabbitmq:
-    addresses: 192.168.200.52:5672,192.168.200.104:5672,192.168.200.106:5672
-    username: admin
-    password: mysteel123
+    addresses: 127.0.0.1:5672
+    username: guest
+    password: guest
     publisher-returns: true
     publisher-confirm-type: correlated #必须配置这个才会确认回调
