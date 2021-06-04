@@ -1,13 +1,11 @@
 package com.ljt.study.rabbitmq.annotation;
 
-import com.ljt.study.YamlPropertySourceFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.PropertySource;
 
 /**
  * @author LiJingTang
@@ -15,7 +13,6 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Slf4j
 @SpringBootApplication
-@PropertySource(value = "classpath:rabbitmq/mq.yml", factory = YamlPropertySourceFactory.class)
 public class AnnotationApplication {
 
     public static void main(String[] args) {
