@@ -25,7 +25,7 @@ public class CanalClient {
         InetSocketAddress address = new InetSocketAddress(AddressUtils.getHostIp(), 11111);
         CanalConnector connector = CanalConnectors.newSingleConnector(address, "example", "canal", "canal");
         connector.connect();
-        connector.subscribe("test\\..*");
+        connector.subscribe();
 
         try {
             int batchSize = 1000;
