@@ -45,6 +45,18 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring-boot-web-starter</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.alibaba.otter</groupId>
             <artifactId>canal.client</artifactId>
             <version>1.1.5</version>
@@ -81,11 +93,6 @@
             <artifactId>curator-framework</artifactId>
             <version>4.3.0</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>com.alibaba</groupId>-->
-        <!--            <artifactId>dubbo</artifactId>-->
-        <!--            <version>2.5.10</version>-->
-        <!--        </dependency>-->
 
         <dependency>
             <groupId>com.alibaba</groupId>
