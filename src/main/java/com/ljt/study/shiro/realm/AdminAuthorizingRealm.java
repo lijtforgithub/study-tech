@@ -47,6 +47,7 @@ class AdminAuthorizingRealm extends AuthorizingRealm {
         CustomAuthToken authToken = (CustomAuthToken) token;
         final String username = authToken.getUsername();
         // 根据username去后台系统数据库查询
+        // 判断是否锁定 LockedAccountException
         return new SimpleAuthenticationInfo(username, encode(AUTH_PWD), getName());
     }
 
