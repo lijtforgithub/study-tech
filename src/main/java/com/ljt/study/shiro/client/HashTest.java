@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class HashTest {
 
     @Test
-    void testMd5(){
+    void md5(){
         String password = "admin";
         String salt = "salt";
         String result = new Md5Hash(password, salt, 1).toString();
@@ -21,7 +21,7 @@ class HashTest {
     }
 
     @Test
-    void testSimpleHash() {
+    void simpleHash() {
         String password = "admin";
         String salt = "salt";
         String result = new SimpleHash("MD5", password, salt, 1).toString();

@@ -78,7 +78,7 @@ class AuthenticationTest {
     }
 
     @Test
-    void testMultiRealm() {
+    void multiRealm() {
         DefaultSecurityManager securityManager = new DefaultSecurityManager();
         List<Realm> realms = Lists.newArrayList(INI_REALM, new AdminRealm(), new CustomRealm());
         securityManager.setRealms(realms);
@@ -92,7 +92,7 @@ class AuthenticationTest {
     }
 
     @Test
-    void testStrategy() {
+    void strategy() {
         DefaultSecurityManager securityManager = new DefaultSecurityManager();
         List<Realm> realms = Lists.newArrayList(new AdminRealm(), new CustomRealm(), INI_REALM);
 

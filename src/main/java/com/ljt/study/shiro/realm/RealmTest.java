@@ -39,14 +39,14 @@ class RealmTest {
     }
 
     @Test
-    void testUser() {
+    void user() {
         Subject subject = SecurityUtils.getSubject();
         subject.login(CustomAuthToken.newUserInstance(PWD, "user", UserAuthorizingRealm.AUTH_PWD));
         log.info(subject.getPrincipal().toString());
     }
 
     @Test
-    void testAdmin() {
+    void admin() {
         Subject subject = SecurityUtils.getSubject();
         subject.login(CustomAuthToken.newAdminInstance(CODE, "admin", CustomCredentialsMatcher.AUTH_CODE));
         log.info(subject.getPrincipal().toString());
