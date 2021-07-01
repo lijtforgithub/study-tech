@@ -2,20 +2,17 @@ package com.ljt.study.rocketmq.client;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
-import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
-import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -33,35 +30,17 @@ class DefaultProducerTest {
     @BeforeAll
     @SneakyThrows
     static void beforeAll() {
-        producer = new DefaultMQProducer(TEST_CLIENT_GROUP);
+        producer = new DefaultMQProducer(CLIENT_GROUP);
         producer.setNamesrvAddr(NAME_SERVER);
         // 先start 再send
         producer.start();
-    }
-
-    @AfterAll
-    @SneakyThrows
-    static void AfterAll() {
-        log.info("开始消费消息");
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(TEST_CLIENT_GROUP);
-        consumer.setNamesrvAddr(NAME_SERVER);
-        consumer.subscribe(TEST_CLIENT_TOPIC, "*");
-        consumer.registerMessageListener((MessageListenerConcurrently) (msgs, context) -> {
-            log.info("consumeMessage ... ");
-            msgs.forEach(msg -> log.info("收到消息：{}", new String(msg.getBody())));
-            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-        });
-
-        consumer.start();
-
-        TimeUnit.SECONDS.sleep(10);
     }
 
 
     @Test
     @SneakyThrows
     void send() {
-        Message msg = new Message(TEST_CLIENT_TOPIC, "我是一条RocketMQ消息".getBytes(StandardCharsets.UTF_8));
+        Message msg = new Message(CLIENT_TOPIC, "同步发送消息".getBytes(StandardCharsets.UTF_8));
         SendResult result = producer.send(msg);
         log.info("同步发送一条消息：{}", result);
     }
@@ -69,37 +48,85 @@ class DefaultProducerTest {
     @Test
     @SneakyThrows
     void sendMulti() {
-        List<Message> msgs = IntStream.rangeClosed(1, 3).mapToObj(i -> new Message(TEST_CLIENT_TOPIC,
-                String.format("我是第%s条RocketMQ消息", i).getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
-        SendResult result = producer.send(msgs);
-        log.info("同步发送{}条消息：{}", msgs.size(), result);
+        List<Message> msgList = IntStream.rangeClosed(1, 3).mapToObj(i -> new Message(CLIENT_TOPIC,
+                String.format("第%s条RocketMQ消息", i).getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
+        SendResult result = producer.send(msgList);
+        log.info("同步发送{}条消息：{}", msgList.size(), result);
     }
 
     @Test
     @SneakyThrows
     void sendAsync() {
-        Message msg = new Message(TEST_CLIENT_TOPIC, "我是一条异步RocketMQ消息".getBytes(StandardCharsets.UTF_8));
+        CountDownLatch latch = new CountDownLatch(1);
+        Message msg = new Message(CLIENT_TOPIC, "异步发送消息".getBytes(StandardCharsets.UTF_8));
         producer.send(msg, new SendCallback() {
             @Override
             public void onSuccess(SendResult result) {
-                log.info("异步发送一条消息：{}", result);
+                log.info("异步发送消息：{}", result);
+                latch.countDown();
             }
 
             @Override
             public void onException(Throwable e) {
-                log.info("异步发送一条消息异常", e);
+                log.info("异步发送消息异常", e);
             }
         });
 
         log.info("异步发送消息");
-        TimeUnit.SECONDS.sleep(3);
+        latch.await();
     }
 
     @Test
     @SneakyThrows
     void sendOneWay() {
-        Message msg = new Message(TEST_CLIENT_TOPIC, "我是一条RocketMQ:Oneway消息".getBytes(StandardCharsets.UTF_8));
+        Message msg = new Message(CLIENT_TOPIC, "Oneway发送消息".getBytes(StandardCharsets.UTF_8));
         producer.sendOneway(msg);
+    }
+
+    @Test
+    @SneakyThrows
+    void sendWithTag() {
+        final String tag = "Tag-A";
+        Message msg = new Message(CLIENT_TOPIC, tag, "bizId", "Tag消息".getBytes(StandardCharsets.UTF_8));
+        producer.send(msg);
+
+        // 同一个组不能启动多个消费者 The consumer group[test_client_group] has been created before, specify another name please
+        DefaultPushConsumerTest.consumeMessage(MessageSelector.byTag(tag));
+    }
+
+    @Test
+    @SneakyThrows
+    void sendUserProp() {
+        final String age = "age";
+        List<Message> msgList = IntStream.rangeClosed(1, 10).mapToObj(i -> {
+            Message msg = new Message(CLIENT_TOPIC, ("消息-" + i).getBytes(StandardCharsets.UTF_8));
+            msg.putUserProperty(age, String.valueOf(i));
+            return msg;
+        }).collect(Collectors.toList());
+        producer.send(msgList);
+
+        // 同一个topic 其他的group都会消费一次 消费者要在发送之前启动
+        DefaultPushConsumerTest.consumeMessage(MessageSelector.bySql(String.format("%s >= %s and %s <= %s", age, 6, age, 8)));
+    }
+
+    @Test
+    void setRetry() {
+        // 默认2次
+        producer.setRetryTimesWhenSendFailed(1);
+        producer.setRetryTimesWhenSendAsyncFailed(1);
+        // 默认false
+        producer.setRetryAnotherBrokerWhenNotStoreOK(true);
+    }
+
+    @Test
+    @SneakyThrows
+    void sendWithQueue() {
+//        producer.setDefaultTopicQueueNums();
+        // 一个topic(逻辑单位)默认4个queue(物理单位保证消息FIFO)
+        producer.send(new Message(CLIENT_TOPIC, "指定队列消息".getBytes(StandardCharsets.UTF_8)), (mqs, msg, arg) -> {
+            mqs.forEach(q -> log.info(q.toString()));
+            return mqs.get(Integer.parseInt(String.valueOf(arg)));
+        }, "0");
     }
 
 }

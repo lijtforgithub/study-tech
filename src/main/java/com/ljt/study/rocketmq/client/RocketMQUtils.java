@@ -12,8 +12,12 @@ class RocketMQUtils {
 
     static final String NAME_SERVER = LOCAL_HOST + ":9876";
 
-    static final String TEST_CLIENT_GROUP = "test_client_group";
+    static final String CLIENT_TOPIC = "test_client_topic";
+    static final String CLIENT_GROUP = "test_client_group";
+    static final String CLIENT_GROUP_X = "test_client_group_x";
 
-    static final String TEST_CLIENT_TOPIC = "test_client_topic";
+
+    static final String DEF_TOPIC = "test_client_topic_def";
+    static final String DEF_GROUP = "test_client_group_def";
 
 }
