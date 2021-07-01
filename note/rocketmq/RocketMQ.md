@@ -3,6 +3,11 @@
 2. CMD命令框执行进入bin目录下执行 start mqnamesrv.cmd 和 start mqbroker.cmd -n 127.0.0.1:9876
 3. [https://github.com/apache/rocketmq-externals/tree/master/rocketmq-console](控制台插件)
 #### 配置
+```
+namesrvAddr=127.0.0.1:9876
+brokerIP1=127.0.0.1
+autoCreateTopicEnable=true
 enablePropertyFilter=true
- - start mqbroker.cmd -n 127.0.0.1:9876 -c ../conf/broker.conf
+```
+ - start mqbroker.cmd -c ../conf/broker.conf
  - 只有Push类型的Consumer支持使用自定义属性过滤

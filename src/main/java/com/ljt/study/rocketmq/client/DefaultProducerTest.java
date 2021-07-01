@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,6 +33,7 @@ class DefaultProducerTest {
     static void beforeAll() {
         producer = new DefaultMQProducer(CLIENT_GROUP);
         producer.setNamesrvAddr(NAME_SERVER);
+        producer.setSendMsgTimeout((int) TimeUnit.MINUTES.toMillis(1));
         // 先start 再send
         producer.start();
     }
@@ -127,6 +129,16 @@ class DefaultProducerTest {
             mqs.forEach(q -> log.info(q.toString()));
             return mqs.get(Integer.parseInt(String.valueOf(arg)));
         }, "0");
+    }
+
+    @Test
+    @SneakyThrows
+    void sendDelay() {
+        // messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+        Message message = new Message(CLIENT_TOPIC, "延迟消费消息".getBytes(StandardCharsets.UTF_8));
+        message.setDelayTimeLevel(5);
+        producer.send(message);
+        producer.send(new Message(CLIENT_TOPIC, "正常消费消息".getBytes(StandardCharsets.UTF_8)));
     }
 
 }
