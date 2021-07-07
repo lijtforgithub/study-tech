@@ -4,3 +4,10 @@ spring:
       - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
       - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
       - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
+rocketmq:
+  name-server: localhost:9876
+  test:
+    group: test_spring_group
+    topic: test_spring_topic
+  producer:
+    group: ${rocketmq.test.group}

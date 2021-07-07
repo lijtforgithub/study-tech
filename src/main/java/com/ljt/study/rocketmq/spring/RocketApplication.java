@@ -1,4 +1,4 @@
-package com.ljt.study.es;
+package com.ljt.study.rocketmq.spring;
 
 import com.ljt.study.YamlPropertySourceFactory;
 import org.springframework.boot.SpringApplication;
@@ -7,14 +7,14 @@ import org.springframework.context.annotation.PropertySource;
 
 /**
  * @author LiJingTang
- * @date 2020-11-12 19:29
+ * @date 2021-07-07 09:19
  */
 @SpringBootApplication
-@PropertySource(value = "classpath:es/application.yml", factory = YamlPropertySourceFactory.class)
-class EsApplication {
+@PropertySource(value = "classpath:rocketmq/application.yml", factory = YamlPropertySourceFactory.class)
+class RocketApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(EsApplication.class);
+        SpringApplication.run(RocketApplication.class, args);
     }
 
 }
