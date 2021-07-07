@@ -1,6 +1,8 @@
 package com.ljt.study.rabbitmq.delay;
 
 import com.alibaba.fastjson.JSON;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
@@ -14,10 +16,12 @@ import java.util.concurrent.CountDownLatch;
  * @date 2020-01-04 14:10
  */
 @Slf4j
+@Setter
+@Getter
 @Component
-public class ConsumerListener implements MessageListener {
+class ConsumerListener implements MessageListener {
 
-    static CountDownLatch cdLatch;
+    private CountDownLatch latch;
 
     @Override
     public void onMessage(Message message) {
@@ -25,8 +29,8 @@ public class ConsumerListener implements MessageListener {
         log.debug("接收消息头信息：{}", header);
         log.info("接收消息内容：{}", new String(message.getBody()));
 
-        if (Objects.nonNull(cdLatch)) {
-            cdLatch.countDown();
+        if (Objects.nonNull(latch)) {
+            latch.countDown();
         }
     }
 

@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2020-12-03 20:08
  */
 @Slf4j
-public class CanalClient {
+class CanalClient {
 
     private static volatile boolean run = true;
 

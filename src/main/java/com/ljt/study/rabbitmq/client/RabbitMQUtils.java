@@ -11,7 +11,7 @@ import java.util.Objects;
  * @author LiJingTang
  * @date 2020-01-16 11:12
  */
-public class RabbitMQUtils {
+class RabbitMQUtils {
 
     private static Connection connection;
 

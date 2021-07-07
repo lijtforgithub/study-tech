@@ -1,7 +1,0 @@
-spring:
-  rabbitmq:
-    addresses: 127.0.0.2:5672
-    username: guest
-    password: guest
-    publisher-returns: true
-    publisher-confirm-type: correlated #必须配置这个才会确认回调

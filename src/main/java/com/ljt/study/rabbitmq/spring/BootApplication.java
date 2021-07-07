@@ -1,4 +1,4 @@
-package com.ljt.study.rabbitmq.annotation;
+package com.ljt.study.rabbitmq.spring;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
@@ -13,10 +13,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @Slf4j
 @SpringBootApplication
-public class AnnotationApplication {
+class BootApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AnnotationApplication.class);
+        SpringApplication.run(BootApplication.class);
     }
 
     @RabbitListener(queuesToDeclare = @Queue("test_queue"))

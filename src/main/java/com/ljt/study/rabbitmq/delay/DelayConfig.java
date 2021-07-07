@@ -1,27 +1,25 @@
 package com.ljt.study.rabbitmq.delay;
 
 import com.google.common.collect.Maps;
+import com.ljt.study.YamlPropertySourceFactory;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import java.util.Map;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * @author LiJingTang
  * @date 2020-01-04 12:54
  */
-@SpringBootApplication
+@Configuration
+@PropertySource(value = "classpath:rabbitmq/application.yml", factory = YamlPropertySourceFactory.class)
 public class DelayConfig {
-
-    public static void main(String[] args) {
-        SpringApplication.run(DelayConfig.class);
-    }
 
     public static final String KEY_DLK = "x-dead-letter-routing-key";
     public static final String KEY_DLX = "x-dead-letter-exchange";
@@ -38,7 +36,7 @@ public class DelayConfig {
     /**
      * 队列TTL时间 单位秒
      */
-    static final int TTL_SED = 1 * 60;
+    static final int TTL_SED = 60;
     /**
      * DLX exchange
      */
@@ -48,24 +46,17 @@ public class DelayConfig {
      */
     private static final String QUEUE_DELAY = "test.delay.queue.consumer";
 
-    @Autowired
-    private CachingConnectionFactory connectionFactory;
-
-    @Bean
-    public RabbitAdmin rabbitAdmin() {
-        return new RabbitAdmin(connectionFactory);
-    }
 
     /**
      * TTL配置在消息上的缓冲队列
      */
     @Bean
-    public Queue ttlMessageQueue(RabbitAdmin rabbitAdmin) {
+    public Queue ttlMessageQueue(AmqpAdmin amqpAdmin) {
         Map<String, Object> args = Maps.newHashMapWithExpectedSize(2);
         args.put(KEY_DLX, EXCHANGE_DLX);
         args.put(KEY_DLK, QUEUE_DELAY);
         Queue queue = new Queue(QUEUE_TTL_MSG, true, false, false, args);
-        rabbitAdmin.declareQueue(queue);
+        amqpAdmin.declareQueue(queue);
         return queue;
     }
 
@@ -75,9 +66,12 @@ public class DelayConfig {
     @Bean
     public Queue ttlQueue() {
         return QueueBuilder.durable(QUEUE_TTL)
-                .withArgument(KEY_DLX, EXCHANGE_DLX) // DLX，dead letter发送到的exchange
-                .withArgument(KEY_DLK, QUEUE_DELAY) // dead letter携带的routing key
-                .withArgument(KEY_TTL, TTL_SED * 1000L) // 设置队列的过期时间
+                // DLX，dead letter发送到的exchange
+                .withArgument(KEY_DLX, EXCHANGE_DLX)
+                // dead letter携带的routing key
+                .withArgument(KEY_DLK, QUEUE_DELAY)
+                // 设置队列的过期时间
+                .withArgument(KEY_TTL, SECONDS.toMillis(TTL_SED))
                 .build();
     }
 
@@ -85,7 +79,7 @@ public class DelayConfig {
      * 实际消费队列 DLX转发队列
      */
     @Bean
-    public Queue consumerQueue(RabbitAdmin rabbitAdmin) {
+    public Queue consumerQueue() {
         return new Queue(QUEUE_DELAY);
     }
 
@@ -108,7 +102,8 @@ public class DelayConfig {
     }
 
     @Bean
-    public SimpleMessageListenerContainer buildResultRecvContainer(Queue consumerQueue, ConsumerListener consumerListener) {
+    public SimpleMessageListenerContainer container(ConnectionFactory connectionFactory, Queue consumerQueue,
+                                                    ConsumerListener consumerListener) {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
         container.setQueues(consumerQueue);
         container.setMessageListener(consumerListener);

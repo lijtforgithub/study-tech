@@ -14,18 +14,18 @@ import org.springframework.data.elasticsearch.core.IndexOperations;
  */
 @Slf4j
 @SpringBootTest
-public class EsRestTemplateTest {
+class BootTest {
 
     @Autowired
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Test
-    public void testCreateIndex() {
+    void createIndex() {
         elasticsearchRestTemplate.indexOps(TestCreateDoc.class).create();
     }
 
     @Test
-    public void testCreateMapping() {
+    void createMapping() {
         final IndexOperations indexOps = elasticsearchRestTemplate.indexOps(TestCreateDoc.class);
         indexOps.putMapping(indexOps.createMapping());
     }

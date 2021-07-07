@@ -15,13 +15,13 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @Slf4j
 @SpringBootTest
-public class TestDocServiceTest {
+class DocServiceTest {
 
     @Autowired
     private TestDocService testDocService;
 
     @Test
-    public void testSave() {
+    void testSave() {
         TestDoc doc = new TestDoc();
         doc.setId(4L);
         doc.setName("小米");
@@ -33,7 +33,7 @@ public class TestDocServiceTest {
     }
 
     @Test
-    public void testSaveList() {
+    void testSaveList() {
         TestDoc doc1 = new TestDoc();
         doc1.setId(5L);
         doc1.setName("小米");
@@ -52,17 +52,17 @@ public class TestDocServiceTest {
     }
 
     @Test
-    public void testFindAll() {
+    void testFindAll() {
         log.info(JSON.toJSONString(testDocService.findAll()));
     }
 
     @Test
-    public void testFindByName() {
+    void testFindByName() {
         log.info(JSON.toJSONString(testDocService.findByName("filter")));
     }
 
     @Test
-    public void testFindByCreateDate() {
+    void testFindByCreateDate() {
         log.info(JSON.toJSONString(testDocService.findByCreateDate("2020-11-18")));
     }
 
