@@ -14,7 +14,7 @@ import java.util.concurrent.CountDownLatch;
  * @author LiJingTang
  * @date 2019-11-28 15:28
  */
-public class LockTest {
+class LockTest {
 
     private static final Logger logger = LoggerFactory.getLogger(LockTest.class);
 

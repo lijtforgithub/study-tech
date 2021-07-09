@@ -2,6 +2,7 @@ package com.ljt.study;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.Objects;
@@ -39,6 +40,11 @@ public abstract class AbstractTest {
         applicationContext = new ClassPathXmlApplicationContext(configLocations);
 
         log.info("【{}】IoC容器初始化完成", configLocations);
+    }
+    protected void setApplicationContext(Class<?> clazz) {
+        applicationContext = new AnnotationConfigApplicationContext(clazz);
+
+        log.debug("【{}】容器启动完成\n", clazz.getSimpleName());
     }
 
 }

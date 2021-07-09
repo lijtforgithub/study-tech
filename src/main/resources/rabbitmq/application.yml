@@ -1,6 +1,0 @@
-spring:
-  autoconfigure:
-    exclude:
-      - org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration

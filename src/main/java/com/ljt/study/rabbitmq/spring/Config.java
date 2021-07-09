@@ -1,6 +1,5 @@
 package com.ljt.study.rabbitmq.spring;
 
-import com.ljt.study.YamlPropertySourceFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -10,7 +9,6 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 /**
  * @author LiJingTang
@@ -18,7 +16,6 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Slf4j
 @Configuration
-@PropertySource(value = "classpath:rabbitmq/application.yml", factory = YamlPropertySourceFactory.class)
 class Config {
 
     @Bean

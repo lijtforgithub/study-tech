@@ -1,4 +1,4 @@
-- canal.serverMode 启动后再admin修改不可以
+- canal.serverMode 启动后在admin修改不可以
 - canal.serverMode = rabbitMQ（配置以服务的canal.properties有效）
 ```
 ##################################################

@@ -1,13 +1,11 @@
 package com.ljt.study.rabbitmq.delay;
 
 import com.google.common.collect.Maps;
-import com.ljt.study.YamlPropertySourceFactory;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 import java.util.Map;
 
@@ -18,7 +16,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * @date 2020-01-04 12:54
  */
 @Configuration
-@PropertySource(value = "classpath:rabbitmq/application.yml", factory = YamlPropertySourceFactory.class)
 public class DelayConfig {
 
     public static final String KEY_DLK = "x-dead-letter-routing-key";
