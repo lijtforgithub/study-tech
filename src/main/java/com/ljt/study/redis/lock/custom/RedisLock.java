@@ -48,6 +48,7 @@ class RedisLock implements Lock {
          * 原子操作：写key和超时时间应该一次加，不应该分2行代码，
          */
         Assert.notNull(stringRedisTemplate, "stringRedisTemplate为空");
+        // 为了实现锁的可重入 还要判断当前线程是否已经获得锁 这里未做实现
         final boolean status = Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(name, uuid, DEF_TIME, TimeUnit.SECONDS));
         if (status) {
             log.info("{} 获取到锁 {}", Thread.currentThread().getName(), name);

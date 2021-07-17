@@ -25,7 +25,7 @@ public class Constant {
     /**
      * zookeeper
      */
-    public static final String ZK_SERVER_IP = "192.168.1.100:2181,192.168.1.101:2181,192.168.1.102:2181";
+    public static final String ZK_SERVER = LOCAL_HOST + ":2181";
     public static final int ZK_TIMEOUT = 5000;
 
 }

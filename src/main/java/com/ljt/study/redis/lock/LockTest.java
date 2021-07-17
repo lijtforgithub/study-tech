@@ -5,10 +5,7 @@ import com.ljt.study.redis.lock.service.OrderService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 
 /**
  * @author LiJingTang
@@ -36,15 +33,13 @@ public class LockTest extends AbstractTest {
         ((ThreadPoolExecutor) executor).prestartAllCoreThreads();
 
         final int count = 9;
-        CountDownLatch latch = new CountDownLatch(count);
         for (int i = 0; i < count; i++) {
             int fi = i;
-            executor.submit(() -> {
-                orderService.grabOrder((fi % OrderService.COUNT) + 1);
-                latch.countDown();
-            });
+            executor.submit(() -> orderService.grabOrder((fi % OrderService.COUNT) + 1));
         }
-        latch.await();
+
+        executor.shutdown();
+        executor.awaitTermination(10, TimeUnit.SECONDS);
     }
 
 }
