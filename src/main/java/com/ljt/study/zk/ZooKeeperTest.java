@@ -15,7 +15,7 @@ import static com.ljt.study.Constant.ZK_TIMEOUT;
  * @author LiJingTang
  * @date 2020-03-08 10:21
  */
-class ClientTest {
+class ZooKeeperTest {
 
     /*
      * zk 是有session概念的，没有连接池的概念

@@ -2,7 +2,7 @@
 <configuration>
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d %p %m%n</pattern>
+            <pattern>%d [%-5p] [%thread] %logger{10} %m%n</pattern>
         </encoder>
     </appender>
 
