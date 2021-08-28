@@ -23,9 +23,9 @@ class CanalClient {
 
     public static void main(String[] args) throws InterruptedException {
         InetSocketAddress address = new InetSocketAddress(AddressUtils.getHostIp(), 11111);
-        CanalConnector connector = CanalConnectors.newSingleConnector(address, "example", "canal", "canal");
+        CanalConnector connector = CanalConnectors.newSingleConnector(address, "study-canal", "canal", "canal");
         connector.connect();
-        connector.subscribe("study-test\\..*");
+        connector.subscribe("study-canal\\.test1,study-canal\\.test2");
 
         try {
             int batchSize = 1000;

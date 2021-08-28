@@ -1,11 +1,11 @@
-package com.ljt.study.rabbitmq.spring;
+package com.ljt.study.rabbitmq.spring.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.BrokerEvent;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.event.EventListener;
 
 /**
  * @author LiJingTang
@@ -19,9 +19,14 @@ class BootApplication {
         SpringApplication.run(BootApplication.class);
     }
 
-    @RabbitListener(queuesToDeclare = @Queue("test_queue"))
+//    @RabbitListener(queuesToDeclare = @Queue("test_queue"))
     public void onMessage(Message message) {
         log.info(new String(message.getBody()));
+    }
+
+    @EventListener(condition = "event.eventType == 'queue.created'")
+    void listener(BrokerEvent event) {
+        log.info(event.toString());
     }
 
 }

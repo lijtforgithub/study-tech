@@ -1,7 +1,7 @@
 ## 基础概念
 RabbitMQ整体上是一个生产者与消费者模型，主要负责接收、存储和转发消息。计算机术语：交换机模型。  
 在rabbitmq的安装目录下找到sbin目录；打开命令行执行：rabbitmq-plugins enable rabbitmq_management
-- connection TCP连接 创建多个 channel 虚拟连接（线程私有）
+- connection TCP连接 创建多个 channel 虚拟连接（**线程私有**）
 - mandatory=true：如果消息未被路由的情况下，消息会被服务器返回给生产者
 - immediate=true：如果该消息关联的队列上有消费者，则立即投递；如果所有匹配队列上没有消费者，则直接将消息返还给生产者，不用将消息存入队列而等待消费者了。3.0版本去掉了这个参数。可以使用TTL=0实现。
 - 备份交换器：如果设置的备份交换器不存在或没有绑定任何队列或没有任何匹配的队列，客户端和服务器都不会有异常，此时消息会丢失。如果和mandatory参数一起使用，那么mandatory参数无效。
