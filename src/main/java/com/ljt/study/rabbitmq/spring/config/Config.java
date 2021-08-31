@@ -38,8 +38,9 @@ class Config {
 
     /**
      * Container实现了SmartLifecycle
-     * DirectMessageListenerContainer
      * 配置了Container才会触发RabbitAdmin的initialize方法
+     * DirectMessageListenerContainer：线程池消费各个队列的消息 顺序消费
+     * SimpleMessageListenerContainer：一个consumer一个线程 轮询消费每个队列
      *
      * spring cloud 配置中心的container不在IOC容器中
      * org.springframework.cloud.stream.binder.rabbit.RabbitMessageChannelBinder#createConsumerEndpoint
@@ -53,16 +54,16 @@ class Config {
         container.setConnectionFactory(connectionFactory);
         container.addQueues(oo());
         container.setMessageListener(messageRecv);
-        container.setConcurrency("1-3");
-        container.setPrefetchCount(3);
-        container.setBatchSize(1);
+        container.setConcurrency("1");
+        // batchSize
+        container.setPrefetchCount(2);
         container.setAcknowledgeMode(AcknowledgeMode.MANUAL);
 
-        container.setErrorHandler(t -> log.info("自定义异常处理：{}", t.getMessage()));
-        container.setAfterReceivePostProcessors(message -> {
-            log.info("MessagePostProcessor: {}", new String(message.getBody()));
-            return message;
-        });
+//        container.setErrorHandler(t -> log.info("自定义异常处理：{}", t.getMessage()));
+//        container.setAfterReceivePostProcessors(message -> {
+//            log.info("MessagePostProcessor: {}", new String(message.getBody()));
+//            return message;
+//        });
 
         return container;
     }
