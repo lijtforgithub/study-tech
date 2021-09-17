@@ -14,6 +14,7 @@ import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.Head;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
 import com.alibaba.excel.util.FileUtils;
+import com.alibaba.excel.write.handler.AbstractCellWriteHandler;
 import com.alibaba.excel.write.handler.AbstractRowWriteHandler;
 import com.alibaba.excel.write.handler.CellWriteHandler;
 import com.alibaba.excel.write.handler.SheetWriteHandler;
@@ -55,10 +56,10 @@ import static com.ljt.study.Constant.XLSX;
  * @author LiJingTang
  * @date 2020-10-20 14:45
  */
-public class WriteTest {
+class WriteTest {
 
     @Test
-    public void testSimpleWrite() {
+    void simple() {
         String path = DESKTOP + "SimpleWrite" + XLSX;
         String path2 = DESKTOP + "SimpleWrite2" + XLSX;
         List<DemoData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoData("李白", new Date(), 6.1)).collect(Collectors.toList());
@@ -78,7 +79,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testExcludeOrIncludeWrite() {
+    void excludeOrInclude() {
         String path = DESKTOP + "ExcludeWrite" + XLSX;
         String path2 = DESKTOP + "IncludeWrite" + XLSX;
         List<DemoData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoData("李贺", new Date(), 6.1)).collect(Collectors.toList());
@@ -93,7 +94,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testIndexWrite() {
+    void index() {
         String path = DESKTOP + "IndexWrite" + XLSX;
         List<IndexData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new IndexData("赵祯", new Date(), 6.1)).collect(Collectors.toList());
 
@@ -101,14 +102,14 @@ public class WriteTest {
     }
 
     @Test
-    public void testComplexHeadWrite() {
+    void complexHead() {
         String path = DESKTOP + "ComplexHeadWrite" + XLSX;
         List<ComplexHeadData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new ComplexHeadData("晏殊", new Date(), 6.1)).collect(Collectors.toList());
         write(path, ComplexHeadData.class).sheet("模板").doWrite(data);
     }
 
     @Test
-    public void testRepeatedWrite() {
+    void repeated() {
         String path = DESKTOP + "RepeatedWrite" + XLSX;
         List<DemoData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoData("李白", new Date(), 6.1)).collect(Collectors.toList());
 
@@ -158,7 +159,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testConverterWrite() {
+    void converter() {
         String path = DESKTOP + "ConverterWrite" + XLSX;
         List<ConverterData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new ConverterData("杜甫", new Date(), 6.1)).collect(Collectors.toList());
 
@@ -166,7 +167,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testImageWrite() throws IOException {
+    void image() throws IOException {
         String path = DESKTOP + "ImageWrite" + XLSX;
         InputStream inputStream = null;
         try {
@@ -190,7 +191,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testTemplateWrite() {
+    void template() {
         String path = DESKTOP + "TemplateWriteDemo" + XLSX;
         String templatePath = DESKTOP + "TemplateWrite" + XLSX;
         List<IndexData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new IndexData("赵构", new Date(), 6.1)).collect(Collectors.toList());
@@ -199,7 +200,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testWidthAndHeightWrite() {
+    void widthAndHeight() {
         String path = DESKTOP + "WidthAndHeightWrite" + XLSX;
         List<WidthAndHeightData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new WidthAndHeightData("赵佶", new Date(), 6.1)).collect(Collectors.toList());
 
@@ -207,7 +208,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testAnnotationStyleWrite() {
+    void annotationStyle() {
         String path = DESKTOP + "AnnotationStyleWrite" + XLSX;
         List<DemoStyleData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoStyleData("赵恒", new Date(), 6.1)).collect(Collectors.toList());
 
@@ -215,7 +216,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testStyleWrite() {
+    void style() {
         String path = DESKTOP + "StyleWrite" + XLSX;
         List<DemoData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoData("李白", new Date(), 6.1)).collect(Collectors.toList());
         // 头的策略
@@ -243,7 +244,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testMergeWrite() {
+    void merge() {
         String path = DESKTOP + "MergeWrite" + XLSX;
         List<DemoMergeData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoMergeData("李白", new Date(), 6.1)).collect(Collectors.toList());
         // 在DemoStyleData里面加上ContentLoopMerge注解
@@ -256,7 +257,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testTableWrite() {
+    void table() {
         String path = DESKTOP + "TableWrite" + XLSX;
         List<DemoData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoData("赵昚", new Date(), 6.1)).collect(Collectors.toList());
 
@@ -281,7 +282,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testDynamicHeadWrite() {
+    void dynamicHead() {
         String path = DESKTOP + "DynamicHeadWrite" + XLSX;
         List<DemoData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoData("赵顼", new Date(), 6.1)).collect(Collectors.toList());
 
@@ -290,7 +291,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testLongestMatchColumnWidthWrite() {
+    void longestMatchColumnWidth() {
         String path = DESKTOP + "LongestMatchColumnWidthWrite" + XLSX;
         List<LongestMatchColumnWidthData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new LongestMatchColumnWidthData("赵熙", new Date(),
                 1000000000000.0)).collect(Collectors.toList());
@@ -299,7 +300,7 @@ public class WriteTest {
     }
 
     @Test
-    public void testCustomHandlerWrite() {
+    void customHandler() {
         String path = DESKTOP + "CustomHandlerWrite" + XLSX;
         List<DemoData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoData("赵曙", new Date(), 6.1)).collect(Collectors.toList());
 
@@ -310,7 +311,7 @@ public class WriteTest {
 
 
     @Test
-    public void testCommentWrite() {
+    void comment() {
         String path = DESKTOP + "CommentWrite" + XLSX;
         List<DemoData> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new DemoData("赵匡胤", new Date(), 6.1)).collect(Collectors.toList());
 
@@ -319,12 +320,46 @@ public class WriteTest {
     }
 
     @Test
-    public void testNoModelWrite() {
+    void noModel() {
         String path = DESKTOP + "NoModelWrite" + XLSX;
         List<List<String>> head = Lists.newArrayList(Lists.newArrayList("唐诗"), Lists.newArrayList("宋词"), Lists.newArrayList("元曲"));
         List<List<String>> data = Lists.newArrayList(Lists.newArrayList("落叶满长安", "封狼居胥"), Lists.newArrayList("封狼居胥"), Lists.newArrayList("多情自古", "此恨绵绵"));
 
         write(path).head(head).sheet("模板").doWrite(data);
+    }
+
+    @Test
+    void formula() {
+        String path = DESKTOP + "formula" + XLSX;
+        List<FormulaDemo> data = IntStream.rangeClosed(1, 10).mapToObj(i -> new FormulaDemo(i, i)).collect(Collectors.toList());
+        write(path, FormulaDemo.class).sheet().registerWriteHandler(new FormulaCellWriteHandler()).doWrite(data);
+    }
+
+    static class FormulaCellWriteHandler extends AbstractCellWriteHandler {
+        @Override
+        public void afterCellDispose(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, List<CellData> cellDataList, Cell cell, Head head, Integer relativeRowIndex, Boolean isHead) {
+            if (Boolean.FALSE.equals(isHead) && cell.getColumnIndex() == 2) {
+                System.out.println(head.getFieldName());
+                int index = relativeRowIndex + 2;
+                cell.setCellType(CellType.FORMULA);
+                cell.setCellFormula(String.format("=(A%d * B%d)", index, index));
+            }
+        }
+    }
+
+    @Data
+    static class FormulaDemo {
+        @ExcelProperty("数量")
+        private int num;
+        @ExcelProperty("单价")
+        private int price;
+        @ExcelProperty("金额")
+        private int money;
+
+        public FormulaDemo(int num, int price) {
+            this.num = num;
+            this.price = price;
+        }
     }
 
 
