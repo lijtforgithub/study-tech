@@ -33,10 +33,10 @@ import static com.ljt.study.Constant.XLSX;
  * @date 2020-10-19 15:00
  */
 @Slf4j
-public class TemplateTest {
+class TemplateTest {
 
     @Test
-    public void testSimpleFill() throws IOException {
+    void simpleFill() throws IOException {
         ClassPathResource resource = getResource("SimpleFill");
         String templatePath = resource.getURI().getRawPath();
         String path = DESKTOP + resource.getFilename();
@@ -56,7 +56,7 @@ public class TemplateTest {
      * 填充list 的时候还要注意 模板中{.} 多了个点 表示list
      */
     @Test
-    public void testListFill() throws IOException {
+    void listFill() throws IOException {
         ClassPathResource resource = getResource("ListFill");
         String templatePath = resource.getURI().getRawPath();
         String path = DESKTOP + resource.getFilename();
@@ -75,7 +75,7 @@ public class TemplateTest {
     }
 
     @Test
-    public void testComplexFill() throws IOException {
+    void complexFill() throws IOException {
         ClassPathResource resource = getResource("ComplexFill");
         String templatePath = resource.getURI().getRawPath();
         String path = DESKTOP + resource.getFilename();
@@ -101,7 +101,7 @@ public class TemplateTest {
      * 这里的解决方案是 确保模板list为最后一行，然后再拼接table.还有03版没救，只能刚正面加内存。
      */
     @Test
-    public void testComplexFillWithTable() throws IOException {
+    void complexFillWithTable() throws IOException {
         ClassPathResource resource = getResource("ComplexFillWithTable");
         String templatePath = resource.getURI().getRawPath();
         String path = DESKTOP + resource.getFilename();
@@ -127,7 +127,7 @@ public class TemplateTest {
      * 横向填充
      */
     @Test
-    public void testHorizontalFill() throws IOException {
+    void horizontalFill() throws IOException {
         ClassPathResource resource = getResource("HorizontalFill");
         String templatePath = resource.getURI().getRawPath();
         String path = DESKTOP + resource.getFilename();
@@ -143,7 +143,7 @@ public class TemplateTest {
     }
 
     @Test
-    public void testCompositeFill() throws IOException {
+    void compositeFill() throws IOException {
         ClassPathResource resource = getResource("CompositeFill");
         String templatePath = resource.getURI().getRawPath();
         String path = DESKTOP + resource.getFilename();

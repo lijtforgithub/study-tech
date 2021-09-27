@@ -25,10 +25,10 @@ import static com.ljt.study.Constant.XLSX;
  * @date 2020-10-22 09:09
  */
 @Slf4j
-public class ReadTest {
+class ReadTest {
 
     @Test
-    public void testSimpleRead() {
+    void simpleRead() {
         String path = DESKTOP + "SimpleRead" + XLSX;
         // 有个很重要的点 DemoDataListener 不能被spring管理，要每次读取excel都要new,然后里面用到spring可以构造方法传进去
         // 这里 需要指定读用哪个class去读，然后读取第一个sheet 文件流会自动关闭
@@ -49,7 +49,7 @@ public class ReadTest {
 
 
     @Test
-    public void testIndexOrNameRead() {
+    void indexOrNameRead() {
         String path = DESKTOP + "SimpleRead" + XLSX;
         // 这里默认读取第一个sheet
         read(path, IndexOrNameData.class, new AnalysisEventListener<IndexOrNameData>() {
@@ -67,7 +67,7 @@ public class ReadTest {
     }
 
     @Data
-    public static class IndexOrNameData {
+    static class IndexOrNameData {
         /**
          * 强制读取第三个 这里不建议 index 和 name 同时用，要么一个对象只用index，要么一个对象只用name去匹配
          */
@@ -125,7 +125,7 @@ public class ReadTest {
     }
 
     @Data
-    public static class DemoData {
+    static class DemoData {
         private String string;
         private Date date;
         private Double doubleData;
