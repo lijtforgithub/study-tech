@@ -1,4 +1,4 @@
-package com.ljt.study.qdsl.config;
+package com.ljt.study.querydsl.config;
 
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLCloseListener;
@@ -17,7 +17,7 @@ import javax.sql.DataSource;
  */
 @Slf4j
 @Configuration
-public class QDslConfig {
+public class QueryDslConfig {
 
     /**
      * 必须使用 DataSourceUtils.getConnection(dataSource) 返回的数据库连接才支持事务

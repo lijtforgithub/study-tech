@@ -9,7 +9,7 @@
     <logger name="com.ljt" level="DEBUG"/>
     <logger name="com.querydsl" level="DEBUG"/>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="console"/>
     </root>
 </configuration>

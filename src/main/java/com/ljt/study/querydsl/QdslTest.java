@@ -1,7 +1,7 @@
-package com.ljt.study.qdsl;
+package com.ljt.study.querydsl;
 
-import com.ljt.study.qdsl.entity.User;
-import com.ljt.study.qdsl.service.UserService;
+import com.ljt.study.querydsl.entity.User;
+import com.ljt.study.querydsl.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,4 +1,4 @@
-package com.ljt.study.qdsl.entity;
+package com.ljt.study.querydsl.entity;
 
 import lombok.Data;
 

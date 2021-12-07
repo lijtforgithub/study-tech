@@ -1,6 +1,6 @@
-package com.ljt.study.qdsl.querypath;
+package com.ljt.study.querydsl.query;
 
-import com.ljt.study.qdsl.entity.User;
+import com.ljt.study.querydsl.entity.User;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.ColumnMetadata;

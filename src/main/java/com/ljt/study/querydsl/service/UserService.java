@@ -1,6 +1,6 @@
-package com.ljt.study.qdsl.service;
+package com.ljt.study.querydsl.service;
 
-import com.ljt.study.qdsl.entity.User;
+import com.ljt.study.querydsl.entity.User;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import org.springframework.util.Assert;
 import java.util.List;
 import java.util.Objects;
 
-import static com.ljt.study.qdsl.querypath.QUser.Q_USER;
+import static com.ljt.study.querydsl.query.QUser.Q_USER;
 
 /**
  * @author LiJingTang
