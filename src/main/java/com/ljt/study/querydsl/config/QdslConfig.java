@@ -17,7 +17,7 @@ import javax.sql.DataSource;
  */
 @Slf4j
 @Configuration
-public class QueryDslConfig {
+public class QdslConfig {
 
     /**
      * 必须使用 DataSourceUtils.getConnection(dataSource) 返回的数据库连接才支持事务
