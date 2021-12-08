@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 @Slf4j
 @Import(DynamicDataSourceConfig.class)
 @Configuration
-public class QueryDslConfig {
+public class QdslConfig {
 
     @Bean
     @ConditionalOnMissingBean
