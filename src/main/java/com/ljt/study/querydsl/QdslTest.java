@@ -1,5 +1,6 @@
 package com.ljt.study.querydsl;
 
+import com.ljt.study.dynamicds.DynamicDataSource;
 import com.ljt.study.querydsl.entity.User;
 import com.ljt.study.querydsl.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,8 @@ class QdslTest {
 
     @Test
     void getOne() {
-        System.out.println(userService.getOne(3L));
+        DynamicDataSource.set("DynamicDataSource[test]");
+        System.out.println(userService.getOne(1L));
     }
 
     @Test

@@ -79,12 +79,12 @@ public class DynamicDataSourceConfig {
 
                 tmp.init();
                 beanFactory.registerSingleton(beanName, tmp);
-                log.info("动态数据源: {}", dbName);
             }
 
             dataSources.putIfAbsent(beanName, beanFactory.getBean(beanName));
         }
 
+        log.info("动态数据源: {}", dataSources.keySet());
         return dataSources;
     }
 

@@ -27,7 +27,7 @@ import javax.sql.DataSource;
 public class QdslConfig {
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(DynamicDataSource.class)
     public SQLQueryFactory sqlQueryFactory(DataSource dataSource) {
         return getSqlQueryFactory(dataSource);
     }
@@ -45,7 +45,7 @@ public class QdslConfig {
     }
 
     @Bean
-    @ConditionalOnBean(type = "dynamicDataSource")
+    @ConditionalOnBean(DynamicDataSource.class)
     public SQLQueryFactory sqlQueryFactoryDynamic(DynamicDataSource dataSource) {
         return getSqlQueryFactory(dataSource);
     }
