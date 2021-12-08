@@ -1,12 +1,18 @@
 package com.ljt.study.querydsl.config;
 
+import com.ljt.study.dynamicds.DynamicDataSource;
+import com.ljt.study.dynamicds.DynamicDataSourceConfig;
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLCloseListener;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.postgresql.PostgreSQLQueryFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
@@ -16,8 +22,15 @@ import javax.sql.DataSource;
  * @date 2021-12-06 10:03
  */
 @Slf4j
+@Import(DynamicDataSourceConfig.class)
 @Configuration
 public class QueryDslConfig {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SQLQueryFactory sqlQueryFactory(DataSource dataSource) {
+        return getSqlQueryFactory(dataSource);
+    }
 
     /**
      * 必须使用 DataSourceUtils.getConnection(dataSource) 返回的数据库连接才支持事务
@@ -25,9 +38,16 @@ public class QueryDslConfig {
      * @see PostgreSQLQueryFactory
      * @see SQLCloseListener
      */
-    @Bean
-    public SQLQueryFactory sqlQueryFactory(DataSource dataSource) {
+    @NotNull
+    private SQLQueryFactory getSqlQueryFactory(DataSource dataSource) {
+        log.info("sqlQueryFactory 设置数据源：{}", dataSource.getClass());
         return new SQLQueryFactory(PostgreSQLTemplates.DEFAULT, () -> DataSourceUtils.getConnection(dataSource));
+    }
+
+    @Bean
+    @ConditionalOnBean(type = "dynamicDataSource")
+    public SQLQueryFactory sqlQueryFactoryDynamic(DynamicDataSource dataSource) {
+        return getSqlQueryFactory(dataSource);
     }
 
 }

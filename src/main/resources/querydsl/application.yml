@@ -1,5 +1,6 @@
 spring:
   datasource:
+    type:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/study
     username: postgres
@@ -17,3 +18,10 @@ spring:
       testOnReturn: false
       poolPreparedStatements: true
       maxOpenPreparedStatements: 20
+    dynamic:
+      enable: true
+      dataSources:
+        - driver-class-name: org.postgresql.Driver
+          url: jdbc:postgresql://localhost:5432/study
+          username: postgres
+          password: admin
