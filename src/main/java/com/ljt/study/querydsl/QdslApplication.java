@@ -9,7 +9,7 @@ import org.springframework.context.annotation.PropertySource;
  * @author LiJingTang
  * @date 2021-12-06 10:45
  */
-@SpringBootApplication
+@SpringBootApplication()
 @PropertySource(value = "classpath:querydsl/application.yml", factory = YamlPropertySourceFactory.class)
 class QdslApplication {
 

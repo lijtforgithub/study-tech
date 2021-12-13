@@ -1,4 +1,4 @@
-package com.ljt.study.dynamicds;
+package com.ljt.study.tools.dynamicdatasource;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceWrapper;
@@ -18,16 +18,13 @@ import org.springframework.context.annotation.Bean;
 import javax.sql.DataSource;
 import java.util.Map;
 
-import static com.ljt.study.dynamicds.DynamicDataSource.DYNAMIC_DATASOURCE;
-import static com.ljt.study.dynamicds.DynamicDataSourceProperties.ENABLE;
-
 /**
  * @author LiJingTang
  * @date 2021-12-08 9:15
  */
 @Slf4j
 @EnableConfigurationProperties(DynamicDataSourceProperties.class)
-@ConditionalOnProperty(name = ENABLE, havingValue = "true")
+@ConditionalOnProperty(name = DynamicDataSourceProperties.ENABLE, havingValue = "true")
 public class DynamicDataSourceConfig {
 
     @Autowired
@@ -40,7 +37,7 @@ public class DynamicDataSourceConfig {
         return new DruidDataSourceWrapper();
     }
 
-    @Bean(DYNAMIC_DATASOURCE)
+    @Bean(DynamicDataSource.DYNAMIC_DATASOURCE)
     public DynamicDataSource dynamicDataSource(DefaultListableBeanFactory beanFactory, DataSource dataSource) {
         if (dataSource instanceof DruidDataSource) {
             DruidDataSource ds = (DruidDataSource) dataSource;

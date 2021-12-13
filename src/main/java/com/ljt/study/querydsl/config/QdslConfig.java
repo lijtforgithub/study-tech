@@ -1,7 +1,7 @@
 package com.ljt.study.querydsl.config;
 
-import com.ljt.study.dynamicds.DynamicDataSource;
-import com.ljt.study.dynamicds.DynamicDataSourceConfig;
+import com.ljt.study.tools.dynamicdatasource.DynamicDataSource;
+import com.ljt.study.tools.dynamicdatasource.DynamicDataSourceConfig;
 import com.ljt.study.tools.encrypt.CustomEncryptablePropertyResolver;
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLCloseListener;

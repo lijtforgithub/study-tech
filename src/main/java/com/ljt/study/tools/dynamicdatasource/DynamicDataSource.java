@@ -1,4 +1,4 @@
-package com.ljt.study.dynamicds;
+package com.ljt.study.tools.dynamicdatasource;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 

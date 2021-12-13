@@ -1,10 +1,8 @@
 package com.ljt.study.querydsl;
 
-import com.ljt.study.dynamicds.DynamicDataSource;
 import com.ljt.study.querydsl.entity.User;
 import com.ljt.study.querydsl.service.UserService;
-import com.ljt.study.querydsl.service.UserServiceImpl;
-import org.jasypt.encryption.StringEncryptor;
+import com.ljt.study.tools.dynamicdatasource.DynamicDataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,8 +11,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static com.ljt.study.querydsl.query.QUser.Q_USER;
 
 /**
  * @author LiJingTang
@@ -26,8 +22,6 @@ class QdslTest {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserServiceImpl userServiceImpl;
 
     private static User newUser() {
         User user = new User();
@@ -68,23 +62,6 @@ class QdslTest {
     @Test
     void delete() {
         userService.delete(1L);
-    }
-
-    @Test
-    void test() {
-        System.out.println(Q_USER.getType().getSimpleName());
-        System.out.println(userServiceImpl.findAll());
-    }
-
-
-    @Autowired
-    private StringEncryptor stringEncryptor;
-
-    @Test
-    void jasypt() {
-        String encrypt = stringEncryptor.encrypt("admin");
-        System.out.println(encrypt);
-        System.out.println(stringEncryptor.decrypt(encrypt));
     }
 
 }

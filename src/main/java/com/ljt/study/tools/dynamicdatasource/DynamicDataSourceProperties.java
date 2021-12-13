@@ -1,4 +1,4 @@
-package com.ljt.study.dynamicds;
+package com.ljt.study.tools.dynamicdatasource;
 
 import lombok.Data;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.ljt.study.dynamicds.DynamicDataSourceProperties.PREFIX;
+import static com.ljt.study.tools.dynamicdatasource.DynamicDataSourceProperties.PREFIX;
 
 /**
  * @author LiJingTang
