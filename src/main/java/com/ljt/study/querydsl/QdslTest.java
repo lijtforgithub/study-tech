@@ -4,6 +4,7 @@ import com.ljt.study.dynamicds.DynamicDataSource;
 import com.ljt.study.querydsl.entity.User;
 import com.ljt.study.querydsl.service.UserService;
 import com.ljt.study.querydsl.service.UserServiceImpl;
+import org.jasypt.encryption.StringEncryptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -73,6 +74,17 @@ class QdslTest {
     void test() {
         System.out.println(Q_USER.getType().getSimpleName());
         System.out.println(userServiceImpl.findAll());
+    }
+
+
+    @Autowired
+    private StringEncryptor stringEncryptor;
+
+    @Test
+    void jasypt() {
+        String encrypt = stringEncryptor.encrypt("admin");
+        System.out.println(encrypt);
+        System.out.println(stringEncryptor.decrypt(encrypt));
     }
 
 }

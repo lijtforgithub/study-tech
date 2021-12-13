@@ -2,10 +2,12 @@ package com.ljt.study.querydsl.config;
 
 import com.ljt.study.dynamicds.DynamicDataSource;
 import com.ljt.study.dynamicds.DynamicDataSourceConfig;
+import com.ljt.study.tools.encrypt.CustomEncryptablePropertyResolver;
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLCloseListener;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.postgresql.PostgreSQLQueryFactory;
+import com.ulisesbocchio.jasyptspringboot.EncryptablePropertyResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -48,6 +50,11 @@ public class QdslConfig {
     @ConditionalOnBean(DynamicDataSource.class)
     public SQLQueryFactory sqlQueryFactoryDynamic(DynamicDataSource dataSource) {
         return getSqlQueryFactory(dataSource);
+    }
+
+    @Bean
+    public EncryptablePropertyResolver encryptablePropertyResolver() {
+        return new CustomEncryptablePropertyResolver();
     }
 
 }

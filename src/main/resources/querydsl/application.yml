@@ -4,7 +4,8 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/study
     username: postgres
-    password: admin
+#    password: ENC(QaiHVZ7b5kqfriLEQA3EzVplJOnyJHd2b5XMHZWqlve7UvMeJzKcRJ0K7Wc4420E)
+    password: encrypt.YWRtaW4=
     druid:
       maxActive: 50
       initialSize: 10
@@ -22,3 +23,7 @@ spring:
       enable: true
       dataSources:
         - url: jdbc:postgresql://localhost:5432/test
+jasypt:
+  encryptor:
+#    bean:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:study}
