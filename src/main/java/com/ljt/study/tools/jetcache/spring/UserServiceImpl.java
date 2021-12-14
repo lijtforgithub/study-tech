@@ -15,12 +15,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(int id) {
-        log.info("创建 User[{}] 对象", id);
         User user = new User();
         user.setId((long) id);
         user.setName(RandomStringUtils.randomAlphabetic(1));
 
+        log.info("创建 User[{}] 对象", user);
+
         return user;
+    }
+
+    @Override
+    public void updateUser(User user) {
+        log.info("更新 User[{}] 缓存", user.getId());
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        log.info("删除 User[{}] 缓存", id);
     }
 
 }

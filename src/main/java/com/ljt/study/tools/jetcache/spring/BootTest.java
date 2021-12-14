@@ -1,12 +1,15 @@
 package com.ljt.study.tools.jetcache.spring;
 
 import com.alicp.jetcache.Cache;
+import com.ljt.study.querydsl.entity.User;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,11 +33,35 @@ class BootTest {
         System.out.println(cache.get(1));
     }
 
+    @SneakyThrows
     @Test
-    void cached() {
+    void getUserById() {
+        List<Thread> list = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            list.add(new Thread(() -> userService.getUserById(1)));
+        }
+        list.forEach(Thread::start);
+
+        TimeUnit.SECONDS.sleep(30);
         System.out.println(userService.getUserById(1));
+    }
+
+    @Test
+    void updateUser() {
         System.out.println(userService.getUserById(1));
-        System.out.println(userService.getUserById(2));
+
+        User user = new User();
+        user.setId(1L);
+        user.setName("更新缓存");
+        userService.updateUser(user);
+
+        System.out.println(userService.getUserById(1));
+    }
+
+    @Test
+    void deleteUser() {
+        System.out.println(userService.getUserById(1));
+        userService.deleteUser(1);
     }
 
 }
