@@ -1,25 +1,40 @@
 ## Linux
-| 命令 | 说明 |
-|---|---|
-| runlevel | 运行级别 |
-| init 3 | 指定运行级别 |
-| ntpdate ntp.api.bz | 同步服务器时间 |
-| df -h | 查看磁盘空间 |
-| df -h . | 查看当前文件夹下的所有文件大小（包含子文件夹） |
-| service network restart | 重启网络 |
-| netstat -nlp | |
-| netstat -tunlp \| grep 端口号 | |
-| ss -tanl | |
-| lsof -i:端口号 | lsof -op $$ |
-| service iptables status | 查看状态 |
-| service iptables stop | 关闭 |
-| chkconfig iptables --list | 查看开机启动状态 |
-| chkconfig iptables off | 关闭开机启动 |
-| chkconfig --list | 开机自动启动的服务 |
-| chkconfig --add 服务名 | 添加开机自动启动服务 |
-| chkconfig --del 服务名 | 删除开机自动启动服务 |
+总核数 = 物理CPU个数 * 每颗物理CPU的核数  
+总逻辑CPU数 = 物理CPU个数 * 每颗物理CPU的核数 * 超线程数
+```
+查看物理CPU个数
+cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l
+查看每个物理CPU中core的个数(即核数)
+cat /proc/cpuinfo | grep "cpu cores" | uniq
+查看逻辑CPU的个数
+cat /proc/cpuinfo | grep "processor" | wc -l
+查看CPU信息（型号）
+cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
+```
 
-```azure
+| 命令 | 说明                      |
+|---|-------------------------|
+| uname -a | OS版本                    |
+| cat /proc/version  | OS                      |
+| runlevel | 运行级别                    |
+| init 3 | 指定运行级别                  |
+| ntpdate ntp.api.bz | 同步服务器时间                 |
+| df -h | 查看磁盘空间                  |
+| df -h . | 查看当前文件夹下的所有文件大小（包含子文件夹） |
+| service network restart | 重启网络                    |
+| netstat -nlp |                         |
+| netstat -tunlp \| grep 端口号                | |
+| ss -tanl |                         |
+| lsof -i:端口号 | lsof -op $$             |
+| service iptables status | 查看状态                    |
+| service iptables stop | 关闭                      |
+| chkconfig iptables --list | 查看开机启动状态                |
+| chkconfig iptables off | 关闭开机启动                  |
+| chkconfig --list | 开机自动启动的服务               |
+| chkconfig --add 服务名 | 添加开机自动启动服务              |
+| chkconfig --del 服务名 | 删除开机自动启动服务              |
+
+```
 exec 8<> /dev/tcp/wwww.baidu.com/80
 echo -e "GET / HTTP/1.0\n" >& 8
 cat <& 8

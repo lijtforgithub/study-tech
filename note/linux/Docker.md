@@ -1,3 +1,4 @@
+> Docker本身并不是容器，它是创建容器的工具，是应用容器引擎。
 #### CentOS 安装 Docker
 1. yum install -y yum-utils device-mapper-persistent-data lvm2
 2. yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
@@ -7,28 +8,31 @@
 6. docker version
 7. 配置阿里云镜像加速器（容器镜像服务）
 #### 常用命令
-| 命令                                          | 说明                            |
-|---------------------------------------------|-------------------------------|
-| docker info                                 |                               |
-| docker version                              |                               |
-| docker build -t 机构/镜像名<:tags>  Dockerfile目录 |                               |
-| docker pull 镜像名<:tags>                      | 从远程仓库拉取镜像                     |
-| docker images                               | 查看本地镜像                        |
-| docker create 镜像名<:tags>                    | 创建容器                          |
-| docker run 镜像名<:tags>                       | 创建容器 启动应用                     |
-| docker run -p 8000:8080 -d tomcat           | 创建容器 启动应用                     |
-| docker ps                                   | 查看正在运行容器                      |
-| docker ps -a                                | 查看所有容器                        |
-| docker rm <-f> 容器ID                         | 删除容器                          |
-| docker stop 容器ID                            | 停止容器 die状态                    |
-| docker kill 容器ID                            | 停止容器 新的进程                     |
-| docker start 容器ID                           | 启动容器                          |
-| docker restart 容器ID                         | 重启容器                          |
-| docker rmi <-f> 镜像名<:tags>                  | 删除镜像                          |
+| 命令                                          | 说明                           |
+|---------------------------------------------|------------------------------|
+| docker info                                 |                              |
+| docker version                              |                              |
+| docker build -t 机构/镜像名<:tags>  Dockerfile目录 |                              |
+| docker pull 镜像名<:tags>                      | 从远程仓库拉取镜像                    |
+| docker images                               | 查看本地镜像                       |
+| docker create 镜像名<:tags>                    | 创建容器                         |
+| docker rmi <-f> 镜像名<:tags>                  | 删除镜像                         |
+| docker run 镜像名<:tags>                       | 创建容器 启动应用                    |
+| docker run -p 8000:8080 -d tomcat           | 创建容器 启动应用                    |
+| docker port 容器ID                            |                 |
+| docker ps                                   | 查看正在运行容器                     |
+| docker ps -a                                | 查看所有容器                       |
+| docker container ls -a                      |                        |
+| docker container prune                      |                        |
+| docker inspect 容器ID                         | 容器的元信息                       |
 | docker exec [-it] 容器id 命令                   | exec 在对应容器中执行命令 -it采用交互方式执行命令 |
-| docker pause 容器ID                           |                               |
-| docker unpause 容器ID                         |                               |
-| docker inspect 容器ID                         | 容器的元信息                        |
+| docker start 容器ID                           | 启动容器                         |
+| docker restart 容器ID                         | 重启容器                         |
+| docker stop 容器ID                            | 停止容器 die状态                   |
+| docker pause 容器ID                           |                              |
+| docker unpause 容器ID                         |                              |
+| docker kill 容器ID                            | 停止容器 新的进程                    |
+| docker rm <-f> 容器ID                         | 删除容器                         |
 
 1. 容器间单向通信
 ```

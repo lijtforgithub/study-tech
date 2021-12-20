@@ -148,9 +148,19 @@ rinetd -c /etc/rinetd.conf
 #### kubectl 常用命令
 | 命令                        | 说明 |
 |---------------------------|--|
+| kubectl cluster-info   | 查看集群信息 |
+| kubectl -s http://localhost:8080 get componentstatuses   | 查看各组件信息 |
+| kubectl get pods -o yaml   | 查看pods定义的详细信息 |
+| kubectl get rs   |  |
 | kubectl create -f yml文件   | 创建部署 |
 | kubectl apply -f yml文件    | 更新部署配置 |
 | kubectl get pod [-o wide] | 查看已部署的pod |
 | kubectl get describe pod pod名称 | 查看pod详细信息 |
 | kubectl logs [-f] pod名称 | 查看pod输出日志 |
 | kubectl delete deployment|service 名称 | 删除部署或服务 |
+```
+kubectl scale deploy/bone-front --replicas=1 -n prod
+kubectl delete deploy/deploy-name svc/deploy-name -n dev 
+kubectl get pod --selector app=bone-app-200 -n test -o wide
+kubectl get pods -n prod -o wide
+```
