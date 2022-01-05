@@ -146,24 +146,24 @@ vi /etc/rinetd.conf
 rinetd -c /etc/rinetd.conf
 ```
 #### kubectl 常用命令
-| 命令                                                        | 说明              |
-|-----------------------------------------------------------|-----------------|
-| kubectl cluster-info                                      | 查看集群信息          |
-| kubectl get nodes                                         | 查看节点信息          |
-| kubectl get namespace                                     | 查看命名空间          |
-| kubectl api-resources --namespaced=true                   | 位于命名空间中的资源      |
-| kubectl api-resources --namespaced=false                  | 不在命名空间中的资源      |
-| kubectl config set-context --current --namespace=<命名空间名称> | 设置名字空间偏好)       |
-| kubectl get rs --all-namespaces                           |                 |
-| kubectl get rc --all-namespaces                           |                 |
-| kubectl get service --all-namespaces                      |                 |
-| kubectl create -f yml文件                                   | 创建部署            |
-| kubectl apply -f yml文件                                    | 更新部署配置          |
+| 命令                                                        | 说明             |
+|-----------------------------------------------------------|----------------|
+| kubectl cluster-info                                      | 查看集群信息         |
+| kubectl get nodes                                         | 查看节点信息         |
+| kubectl get namespace                                     | 查看命名空间         |
+| kubectl api-resources --namespaced=true                   | 位于命名空间中的资源     |
+| kubectl api-resources --namespaced=false                  | 不在命名空间中的资源     |
+| kubectl config set-context --current --namespace=<命名空间名称> | 设置名字空间偏好       |
+| kubectl get rs --all-namespaces                           |                |
+| kubectl get rc --all-namespaces                           |                |
+| kubectl get service --all-namespaces                      |                |
+| kubectl create -f yml文件                                   | 创建部署           |
+| kubectl apply -f yml文件                                    | 更新部署配置         |
 | kubectl get pod --all-namespaces                          | 查看已部署的所有命名空间pod |
-| kubectl get pod [-o wide] [-o yaml]                       | 查看已部署的pod       |
-| kubectl get describe pod pod名称                            | 查看pod详细信息       |
-| kubectl logs [-f] pod名称                                   | 查看pod输出日志       |
-| kubectl delete deployment 或 service 名称                    | 删除部署或服务         |
+| kubectl get pod [-o wide] [-o yaml]                       | 查看已部署的pod      |
+| kubectl get describe pod pod名称                            | 查看pod详细信息      |
+| kubectl logs [-f] pod名称                                   | 查看pod输出日志      |
+| kubectl delete deployment 或 service 名称                    | 删除部署或服务        |
 
 ```
 kubectl config view | grep namespace:
@@ -172,6 +172,6 @@ kubectl scale deploy/bone-front --replicas=1 -n prod
 kubectl delete deploy/deploy-name svc/deploy-name -n dev 
 kubectl get pod --selector app=bone-app-200 -n test -o wide
 kubectl get pod -n prod -o wide
-
+kubectl edit deployment/gateway
 ```
 1. 创建一个svc时 Kubernetes 会创建一个相应的 DNS。形式是 <服务名称>.<命名空间>.svc.cluster.local

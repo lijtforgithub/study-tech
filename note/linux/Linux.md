@@ -10,6 +10,8 @@ cat /proc/cpuinfo | grep "cpu cores" | uniq
 cat /proc/cpuinfo | grep "processor" | wc -l
 查看CPU信息（型号）
 cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
+一个文件夹多少个文件
+ls -l | grep "^-" | wc -l
 ```
 
 | 命令 | 说明                      |
