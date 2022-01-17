@@ -47,6 +47,8 @@ class Config {
      *
      * this.channel.basicQos(this.prefetchCount);
      * org.springframework.amqp.rabbit.listener.BlockingQueueConsumer#setQosAndCreateConsumers()
+     *
+     * 如果两个线程去消费一个队列另一个线程不ack 当前线程即使消费完了 也消费不了下一条消息 重复ack会报错 暂时怎么保证的不知道
      */
     @Bean
     public SimpleMessageListenerContainer simpleContainer(ConnectionFactory connectionFactory, MessageRecv messageRecv) {

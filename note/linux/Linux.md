@@ -12,6 +12,8 @@ cat /proc/cpuinfo | grep "processor" | wc -l
 cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
 一个文件夹多少个文件
 ls -l | grep "^-" | wc -l
+查找包含指定key的文件
+grep -r key ./
 ```
 
 | 命令 | 说明                      |
