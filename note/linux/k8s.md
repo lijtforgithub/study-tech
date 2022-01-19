@@ -175,6 +175,8 @@ rinetd -c /etc/rinetd.conf
 
 ```
 kubectl config view | grep namespace:
+kubectl get nodes --show-labels
+kubectl expose deploy name
 
 kubectl scale deploy/bone-front --replicas=1 -n prod
 kubectl delete deploy/deploy-name svc/deploy-name -n dev 
