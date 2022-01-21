@@ -176,13 +176,14 @@ rinetd -c /etc/rinetd.conf
 ```
 kubectl config view | grep namespace:
 kubectl get nodes --show-labels
-kubectl expose deploy name
+kubectl expose deploy name --type=NodePort --port=8080
 
 kubectl scale deploy/bone-front --replicas=1 -n prod
 kubectl delete deploy/deploy-name svc/deploy-name -n dev 
 kubectl get pod --selector app=bone-app-200 -n test -o wide
 kubectl get po -l 'app=gateway'
 kubectl get pod -n prod -o wide
+kubectl get po -w
 kubectl edit deployment/gateway
 ```
 1. 创建一个svc时 Kubernetes 会创建一个相应的 DNS。形式是 <服务名称>.<命名空间>.svc.cluster.local
