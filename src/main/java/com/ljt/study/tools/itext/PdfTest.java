@@ -7,7 +7,11 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Image;
 import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
+
+import java.io.*;
+import java.util.Objects;
 
 /**
  * @author LiJingTang
@@ -17,21 +21,28 @@ class PdfTest {
 
     @SneakyThrows
     @Test
-    void imageToPDF() {
-        final String ORIG = "D:\\李敬堂\\八卦图.jpg";
-        final String OUTPUT_FOLDER = "D:\\李敬堂\\";
+    void imageToPdf() {
+        final String image = "D:\\李敬堂\\cert.jpg";
+        final String pdf = "D:\\李敬堂\\ImageToPdf.pdf";
+        imageToPdf(new FileInputStream(image), new FileOutputStream(pdf));
+    }
 
-        ImageData imageData = ImageDataFactory.create(ORIG);
+    void imageToPdf(InputStream imageInput, OutputStream pdfOutput) throws IOException {
+        Objects.requireNonNull(imageInput, "imageInput");
+        Objects.requireNonNull(pdfOutput, "pdfOutput");
 
-        PdfDocument pdfDocument = new PdfDocument(new PdfWriter(OUTPUT_FOLDER + "ImageToPdf.pdf"));
-        Document document = new Document(pdfDocument);
+        byte[] bytes = IOUtils.toByteArray(imageInput);
+        ImageData imageData = ImageDataFactory.create(bytes);
+        PdfDocument pdfDocument = new PdfDocument(new PdfWriter(pdfOutput));
 
         Image image = new Image(imageData);
         image.setWidth(pdfDocument.getDefaultPageSize().getWidth() - 50);
-        image.setAutoScaleHeight(true);
+//        image.setAutoScaleHeight(true);
 
-        document.add(image);
-        pdfDocument.close();
+        try (Document document = new Document(pdfDocument)) {
+            document.add(image);
+            pdfDocument.close();
+        }
     }
 
 }
