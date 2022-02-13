@@ -4,35 +4,40 @@
 2. yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 3. yum makecache fast
 4. yum -y install docker-ce
+   - yum list docker-ce --showduplicates | sort -r
+   - yum -y install docker-ce-18.09.9 docker-ce-cli-18.09.9
 5. service docker start
 6. docker version
 7. 配置阿里云镜像加速器（容器镜像服务）
 #### 常用命令
-| 命令                                          | 说明                           |
-|---------------------------------------------|------------------------------|
-| docker info                                 |                              |
-| docker version                              |                              |
-| docker build -t 机构/镜像名<:tags>  Dockerfile目录 |                              |
-| docker pull 镜像名<:tags>                      | 从远程仓库拉取镜像                    |
-| docker images                               | 查看本地镜像                       |
-| docker create 镜像名<:tags>                    | 创建容器                         |
-| docker rmi <-f> 镜像名<:tags>                  | 删除镜像                         |
-| docker run 镜像名<:tags>                       | 创建容器 启动应用                    |
-| docker run -p 8000:8080 -d tomcat           | 创建容器 启动应用                    |
-| docker port 容器ID                            |                 |
-| docker ps                                   | 查看正在运行容器                     |
-| docker ps -a                                | 查看所有容器                       |
-| docker container ls -a                      |                        |
-| docker container prune                      |                        |
-| docker inspect 容器ID                         | 容器的元信息                       |
+| 命令                                          | 说明            |
+|---------------------------------------------|---------------|
+| docker info                                 |               |
+| docker version                              |               |
+| docker build -t 机构/镜像名<:tags>  Dockerfile目录 |               |
+| docker pull 镜像名<:tags>                      | 从远程仓库拉取镜像     |
+| docker images                               | 查看本地镜像        |
+| docker create 镜像名<:tags>                    | 创建容器          |
+| docker rmi <-f> 镜像名<:tags>                  | 删除镜像          |
+| docker run 镜像名<:tags>                       | 创建容器 启动应用     |
+| docker run -p 8000:8080 -d tomcat           | 创建容器 启动应用     |
+| docker port 容器ID                            |               |
+| docker ps                                   | 查看正在运行容器      |
+| docker ps -a                                | 查看所有容器        |
+| docker container ls -a                      |               |
+| docker container prune                      |               |
+| docker inspect 容器ID                         | 容器的元信息        |
 | docker exec [-it] 容器id 命令                   | exec 在对应容器中执行命令 -it采用交互方式执行命令 |
-| docker start 容器ID                           | 启动容器                         |
-| docker restart 容器ID                         | 重启容器                         |
-| docker stop 容器ID                            | 停止容器 die状态                   |
-| docker pause 容器ID                           |                              |
-| docker unpause 容器ID                         |                              |
-| docker kill 容器ID                            | 停止容器 新的进程                    |
-| docker rm <-f> 容器ID                         | 删除容器                         |
+| docker start 容器ID                           | 启动容器          |
+| docker restart 容器ID                         | 重启容器          |
+| docker stop 容器ID                            | 停止容器 die状态    |
+| docker pause 容器ID                           |               |
+| docker unpause 容器ID                         |               |
+| docker kill 容器ID                            | 停止容器 新的进程     |
+| docker rm <-f> 容器ID                         | 删除容器          |
+| docker search 镜像名                         |               |
+| docker tag 源镜像 新镜像名                         |               |
+| docker push 镜像名                         |               |
 
 1. 容器间单向通信
 ```
@@ -83,7 +88,7 @@ docker run --volumes-from webpage --name t1 -d tomcat
    RUN yum install -y vim #shell 命令格式 会创建子线程
    RUN ["yum", "install", "-y", "vim"] #Exec命令格式
    ```
-
+8. USER
 #### 运行MySQL
 ```
 mkdir /opt/mysql
@@ -124,4 +129,17 @@ docker run \
 yum install -y mysql 
 mysql -uroot -h127.0.0.1 -p
 
+```
+#### harbor
+```
+tar xf  harbor-offline-installer-v1.10.10.tgz
+修改 harbor.yml (域名 端口 密码 数据路径)
+mkdier -p ../data/harbor /var/log/harbor
+yum install -y docker-compose
+sh install.sh
+
+docker-compose ps
+docker-compose start
+docker-compose stop
+docker-compose restart
 ```
