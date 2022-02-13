@@ -1,0 +1,66 @@
+PUT /_template/logs
+{
+  "index_patterns" : ["logs-*"],
+  "settings": {
+    "number_of_shards": "2",
+    "number_of_replicas": "1",
+    "index.refresh_interval": "5s"
+  },
+  "version": 1,
+  "mappings" : {
+    "properties" : {
+      "@timestamp" : { "type" : "date"},
+      "@version" : {"type" : "keyword"},
+      "inputType" : { "type" : "keyword"},
+      "tenant" : {"type" : "keyword"},
+      "env" : { "type" : "keyword"},
+      "app" : {
+        "type" : "text",
+        "fields" : { "keyword" : { "type" : "keyword", "ignore_above" : 256}}
+      },
+      "hostname" : {"type" : "keyword"},
+      "thread" : { "type" : "keyword"},
+      "level" : { "type" : "keyword"},
+      "msg" : {
+        "type" : "text",
+        "fields" : { "keyword" : { "type" : "keyword", "ignore_above" : 256}}
+      }
+    }
+  }
+}
+
+PUT /_template/access_logs
+{
+  "index_patterns" : ["access_logs-*"],
+  "settings": {
+    "number_of_shards": "2",
+    "number_of_replicas": "1",
+    "index.refresh_interval": "5s"
+  },
+  "version": 1,
+  "mappings" : {
+    "properties" : {
+      "@timestamp" : { "type" : "date"},
+      "tenant" : {"type" : "keyword"},
+      "env" : { "type" : "keyword"},
+      "app" : {"type" : "keyword"},
+      "hostname" : {"type" : "keyword"},
+      "level" : { "type" : "keyword"},
+      "userIP" : { "type" : "keyword"},
+      "uid" : { "type" : "keyword"},
+      "uuid" : { "type" : "keyword"},
+      "memberId" : { "type" : "keyword"},
+      "userType" : { "type" : "keyword"},
+      "deviceType" : { "type" : "keyword"},
+      "referer" : { "type" : "keyword"},
+      "target" : {"type" : "keyword"},
+      "resource" : { "type" : "keyword"},
+      "method" : { "type" : "keyword"},
+      "params" : { "type" : "text", "fields" : { "keyword" : { "type" : "keyword", "ignore_above" : 256}}},
+      "result" : { "type" : "text", "fields" : { "keyword" : { "type" : "keyword", "ignore_above" : 256}}},
+      "statusCode" : { "type" : "integer"},
+      "accessStartMs" : { "type" : "date"},
+      "duration" : { "type" : "long"}
+    }
+  }
+}

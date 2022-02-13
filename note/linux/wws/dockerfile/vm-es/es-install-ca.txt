@@ -1,0 +1,50 @@
+# 1.为集群创建认证机构
+bin/elasticsearch-certutil ca
+
+# 2.为节点颁发证书,文件名默认即可,密码时必填
+bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12
+bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password #输入第一步输入的密码
+bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password #输入第一步输入的密码
+
+# 3.多节点配置
+scp config/elastic-certificates.p12 config/elasticsearch.keystore config/elastic-stack-ca.p12 集群中其它节点
+
+# 4.修改配置(elasticsearch.yml)
+#---------------------security------------------
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.security.transport.ssl.keystore.path: config/elastic-certificates.p12
+xpack.security.transport.ssl.truststore.path: config/elastic-certificates.p12
+
+# 5.密码设置(系统内置用户的密码):[apm_system、kibana、logstash_system、beats_system、remote_monitoring_user、elastic]
+bin/elasticsearch-setup-passwords interactive
+
+# 6.配置kibana访问密码
+# 创建keystore
+su -c 'bin/kibana-keystore create' elasticsearch
+# 设置kibana访问es的用户名
+su -c 'bin/kibana-keystore add elasticsearch.username' elasticsearch
+# 设置kibana访问es的密码
+su -c 'bin/kibana-keystore add elasticsearch.password' elasticsearch
+
+# 7.添加访问用户
+# "privileges" : [ "all", ""manage", "read", "index" ]
+DELETE /_security/user/logs
+DELETE /_security/role/logs
+POST /_security/role/logs
+{
+  "indices" : [
+    {
+      "names" : [ "*" ],
+      "privileges" : [ "read" ]
+    }
+  ]
+}
+POST /_security/user/logs
+{
+  "password" : "123456",
+  "full_name" : "logs",
+  "email" : "logs@anony.mous",
+  "roles" : [ "logs" ]
+}

@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-headless
+  labels:
+    app: eureka-headless
+spec:
+  clusterIP: None
+  ports:
+  - port: 8080
+  selector:
+    app: guowy-cloud-eureka-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: guowy-cloud-eureka-server
+  labels:
+    app: guowy-cloud-eureka-server
+spec:
+  type: NodePort
+  # session的亲和性
+  sessionAffinity: ClientIP
+  ports:
+  - name: client
+    port: 8080
+    targetPort: 8080
+    # node port 端口，check端口是否被占用
+    nodePort: 30879
+  selector:
+    app: guowy-cloud-eureka-server
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: guowy-cloud-eureka-server
+spec:
+  # 副本
+  replicas: 2
+  # 如果使用StatefulSet，spec.serviceName需要指向headlessServiceName，且不能省略指定步骤，官方文档要求headlessService必须在创建StatefulSet之前创建完成
+  # 官方要求要在创建StatefulSet之前创建好headlessService，是为了让pod启动时能自动对应到service上。
+  # 之所以要指定一个headlessService，是因为admin可以给StatefulSet创建多个、多种类型的service，k8s不知道要用哪个service的名称当作集群内域名的一部分。
+  serviceName: "eureka-headless"
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: guowy-cloud-eureka-server
+  template:
+    metadata:
+      labels:
+        app: guowy-cloud-eureka-server
+    spec:
+      restartPolicy: Always
+      # 认证 Secrets
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      volumes:
+      - name: apply-logs
+        hostPath:
+          path: /apply/logs
+      containers:
+      - name: eureka
+        # 镜像:版本号
+        image: "ccr.ccs.tencentyun.com/gwy-cloud/guowy-cloud-eureka-server:202006021918"
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            # cpu request
+            cpu: 300m
+            memory: 1200Mi
+          limits:
+            # cpu limit
+            cpu: 500m
+            memory: 1500Mi
+        env:
+        # 环境
+        - name: GWY_ENV
+          value: "test"
+        - name: GWY_SPRING_APPLICATION_NAME
+          value: "guowy-cloud-eureka-server"
+        volumeMounts:
+        - name: apply-logs
+          mountPath: /apply/logs

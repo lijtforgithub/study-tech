@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gwowy-sentinel-dashboard-webapp
+  namespace: default
+  labels:
+    k8s-app: gwowy-sentinel-dashboard-webapp
+spec:
+  # ClusterIP | NodePort
+  type: NodePort
+  ports:
+  - name: port-8080
+    port: 8080
+    targetPort: 8080
+    nodePort: 32182
+  selector:
+    k8s-app: gwowy-sentinel-dashboard-webapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gwowy-sentinel-dashboard-webapp
+  namespace: default
+  labels:
+    k8s-app: gwowy-sentinel-dashboard-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: gwowy-sentinel-dashboard-webapp
+  template:
+    metadata:
+      name: gwowy-sentinel-dashboard-webapp
+      namespace: default
+      labels:
+        k8s-app: gwowy-sentinel-dashboard-webapp
+    spec:
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      volumes:
+      - name: apply-logs
+        hostPath:
+          path: /apply/logs
+      containers:
+      - image: ccr.ccs.tencentyun.com/gwy-middleware/gwowy-sentinel-dashboard-webapp:1.8.0
+        name: gwowy-sentinel-dashboard-webapp
+        imagePullPolicy: Always
+        ports:
+        - name: port-8080
+          containerPort: 8080
+        resources:
+          requests:
+            memory: 1200Mi
+            cpu: 300m
+          limits:
+            memory: 1500Mi
+            cpu: 500m
+        env:
+        - name: GWY_TENANT
+          value: sanweigo
+        - name: GWY_ENV
+          value: test
+        - name: GWY_SPRING_APPLICATION_NAME
+          value: gwowy-sentinel-dashboard-webapp
+        - name: GWY_SENTINEL_AUTH_USERNAME
+          value: admin
+        - name: GWY_SENTINEL_AUTH_PASSWORD
+          value: "123456"
+        - name: GWY_DATASOURCE_ZOOKEEPER_SERVER_ADDR
+          value: "zk-cs.default.svc.cluster.local:2181"
+        volumeMounts:
+        - name: apply-logs
+          mountPath: /apply/logs

@@ -1,0 +1,100 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Sample alarm rules.
+rules:
+  # Rule unique name, must be ended with `_rule`.
+  # 规则名唯一,必须以`_rule`结尾
+  service_resp_time_rule:
+    metrics-name: service_resp_time
+    op: ">"
+    threshold: 5000
+    period: 10
+    count: 3
+    silence-period: 5
+    #message: Response time of service {name} is more than 5000ms in 3 minutes of last 10 minutes.
+    message: 在近10分钟的3分钟内,服务[{name}]的响应时间大于5000ms
+  service_sla_rule:
+    # Metrics value need to be long, double or int
+    # 指标值必须为long、double、int类型
+    metrics-name: service_sla
+    op: "<"
+    threshold: 8000
+    # The length of time to evaluate the metrics
+    # 评估指标的时长
+    period: 10
+    # How many times after the metrics match the condition, will trigger alarm
+    # 指标满足条件后多少次会触发告警(1次会存在误判的可能)
+    count: 2
+    # How many times of checks, the alarm keeps silence after alarm triggered, default as same as period.
+    # 告警连续触发多少次后保持静默(不再告警),默认与周期(period)相同
+    silence-period: 3
+    #message: Successful rate of service {name} is lower than 80% in 2 minutes of last 10 minutes
+    message: 在近10分钟的2分钟内,服务[{name}]的请求成功率小于80%
+  service_resp_time_percentile_rule:
+    # Metrics value need to be long, double or int
+    # 指标值必须为long、double、int类型
+    metrics-name: service_percentile
+    op: ">"
+    threshold: 1000,1000,1000,1000,1000
+    period: 10
+    count: 3
+    silence-period: 5
+    #message: Percentile response time of service {name} alarm in 3 minutes of last 10 minutes, due to more than one condition of p50 > 1000, p75 > 1000, p90 > 1000, p95 > 1000, p99 > 1000
+    message: 在近10分钟的3分钟内,服务[{name}]的百分比响应时间满足[p50>1000、p75>1000、p90>1000、p95>1000、p99>1000]中的情况之一
+  service_instance_resp_time_rule:
+    metrics-name: service_instance_resp_time
+    op: ">"
+    threshold: 5000
+    period: 10
+    count: 2
+    silence-period: 5
+    #message: Response time of service instance {name} is more than 5000ms in 2 minutes of last 10 minutes
+    message: 在近10分钟的2分钟内,服务实例[{name}]的响应时间大于5000ms
+  database_access_resp_time_rule:
+    metrics-name: database_access_resp_time
+    threshold: 1000
+    op: ">"
+    period: 10
+    count: 2
+    #message: Response time of database access {name} is more than 1000ms in 2 minutes of last 10 minutes
+    message: 在近10分钟的2分钟内,数据库访问[{name}]的响应时间大于1000ms
+  endpoint_relation_resp_time_rule:
+    metrics-name: endpoint_relation_resp_time
+    threshold: 5000
+    op: ">"
+    period: 10
+    count: 2
+    #message: Response time of endpoint relation {name} is more than 5000ms in 2 minutes of last 10 minutes
+    message: 在近10分钟的2分钟内,端点[{name}]的响应时间大于5000ms
+#  Active endpoint related metrics alarm will cost more memory than service and service instance metrics alarm.
+#  Because the number of endpoint is much more than service and instance.
+#
+#  endpoint_avg_rule:
+#    metrics-name: endpoint_avg
+#    op: ">"
+#    threshold: 1000
+#    period: 10
+#    count: 2
+#    silence-period: 5
+#    message: Response time of endpoint {name} is more than 1000ms in 2 minutes of last 10 minutes
+
+webhooks:
+#  - http://127.0.0.1/notify/
+#  - http://127.0.0.1/go-wechat/
+  #- http://127.0.0.1:8088/sw/alarm
+  - http://guowy-alarm-provider.default.svc.cluster.local:8080/sw/alarm
+

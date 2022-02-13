@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: oap
+  namespace: default
+  labels:
+    k8s-app: oap
+spec:
+  # ClusterIP | NodePort
+  type: ClusterIP
+  ports:
+  - name: oap-grpc-11800
+    port: 11800
+    targetPort: 11800
+  - name: oap-rest-12800
+    port: 12800
+    targetPort: 12800
+  selector:
+    k8s-app: oap
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oap
+  namespace: default
+  labels:
+    k8s-app: oap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: oap
+  template:
+    metadata:
+      name: oap
+      namespace: default
+      labels:
+        k8s-app: oap
+    spec:
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      volumes:
+      - name: apply-logs
+        hostPath:
+          path: /apply/logs
+      containers:
+      - image: ccr.ccs.tencentyun.com/gwy-middleware/skywalking-oap-server:8.5.0-es7
+        name: oap
+        imagePullPolicy: Always
+        ports:
+        - name: oap-rest-12800
+          containerPort: 12800
+        - name: oap-grpc-11800
+          containerPort: 11800
+        resources:
+          requests:
+            cpu: 2000m
+            memory: 3000Mi
+          limits:
+            cpu: 2100m
+            memory: 3200Mi
+        env:
+        - name: GWY_TENANT
+          value: sanweigo
+        - name: GWY_ENV
+          value: test
+        - name: GWY_SPRING_APPLICATION_NAME
+          value: skywalking-oap-server
+        - name: JAVA_OPTS
+          value: " -Xms3g -Xmx3g -XX:+UseG1GC -XX:MaxGCPauseMillis=100"
+        - name: SW_CLUSTER
+          value: standalone
+        - name: SW_STORAGE
+          value: h2
+        - name: SW_CORE_RECORD_DATA_TTL
+          value: "1"
+        - name: SW_CORE_METRICS_DATA_TTL
+          value: "3"
+        volumeMounts:
+        - name: apply-logs
+          mountPath: /apply/logs

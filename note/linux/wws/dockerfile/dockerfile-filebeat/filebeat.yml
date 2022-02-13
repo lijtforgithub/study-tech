@@ -1,0 +1,224 @@
+###################### Filebeat Configuration Example #########################
+
+# This file is an example configuration file highlighting only the most common
+# options. The filebeat.reference.yml file from the same directory contains all the
+# supported options with more comments. You can use it as a reference.
+#
+# You can find the full configuration reference here:
+# https://www.elastic.co/guide/en/beats/filebeat/index.html
+
+# For more available modules and options, please see the filebeat.reference.yml sample
+# configuration file.
+
+#=========================== Filebeat inputs =============================
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /apply/logs/default/*/*/*.log
+    - /apply/logs/dev/*/*/*.log
+    - /apply/logs/test/*/*/*.log
+    - /apply/logs/pre/*/*/*.log
+    - /apply/logs/prod/*/*/*.log
+    #- c:\programdata\elasticsearch\logs\*
+  #exclude_files: ['logstash-plain.log']
+  ignore_older: 24h
+  # 事件开头的匹配[pattern]
+  multiline.pattern: '^\d{4}-\d{2}-\d{2}'
+  # 是否需要对[pattern]条件转置使用,true:符合正则表达式的为一个基准行,false:不符合表达式的为一个基准行
+  multiline.negate: true
+  # 匹配[pattern]后,与前面(before)还是后面(after)的内容合并为一条日志
+  multiline.match: after
+  # 单个事件允许的最大日志行数,超过则丢弃(比如异常堆栈就是多行),默认500
+  multiline.max_lines: 500
+  # 在指定的timeout时间后,即便没有匹配到的新事件也会发送出去,默认5s
+  multiline.timeout: 5s
+  # true:每次从文件尾开始读取,false:每次从文件头开始读取,适用首次读取
+  #tail_files: false
+#============================= Filebeat modules ===============================
+
+filebeat.config.modules:
+  # Glob pattern for configuration loading
+  path: ${path.config}/modules.d/*.yml
+
+  # Set to true to enable config reloading
+  # 是否启用配置重新加载
+  reload.enabled: false
+
+  # Period on which files under path should be checked for changes
+  #reload.period: 10s
+
+#==================== Elasticsearch template setting ==========================
+
+setup.template:
+  # 是否启用ES模板
+  enabled: false
+  # 是否覆盖ES模板
+  overwrite: true
+  # ES索引分片数
+  settings.index.number_of_shards: 1
+  #index.codec: best_compression
+  #_source.enabled: false
+
+#================================ General =====================================
+
+# The name of the shipper that publishes the network data.
+# It can be used to group all the transactions sent by a single shipper in the web interface.
+#name:
+
+# The tags of the shipper are included in their own field with each transaction published.
+#tags: ["service-X", "web-tier"]
+
+# Optional fields that you can specify to add additional information to the output.
+# 是否将fields中的字段添加到顶级字段中,false:将fields中的字段添加到fields分组字段下,如果有字段重名,自定义字段会覆盖原有字段
+fields_under_root: true
+# 自定义的附加字段
+fields:
+  # 租户
+  tenant: ${GWY_TENANT:sanweigo}
+  # 环境
+  env: ${GWY_ENV:dev}
+filebeat.shutdown_timeout: 5s
+
+#============================== Dashboards =====================================
+# These settings control loading the sample dashboards to the Kibana index. Loading
+# the dashboards is disabled by default and can be enabled either by setting the
+# options here or by using the `setup` command.
+#setup.dashboards.enabled: false
+
+# The URL from where to download the dashboards archive. By default this URL
+# has a value which is computed based on the Beat name and version. For released
+# versions, this URL points to the dashboard archive on the artifacts.elastic.co website.
+#setup.dashboards.url:
+
+#============================== Kibana =====================================
+
+# Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.
+# This requires a Kibana endpoint configuration.
+setup.kibana:
+
+  # Kibana Host
+  # Scheme and port can be left out and will be set to the default (http and 5601)
+  # In case you specify and additional path, the scheme is required: http://localhost:5601/path
+  # IPv6 addresses should always be defined as: https://[2001:db8::1]:5601
+  #host: "localhost:5601"
+
+  # Kibana Space ID
+  # ID of the Kibana Space into which the dashboards should be loaded. By default,
+  # the Default Space will be used.
+  #space.id:
+
+#============================= Elastic Cloud ==================================
+
+# These settings simplify using Filebeat with the Elastic Cloud (https://cloud.elastic.co/).
+
+# The cloud.id setting overwrites the `output.elasticsearch.hosts` and `setup.kibana.host` options.
+# You can find the `cloud.id` in the Elastic Cloud web UI.
+#cloud.id:
+
+# The cloud.auth setting overwrites the `output.elasticsearch.username` and `output.elasticsearch.password` settings. The format is `<user>:<pass>`.
+#cloud.auth:
+
+#================================ Outputs =====================================
+
+# Configure what output to use when sending the data collected by the beat.
+
+#-------------------------- Elasticsearch output ------------------------------
+output.elasticsearch:
+  enabled: false
+  #hosts: ["localhost:9200"]
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+#----------------------------- Logstash output --------------------------------
+output.logstash:
+  enabled: false
+  hosts: ["logstash.kube-system.svc.cluster.local:5044"]
+
+  # Optional SSL. By default is off.
+  # List of root certificates for HTTPS server verifications
+  #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
+
+  # Certificate for SSL client authentication
+  #ssl.certificate: "/etc/pki/client/cert.pem"
+
+  # Client Certificate Key
+  #ssl.key: "/etc/pki/client/cert.key"
+
+#----------------------------- Kafka output --------------------------------
+output.kafka:
+  enabled: true
+  hosts: ["${GWY_KAFKA_NODE01}"]
+  username: ${GWY_KAFKA_USERNAME}
+  password: ${GWY_KAFKA_PASSWORD}
+  topic: "elastic_logs_topic"
+  client_id: "filebeat"
+  required_acks: 1
+  compression: gzip
+  max_message_bytes: 1000000
+
+#================================ Processors =====================================
+
+# Configure processors to enhance or manipulate events generated by the beat.
+
+#processors:
+  #- add_host_metadata: ~
+  #- add_cloud_metadata: ~
+  #- add_docker_metadata: ~
+  #- add_kubernetes_metadata: ~
+
+#================================ Logging =====================================
+
+# Sets log level. The default log level is info.
+# Available log levels are: error, warning, info, debug
+#logging.level: debug
+logging.level: info
+logging.to_files: true
+logging.to_syslog: false
+logging.files:
+  name: filebeat
+  keepfiles: 7
+# At debug level, you can selectively enable logging only for some components.
+# To enable all selectors use ["*"]. Examples of other selectors are "beat",
+# "publish", "service".
+#logging.selectors: ["*"]
+
+#============================== Console output ===============================
+output.console:
+  enabled: false
+  pretty: true
+
+#================================= Paths ======================================
+path.data: /apply/elkb_data/dev/filebeat/filebeat
+path.logs: /apply/elkb_logs/dev/filebeat/filebeat
+
+#============================== X-Pack Monitoring ===============================
+# filebeat can export internal metrics to a central Elasticsearch monitoring
+# cluster.  This requires xpack monitoring to be enabled in Elasticsearch.  The
+# reporting is disabled by default.
+
+# Set to true to enable the monitoring reporter.
+#monitoring.enabled: false
+
+# Sets the UUID of the Elasticsearch cluster under which monitoring data for this
+# Filebeat instance will appear in the Stack Monitoring UI. If output.elasticsearch
+# is enabled, the UUID is derived from the Elasticsearch cluster referenced by output.elasticsearch.
+#monitoring.cluster_uuid:
+
+# Uncomment to send the metrics to Elasticsearch. Most settings from the
+# Elasticsearch output are accepted here as well.
+# Note that the settings should point to your Elasticsearch *monitoring* cluster.
+# Any setting that is not set is automatically inherited from the Elasticsearch
+# output configuration, so if you have the Elasticsearch output configured such
+# that it is pointing to your Elasticsearch monitoring cluster, you can simply
+# uncomment the following line.
+#monitoring.elasticsearch:
+
+#================================= Migration ==================================
+
+# This allows to enable 6.7 migration aliases
+#migration.6_to_7.enabled: true

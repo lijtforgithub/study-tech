@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: canal-admin
+  labels:
+    app: canal-admin
+spec:
+  # ClusterIP(集群内部容器访问地址)|NodePort(指定暴露到宿主机的端口)
+  type: NodePort
+  ports:
+  - name: client
+    port: 8089
+    targetPort: 8089
+    # admin的node port端口配置，查看端口有没有被占用
+    nodePort: 30089
+  selector:
+    app: canal-admin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canal-admin
+spec:
+  selector:
+    matchLabels:
+      app: canal-admin
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: canal-admin
+    spec:
+      restartPolicy: Always
+      # 认证Secrets
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      containers:
+      - name: canal-admin
+        imagePullPolicy: Always
+        # 镜像
+        image: "ccr.ccs.tencentyun.com/gwy-middleware/canal-admin:1.1.4"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "0.5"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        env:
+        # 环境
+        - name: GWY_ENV
+          value: "test"
+        - name: GWY_SPRING_APPLICATION_NAME
+          value: "canal-admin"
+        # canal admin连接的mysql地址，canal server的配置通过canal admin来统一配置
+        - name: spring.datasource.address
+          value: "172.31.0.16:3306"
+        # canal admin 连接的DB配置，canal账号在库canal_manager授权insert 、update、delete、SELECT；全局：REPLICATION SLAVE、SHOW DATABASES、REPLICATION CLIENT
+        - name: spring.datasource.database
+          value: "canal_manager"
+        - name: spring.datasource.username
+          value: "canal"
+        - name: spring.datasource.password
+          value: "canal"
+        ports:
+        # 8089 web
+        - name: admin-port
+          containerPort: 8089

@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  namespace: kube-system
+  labels:
+    k8s-app: filebeat
+spec:
+  selector:
+    matchLabels:
+      k8s-app: filebeat
+  template:
+    metadata:
+      name: filebeat
+      namespace: kube-system
+      labels:
+        k8s-app: filebeat
+    spec:
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      volumes:
+      - name: apply
+        hostPath:
+          path: /apply
+      - name: apply-agents
+        hostPath:
+          path: /apply/java_agents
+      initContainers:
+      - image: ccr.ccs.tencentyun.com/gwy-middleware/skywalking-agent:8.5.0
+        name: skywalking-agent
+        imagePullPolicy: Always
+        command: [ "sh", "/opt/start.sh" ]
+        volumeMounts:
+        - name: apply-agents
+          mountPath: /apply/java_agents
+      containers:
+      - image: ccr.ccs.tencentyun.com/gwy-middleware/filebeat-logs:7.5.2
+        name: filebeat
+        imagePullPolicy: Always
+        env:
+        - name: GWY_TENANT
+          value: sanweigo
+        - name: GWY_ENV
+          value: test
+        - name: GWY_SPRING_APPLICATION_NAME
+          value: filebeat
+        - name: GWY_KAFKA_NODE01
+          value: "81.68.123.235:9092"
+        - name: GWY_KAFKA_USERNAME
+          value: "kafka"
+        - name: GWY_KAFKA_PASSWORD
+          value: "kafkaFSGsnW$B&JSbG3w0IAgO"
+        volumeMounts:
+        - name: apply
+          mountPath: /apply
+      - image: ccr.ccs.tencentyun.com/gwy-middleware/log-clean:1.0.0
+        name: log-clean
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 50m
+            memory: 100Mi
+          limits:
+            cpu: 60m
+            memory: 110Mi
+        env:
+        - name: GWY_TENANT
+          value: sanweigo
+        - name: GWY_ENV
+          value: test
+        - name: GWY_SPRING_APPLICATION_NAME
+          value: log-clean
+        # 日志保留天数,单位天
+        - name: LOG_RETENTION_DAYS
+          value: "60"
+        # 待清理日志的目录列表,多目录之间以空格分隔
+        - name: LOG_CLEAN_DIRS
+          value: "/apply/logs/test"
+        volumeMounts:
+        - name: apply
+          mountPath: /apply

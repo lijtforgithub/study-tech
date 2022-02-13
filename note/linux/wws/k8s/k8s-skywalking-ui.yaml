@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: skywalking-ui
+  namespace: default
+  labels:
+    k8s-app: skywalking-ui
+spec:
+  # ClusterIP | NodePort
+  type: NodePort
+  ports:
+  - name: ui-http-8080
+    port: 8080
+    targetPort: 8080
+    nodePort: 32183
+  selector:
+    k8s-app: skywalking-ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skywalking-ui
+  namespace: default
+  labels:
+    k8s-app: skywalking-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: skywalking-ui
+  template:
+    metadata:
+      name: skywalking
+      namespace: default
+      labels:
+        k8s-app: skywalking-ui
+    spec:
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      volumes:
+      - name: apply-logs
+        hostPath:
+          path: /apply/logs
+      containers:
+      - image: ccr.ccs.tencentyun.com/gwy-middleware/skywalking-ui:8.5.0
+        name: ui
+        imagePullPolicy: Always
+        ports:
+        - name: ui-http-8080
+          containerPort: 8080
+        resources:
+          requests:
+            cpu: 300m
+            memory: 1200Mi
+          limits:
+            cpu: 500m
+            memory: 1300Mi
+        env:
+        - name: GWY_TENANT
+          value: sanweigo
+        - name: GWY_ENV
+          value: test
+        - name: GWY_SPRING_APPLICATION_NAME
+          value: skywalking-ui
+        - name: JAVA_OPTS
+          value: " -Xms1g -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=100"
+        volumeMounts:
+        - name: apply-logs
+          mountPath: /apply/logs
