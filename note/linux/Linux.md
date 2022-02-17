@@ -60,39 +60,13 @@ arp -a
 ```
 service nginx reload  
 service nginx restart
+nginx -t
 ```
 #### 公钥
 ```
 ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa  
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys  
 chmod 0600 ~/.ssh/authorized_keys
-```
-#### Hadoop
-```
-sbin/hadoop-daemon.sh start journalnode
-bin/hdfs namenode -format
-sbin/hadoop-daemon.sh start namenode
-hdfs namenode -bootstrapStandby
-
-bin/hdfs zkfc -formatZK
-bin/hdfs start zkfc
-
-sbin/start-dfs.sh
-
-bin/hdfs dfs -mkdir -p /usr/file
-bin/hdfs dfs -put /home/soft/jdk-8u131-linux-x64.tar.gz /usr/file
-
-要在ResouceManager所在的机器上启动start-yarn.sh
- ./hadoop jar /home/wc.jar com.ljt.study.hadoop.mr.WordCount /lijt/input/wc/ /lijt/output/wc
-
-启动hadfs,注意有的是在多个节点执行的。
-hadoop-daemons.sh start journalnode
-hadoop-daemon.sh start namenode（每个namenode都要执行）
-hadoop-daemon.sh start zkfc（每个namenode都要执行）
-hadoop-daemons.sh start datanode
-
-启动yarn  
-start-yarn.sh
 ```
 ## CMD
 | 命令 | 说明 |
