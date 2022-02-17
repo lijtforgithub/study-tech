@@ -24,7 +24,7 @@ filter {
   }
   
   dissect {
-    mapping => { "message" => "%{ts} %{+ts} %{level} [%{thread}] %{logger} %{} %{msg}" }
+    mapping => { "message" => "%{ts} %{+ts} %{level} [%{thread}] %{logger} - %{msg}" }
   }
   
   date {
