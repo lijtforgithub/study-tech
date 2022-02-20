@@ -10,6 +10,7 @@
 6. docker version
 7. 配置阿里云镜像加速器（容器镜像服务）
 #### 常用命令
+
 | 命令                                          | 说明            |
 |---------------------------------------------|---------------|
 | docker info                                 |               |
@@ -22,7 +23,7 @@
 | docker run 镜像名<:tags>                       | 创建容器 启动应用     |
 | docker run -p 8000:8080 -d tomcat           | 创建容器 启动应用     |
 | docker port 容器ID                            |               |
-| docker ps                                   | 查看正在运行容器      |
+| docker ps  [--no-trunc]                      | 查看正在运行容器      |
 | docker ps -a                                | 查看所有容器        |
 | docker container ls -a                      |               |
 | docker container prune                      |               |
