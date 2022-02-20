@@ -5,8 +5,8 @@ logstash -f 方式运行的实例是一个管道 当要在一个实例中运行�
 #### conf
 ```
 input {
-
-  #stdin { }
+ 
+  stdin { }
   
   beats {
     port => 5044
@@ -17,14 +17,18 @@ input {
 filter {
 
   mutate {
-	add_field => {
-	  "hostname" => "%{[host][name]}"
-	}
-	remove_field => [ "ecs", "input", "agent", "host", "log", "tags" ]
+    gsub => [ "[log][file][path]", "[\\]", "/" ]
+    split => [ "[log][file][path]", "/" ]
+    add_field => {
+      "env" => "%{[log][file][path][3]}"
+      "app" => "%{[log][file][path][4]}"
+      "hostname" => "%{[log][file][path][5]}"
+    }
+    remove_field => [ "ecs", "input", "agent", "host", "tags", "log" ]
   }
   
   dissect {
-    mapping => { "message" => "%{ts} %{+ts} %{level} [%{thread}] %{logger} - %{msg}" }
+    mapping => { "message" => "%{ts} %{+ts->} %{level} %{} --- [%{thread}] %{msg}" }
   }
   
   date {
@@ -45,10 +49,9 @@ filter {
 output {
 
   stdout { codec => rubydebug }
-  
   elasticsearch {
-	hosts => "127.0.0.1"
-	index => "logstash-applog-%{+YYYY-MM-dd}"
+    hosts => ["192.168.3.111:9200", "192.168.3.112:9200", "192.168.3.113:9200"]
+    index => "logstash-applog-%{+YYYY-MM-dd}"
   }
   
 }

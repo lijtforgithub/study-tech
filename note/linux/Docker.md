@@ -35,9 +35,10 @@
 | docker unpause 容器ID                         |               |
 | docker kill 容器ID                            | 停止容器 新的进程     |
 | docker rm <-f> 容器ID                         | 删除容器          |
-| docker search 镜像名                         |               |
+| docker search 镜像名                           |               |
 | docker tag 源镜像 新镜像名                         |               |
-| docker push 镜像名                         |               |
+| docker push 镜像名                             |               |
+| docker logs -f 容器ID                         |               |
 
 1. 容器间单向通信
 ```
@@ -91,50 +92,39 @@ docker run --volumes-from webpage --name t1 -d tomcat
 8. USER
 #### 运行MySQL
 ```
-mkdir /opt/mysql
-mkdir /opt/mysql/conf.d
-mkdir /opt/mysql/data/
+cd /apply
+mkdir mysql/data
+mkdir mysql/conf/my.cnf
+mkdir mysql/mysql-files
 
-chmod  -R 777 /opt/mysql/
-
-
-vi /opt/mysql/my.cnf
-
-[mysqld]
-user=mysql
-character-set-server=utf8
-default_authentication_plugin=mysql_native_password
-secure_file_priv=/var/lib/mysql
-expire_logs_days=7
-sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
-max_connections=1000
-
-[client]
-default-character-set=utf8
-
-[mysql]
-default-character-set=utf8
-
+chmod -R 777 mysql
 
 docker run \
- --name mysql57 \
+ --name mysql8 \
  -p 3306:3306 \
- -v /opt/mysql/data:/var/lib/mysql \
- -v /opt/mysql/log:/var/log/mysql \
- -v /opt/mysql/my.cnf:/etc/mysql/my.cnf:rw \
- -e MYSQL_ROOT_PASSWORD=password \
- -d registry.cn-beijing.aliyuncs.com/qingfeng666/mysql:5.7 --default-authentication-plugin=mysql_native_password
+ -v /apply/mysql/data:/var/lib/mysql \
+ -v /apply/mysql/conf/my.cnf:/etc/mysql/my.cnf:rw \
+ -v /apply/mysql/mysql-files:/var/lib/mysql-files \
+ -e MYSQL_ROOT_PASSWORD=admin \
+ -d mysql:8.0.28 --default-authentication-plugin=mysql_native_password
  
+
+docker exec -ti 容器ID bash
+mysql
+
+CREATE USER 'root'@'%' IDENTIFIED BY 'admin';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
 
 yum install -y mysql 
 mysql -uroot -h127.0.0.1 -p
-
 ```
 #### harbor
 ```
 tar xf  harbor-offline-installer-v1.10.10.tgz
 修改 harbor.yml (域名 端口 密码 数据路径)
-mkdier -p ../data/harbor /var/log/harbor
+mkdier -p ../harbor-data/data ../harbor-data/log
 yum install -y docker-compose
 sh install.sh
 
