@@ -22,7 +22,7 @@ class PdfTest {
     @SneakyThrows
     @Test
     void imageToPdf() {
-        final String image = "D:\\李敬堂\\cert.jpg";
+        final String image = "D:\\李敬堂\\test.png";
         final String pdf = "D:\\李敬堂\\ImageToPdf.pdf";
         imageToPdf(new FileInputStream(image), new FileOutputStream(pdf));
     }
@@ -37,7 +37,7 @@ class PdfTest {
 
         Image image = new Image(imageData);
         image.setWidth(pdfDocument.getDefaultPageSize().getWidth() - 50);
-//        image.setAutoScaleHeight(true);
+        image.setAutoScaleHeight(true);
 
         try (Document document = new Document(pdfDocument)) {
             document.add(image);
