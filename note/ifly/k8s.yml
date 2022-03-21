@@ -1,0 +1,211 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  # prometheus监控配置start
+  annotations:
+    prometheus.io/path: /actuator/prometheus
+    prometheus.io/port: '31020'
+    prometheus.io/scrape: "true"
+    # prometheus监控配置end
+  name: ${service-name}
+  namespace: ${name-space}
+  labels:
+    app: ${service-name}
+spec:
+  type: ClusterIP
+  selector:
+    app: ${service-name}
+  ports:
+    - protocol: TCP
+      port: 31020
+      targetPort: 31020
+      name: app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    "initializer.kubernetes.io/lxcfs": "true"
+  name: ${service-name}
+  labels:
+    app: ${service-name}
+  namespace: ${name-space}
+spec:
+  replicas: 2
+  # 滚动升级策略
+  minReadySeconds: 15
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  selector:
+    matchLabels:
+      app: ${service-name}
+  template:
+    metadata:
+      labels:
+        app: ${service-name}
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - '${service-name}'
+              topologyKey: "kubernetes.io/hostname"
+      #skywalking 链路监控配置start
+      initContainers:
+        - image: artifacts.iflytek.com/zhyl-docker-repo/zhws-common/skywalking-agent:8.5.1
+          name: sw-agent-sidecar
+          imagePullPolicy: IfNotPresent
+          command: ["sh"]
+          args:
+            [
+                "-c",
+                "mkdir -p /skywalking/agent && cp -r /usr/skywalking/agent/* /skywalking/agent",
+            ]
+          volumeMounts:
+            - mountPath: /skywalking/agent
+              name: sw-agent
+      #skywalking 链路监控配置end
+      containers:
+        #扁鹊日志配置start
+        - name: filebeat
+          image: artifacts.iflytek.com/zhyl-docker-repo/zhws-common/filebeat:7.9.1
+          command: ["filebeat"]
+          args:
+            - -c
+            - /usr/share/filebeat/config/filebeat.yml
+          securityContext:
+            runAsUser: 0
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 200m
+          volumeMounts:
+            - name: filebeat-configmap-${service-name}
+              mountPath: /usr/share/filebeat/config
+            - name: log
+              mountPath: /logs/${service-name}
+            - name: data
+              mountPath: /usr/share/filebeat/data
+          #扁鹊日志配置结束
+        - name: ${service-name}
+          image: artifacts.iflytek.com/zhyl-docker-repo/zyzl40/imaoutpatient:2489
+          command: ["java"]
+          args:
+            - -Xms1g
+            - -Xmx2g
+            - -XX:+HeapDumpOnOutOfMemoryError
+            - -XX:HeapDumpPath=heapdump.hprof
+            - -Dskywalking.agent.sample_n_per_3_secs=30
+            - -Dskywalking.trace.ignore_path=**/**/health,**/prometheus
+            - -javaagent:/usr/skywalking/agent/skywalking-agent.jar
+            - -Dskywalking.agent.service_name=${name-space}::${service-name}
+            - -Dskywalking.collector.backend_service=${skywalking-server}
+            - -jar
+            - /usr/local/${jar-name}
+            - --spring.application.name=${service-name}
+            - --server.port=31020
+            - --spring.cloud.nacos.config.server-addr=${nacos-server}
+            - --spring.cloud.nacos.config.namespace=${name-space}
+            - --spring.cloud.nacos.config.username=${nacos-user}
+            - --spring.cloud.nacos.config.password=${nacos-user}
+            - --spring.cloud.nacos.config.shared-dataids=application.yml,${service-name}.yml
+            - --spring.cloud.nacos.config.refreshable-dataids=application.yml,${service-name}.yml
+            - --spring.main.allow-bean-definition-overriding=true
+            - --flylog.enabled=false
+          volumeMounts:
+            - mountPath: /usr/skywalking/agent
+              name: sw-agent
+            - name: log
+              mountPath: /logs/${service-name}
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "200m"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 31020
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 31020
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 30
+          ports:
+            - containerPort: 31020
+      imagePullSecrets:
+        - name: ${name-space}-secrets
+      volumes:
+        - name: sw-agent
+          emptyDir: {}
+        - name: log
+          hostPath:
+            path: /disk1/logs_offline
+            # 挂载前不做任何检查
+            type: ""
+        - name: data
+          emptyDir: {}
+        - name: filebeat-configmap-${service-name}
+          configMap:
+            name: filebeat-configmap-${service-name}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-configmap-${service-name}
+  namespace: ${name-space}
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+      - type: log
+        enabled: true
+        paths:
+          - /logs/${service-name}/all.log
+        fields:
+          business_line: ima
+          topic: ima-k8s
+          platform: prod
+          application: ${name-space}
+        fields_under_root: true
+        multiline.type: pattern
+        multiline.pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}'
+        multiline.negate: true
+        multiline.match: after
+    filebeat.config.modules:
+      path: /usr/share/filebeat/modules.d/*.yml
+      reload.enabled: false
+    output.logstash:
+      hosts: ["${logstash-server}"]
+    processors:
+      - drop_fields:
+          fields: ["agent","log","fields","ecs","event","tags"]
+      - add_host_metadata: ~                        
