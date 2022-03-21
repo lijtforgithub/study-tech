@@ -208,4 +208,4 @@ data:
     processors:
       - drop_fields:
           fields: ["agent","log","fields","ecs","event","tags"]
-      - add_host_metadata: ~                        
+      - add_host_metadata: ~
