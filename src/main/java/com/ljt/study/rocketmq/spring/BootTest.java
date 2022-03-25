@@ -15,14 +15,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class BootTest {
 
-    @Value("${rocketmq.test.group}")
+    @Value("${rocketmq.test.topic}")
     private String testTopic;
     @Autowired
     private RocketMQTemplate rocketMqTemplate;
 
     @Test
     void syncSend() {
-        rocketMqTemplate.syncSend(testTopic, "rocketMQTemplate:syncSend");
+        TempUser user = new TempUser();
+        user.setId(100);
+        user.setName("CC");
+        rocketMqTemplate.syncSend(testTopic, user);
     }
 
 }
