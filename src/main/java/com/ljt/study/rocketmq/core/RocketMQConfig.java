@@ -38,8 +38,8 @@ public class RocketMQConfig {
     }
 
     @Bean
-    RocketMQContinerPostProcessor rocketMQContinerProcessor(RocketMQCustomProperties rocketMQCustomProperties) {
-        return new RocketMQContinerPostProcessor(rocketMQCustomProperties);
+    RocketMQContainerPostProcessor rocketMQContainerProcessor(RocketMQCustomProperties rocketMQCustomProperties) {
+        return new RocketMQContainerPostProcessor(rocketMQCustomProperties);
     }
 
 }

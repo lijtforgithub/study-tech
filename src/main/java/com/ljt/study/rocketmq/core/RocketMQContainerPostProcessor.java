@@ -11,11 +11,11 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * @date 2022-03-28 13:45
  */
 @Slf4j
-class RocketMQContinerPostProcessor implements BeanPostProcessor {
+class RocketMQContainerPostProcessor implements BeanPostProcessor {
 
     private final RocketMQCustomProperties customProperties;
 
-    public RocketMQContinerPostProcessor(RocketMQCustomProperties rocketMQCustomProperties) {
+    public RocketMQContainerPostProcessor(RocketMQCustomProperties rocketMQCustomProperties) {
         this.customProperties = rocketMQCustomProperties;
     }
 
