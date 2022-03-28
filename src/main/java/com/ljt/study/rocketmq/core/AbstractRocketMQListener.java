@@ -1,10 +1,9 @@
 package com.ljt.study.rocketmq.core;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyContext;
-import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyStatus;
-import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
+import org.apache.rocketmq.client.consumer.listener.*;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
@@ -15,6 +14,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
@@ -22,6 +22,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,23 +31,32 @@ import java.util.Objects;
  * @date 2022-03-24 15:39
  */
 @Slf4j
-public abstract class AbstractRocketMQListener<T> implements RocketMQListener<MessageExt>, MessageListenerOrderly {
+public abstract class AbstractRocketMQListener<T> implements RocketMQListener<MessageExt>, MessageListenerOrderly, MessageListenerConcurrently {
 
     private Type messageType;
     private MethodParameter methodParameter;
     private MessageContext messageContext;
 
     @Autowired
+    private RocketMQCustomProperties customProperties;
+    @Autowired
     private Environment environment;
 
     @Autowired
-    private RocketMQMessageConverter rocketMQMessageConverter;
+    private RocketMQMessageConverter messageConverter;
     @Autowired
     private MessageErrorHandler errorHandler;
-    @Autowired
-    private List<MessagePostProcessor> messagePostProcessors;
+    @Autowired(required = false)
+    private List<MessagePostProcessor> messagePostProcessors = Collections.emptyList();
 
-    protected AbstractRocketMQListener() {}
+    protected AbstractRocketMQListener() {
+    }
+
+    protected AbstractRocketMQListener(String consumerGroup) {
+        this.messageContext = new MessageContext();
+        this.messageContext.setConsumerGroup(consumerGroup);
+        this.messageContext.setMessageModel(MessageModel.CLUSTERING);
+    }
 
     protected AbstractRocketMQListener(MessageContext messageContext) {
         this.messageContext = messageContext;
@@ -60,11 +70,14 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
 
         try {
             handleMessage((T) doConvertMessage(message));
+            after(message);
         } catch (Exception e) {
+            if (message.getReconsumeTimes() < getMaxReconsumeTimes()) {
+                throw new RuntimeException(e.getMessage());
+            }
+
             error(message, e);
         }
-
-        after(message);
     }
 
     @Override
@@ -74,13 +87,27 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
                 onMessage(message);
             } catch (Exception e) {
                 log.warn("consume message failed. messageId:{}, topic:{}, reconsumeTimes:{}", message.getMsgId(), message.getTopic(), message.getReconsumeTimes(), e);
-                long suspendCurrentQueueTimeMillis = 10000;
-                context.setSuspendCurrentQueueTimeMillis(suspendCurrentQueueTimeMillis);
+                context.setSuspendCurrentQueueTimeMillis(getSuspendCurrentQueueTimeMillis());
                 return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
             }
         }
 
         return ConsumeOrderlyStatus.SUCCESS;
+    }
+
+    @Override
+    public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+        for (MessageExt message : msgs) {
+            try {
+                onMessage(message);
+            } catch (Exception e) {
+                log.warn("consume message failed. messageId:{}, topic:{}, reconsumeTimes:{}", message.getMsgId(), message.getTopic(), message.getReconsumeTimes(), e);
+                context.setDelayLevelWhenNextConsume(getDelayLevelWhenNextConsume());
+                return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+            }
+        }
+
+        return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
     }
 
     /**
@@ -104,10 +131,6 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
             errorHandler.handleError(message, e);
         } catch (Exception e1) {
             log.error("errorHandler异常", e1);
-        }
-
-        if (errorHandler.isPushAgain()) {
-            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -133,6 +156,7 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
 
     protected MessageContext getMessageContext() {
         if (Objects.nonNull(messageContext)) {
+            Assert.notNull(messageContext.getMessageModel(), "消费模式为空");
             return messageContext;
         }
 
@@ -141,6 +165,7 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
 
         MessageContext context = new MessageContext();
         context.setConsumerGroup(group);
+        context.setMessageModel(annotation.messageModel());
         return context;
     }
 
@@ -223,7 +248,19 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     }
 
     private MessageConverter getMessageConverter() {
-        return rocketMQMessageConverter.getMessageConverter();
+        return messageConverter.getMessageConverter();
+    }
+
+    protected long getSuspendCurrentQueueTimeMillis() {
+        return customProperties.getSuspendCurrentQueueTimeMillis();
+    }
+
+    protected int getDelayLevelWhenNextConsume() {
+        return customProperties.getDelayLevelWhenNextConsume();
+    }
+
+    protected int getMaxReconsumeTimes() {
+        return customProperties.getMaxReconsumeTimes();
     }
 
 }

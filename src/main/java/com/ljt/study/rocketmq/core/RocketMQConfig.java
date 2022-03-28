@@ -1,8 +1,6 @@
 package com.ljt.study.rocketmq.core;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +12,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 @Slf4j
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(RocketMQAutoConfiguration.class)
 public class RocketMQConfig {
 
     @Bean
@@ -23,7 +20,6 @@ public class RocketMQConfig {
     }
 
     @Bean
-    @ConditionalOnClass(StringRedisTemplate.class)
     RepeatConsumePostProcessor repeatConsumePostProcessor(StringRedisTemplate stringRedisTemplate, RocketMQCustomProperties customProperties) {
         log.debug("RepeatConsumePostProcessor 实例化: {}", customProperties.getRepeatPrefix());
         RepeatConsumePostProcessor postProcessor = new RepeatConsumePostProcessor();
@@ -39,6 +35,11 @@ public class RocketMQConfig {
         log.debug("默认 MessageErrorHandler 实例化");
 
         return (message, e) -> log.error("处理消息[" + message.getMsgId() + "]异常");
+    }
+
+    @Bean
+    RocketMQContinerPostProcessor rocketMQContinerProcessor(RocketMQCustomProperties rocketMQCustomProperties) {
+        return new RocketMQContinerPostProcessor(rocketMQCustomProperties);
     }
 
 }

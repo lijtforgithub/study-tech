@@ -3,6 +3,7 @@ package com.ljt.study.rocketmq.core;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.rocketmq.spring.annotation.MessageModel;
 
 import java.io.Serializable;
 
@@ -18,5 +19,6 @@ public class MessageContext implements Serializable {
     private static final long serialVersionUID = 7448876794817371729L;
 
     private String consumerGroup;
+    private MessageModel messageModel;
 
 }

@@ -10,8 +10,4 @@ public interface MessageErrorHandler {
 	 */
 	void handleError(MessageExt message, Exception e);
 
-	default boolean isPushAgain() {
-		return true;
-	}
-
 }
