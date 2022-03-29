@@ -129,7 +129,7 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
         try {
             errorHandler.handleError(message, e);
         } catch (Exception e1) {
-            log.error("errorHandler异常", e1);
+            log.error("error异常", e1);
         }
     }
 
