@@ -20,9 +20,9 @@ public class RocketMQConfig {
     }
 
     @Bean
-    RepeatConsumePostProcessor repeatConsumePostProcessor(StringRedisTemplate stringRedisTemplate, RocketMQCustomProperties customProperties) {
+    RepeatConsumeProcessor repeatConsumeProcessor(StringRedisTemplate stringRedisTemplate, RocketMQCustomProperties customProperties) {
         log.debug("RepeatConsumePostProcessor 实例化: {}", customProperties.getRepeatPrefix());
-        RepeatConsumePostProcessor postProcessor = new RepeatConsumePostProcessor();
+        RepeatConsumeProcessor postProcessor = new RepeatConsumeProcessor();
         postProcessor.setPrefix(customProperties.getRepeatPrefix());
         postProcessor.setCacheTime(customProperties.getRepeatCacheTime());
         postProcessor.setStringRedisTemplate(stringRedisTemplate);

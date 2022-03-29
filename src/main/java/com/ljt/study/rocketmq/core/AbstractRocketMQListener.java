@@ -9,7 +9,6 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SmartMessageConverter;
@@ -22,7 +21,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,8 +44,8 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     private RocketMQMessageConverter messageConverter;
     @Autowired
     private MessageErrorHandler errorHandler;
-    @Autowired(required = false)
-    private List<MessagePostProcessor> messagePostProcessors = Collections.emptyList();
+    @Autowired
+    private RepeatConsumeProcessor repeatConsumeProcessor;
 
     protected AbstractRocketMQListener() {
     }
@@ -66,7 +64,9 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     public void onMessage(MessageExt message) {
         log.debug("收到消息：{}", message.getMsgId());
 
-        before(message);
+        if (!before(message)) {
+            return;
+        }
 
         try {
             handleMessage((T) doConvertMessage(message));
@@ -123,7 +123,6 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
         this.messageType = getMessageType();
         this.methodParameter = getMethodParameter();
         this.messageContext = getMessageContext();
-        AnnotationAwareOrderComparator.sort(messagePostProcessors);
     }
 
     private void error(MessageExt message, Exception e) {
@@ -134,24 +133,21 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
         }
     }
 
-    private void before(MessageExt message) {
-        messagePostProcessors.forEach(processor -> {
-            try {
-                processor.postProcessBeforeHandle(message, getMessageContext());
-            } catch (Exception e) {
-                log.error("before异常" + processor.getClass().getName(), e);
-            }
-        });
+    private boolean before(MessageExt message) {
+        try {
+            return repeatConsumeProcessor.beforeHandle(message, getMessageContext());
+        } catch (Exception e) {
+            log.error("before异常", e);
+            return true;
+        }
     }
 
     private void after(MessageExt message) {
-        messagePostProcessors.forEach(processor -> {
-            try {
-                processor.postProcessAfterHandle(message, getMessageContext());
-            } catch (Exception e) {
-                log.error("after异常" + processor.getClass().getName(), e);
-            }
-        });
+        try {
+            repeatConsumeProcessor.beforeHandle(message, getMessageContext());
+        } catch (Exception e) {
+            log.error("after异常", e);
+        }
     }
 
     protected MessageContext getMessageContext() {

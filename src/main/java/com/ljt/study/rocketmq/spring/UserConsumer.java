@@ -7,7 +7,6 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
@@ -16,7 +15,7 @@ import javax.annotation.PostConstruct;
  * @date 2022-03-25 16:55
  */
 @Slf4j
-@Component
+//@Component
 class UserConsumer {
 
     @Value("${rocketmq.test.topic}")
@@ -30,7 +29,7 @@ class UserConsumer {
 
     @PostConstruct
     public void init() throws MQClientException {
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(group);
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer();
         consumer.setNamesrvAddr(rocketMQProperties.getNameServer());
         consumer.subscribe(topic, "*");
 

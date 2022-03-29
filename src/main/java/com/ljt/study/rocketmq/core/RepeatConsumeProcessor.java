@@ -14,27 +14,28 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Setter
-class RepeatConsumePostProcessor implements MessagePostProcessor {
+class RepeatConsumeProcessor {
 
     private String prefix;
     private Long cacheTime;
     private StringRedisTemplate stringRedisTemplate;
 
-    @Override
-    public void postProcessBeforeHandle(MessageExt message, MessageContext context) {
+    public boolean beforeHandle(MessageExt message, MessageContext context) {
         if (MessageModel.BROADCASTING == context.getMessageModel()) {
-            return;
+            return true;
         }
 
         log.debug("开始消息重复消费验证topic={} group={} msgId={}", message.getTopic(), context.getConsumerGroup(), message.getMsgId());
         String key = getKey(message, context);
         if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
             log.warn("重复投递{}", key);
+            return false;
         }
+
+        return true;
     }
 
-    @Override
-    public void postProcessAfterHandle(MessageExt message, MessageContext context) {
+    public void afterHandle(MessageExt message, MessageContext context) {
         if (MessageModel.BROADCASTING == context.getMessageModel()) {
             return;
         }

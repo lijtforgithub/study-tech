@@ -1,6 +1,7 @@
 package com.ljt.study.rocketmq.spring;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ class BootTest {
     void syncSend() {
         TempUser user = new TempUser();
         user.setId(100);
-        user.setName("CC");
+        user.setName(RandomStringUtils.randomAlphabetic(10));
         rocketMqTemplate.syncSend(testTopic, user);
     }
 
