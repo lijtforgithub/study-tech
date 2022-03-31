@@ -44,8 +44,8 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     private RocketMQMessageConverter messageConverter;
     @Autowired
     private MessageErrorHandler errorHandler;
-    @Autowired
-    private RepeatConsumeProcessor repeatConsumeProcessor;
+    @Autowired(required = false)
+    private MessageProcessor messageProcessor;
 
     protected AbstractRocketMQListener() {
     }
@@ -134,8 +134,12 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     }
 
     private boolean before(MessageExt message) {
+        if (Objects.isNull(messageProcessor)) {
+            return true;
+        }
+
         try {
-            return repeatConsumeProcessor.beforeHandle(message, getMessageContext());
+            return messageProcessor.beforeHandle(message, getMessageContext());
         } catch (Exception e) {
             log.error("before异常", e);
             return true;
@@ -143,8 +147,12 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     }
 
     private void after(MessageExt message) {
+        if (Objects.isNull(messageProcessor)) {
+            return;
+        }
+
         try {
-            repeatConsumeProcessor.beforeHandle(message, getMessageContext());
+            messageProcessor.beforeHandle(message, getMessageContext());
         } catch (Exception e) {
             log.error("after异常", e);
         }

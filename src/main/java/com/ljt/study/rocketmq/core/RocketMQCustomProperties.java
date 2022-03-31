@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "rocketmq.custom")
 public class RocketMQCustomProperties {
 
+    private Boolean repeatEnable;
     private String repeatPrefix = "rocketmq:repeat";
     private Long repeatCacheTime = 3600L;
 

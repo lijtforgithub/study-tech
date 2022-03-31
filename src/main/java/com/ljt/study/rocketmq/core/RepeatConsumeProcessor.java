@@ -14,12 +14,13 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Setter
-class RepeatConsumeProcessor {
+class RepeatConsumeProcessor implements MessageProcessor {
 
     private String prefix;
     private Long cacheTime;
     private StringRedisTemplate stringRedisTemplate;
 
+    @Override
     public boolean beforeHandle(MessageExt message, MessageContext context) {
         if (MessageModel.BROADCASTING == context.getMessageModel()) {
             return true;
@@ -35,6 +36,7 @@ class RepeatConsumeProcessor {
         return true;
     }
 
+    @Override
     public void afterHandle(MessageExt message, MessageContext context) {
         if (MessageModel.BROADCASTING == context.getMessageModel()) {
             return;

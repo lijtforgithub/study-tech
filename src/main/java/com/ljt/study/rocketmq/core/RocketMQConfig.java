@@ -2,6 +2,7 @@ package com.ljt.study.rocketmq.core;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -19,9 +20,10 @@ public class RocketMQConfig {
         return new RocketMQCustomProperties();
     }
 
+    @ConditionalOnProperty(prefix = "rocketmq.custom", value = "repeat-enable", havingValue = "true")
     @Bean
-    RepeatConsumeProcessor repeatConsumeProcessor(StringRedisTemplate stringRedisTemplate, RocketMQCustomProperties customProperties) {
-        log.debug("RepeatConsumePostProcessor 实例化: {}", customProperties.getRepeatPrefix());
+    MessageProcessor repeatConsumeProcessor(StringRedisTemplate stringRedisTemplate, RocketMQCustomProperties customProperties) {
+        log.debug("{} 实例化: {}", RepeatConsumeProcessor.class.getSimpleName(), customProperties.getRepeatPrefix());
         RepeatConsumeProcessor postProcessor = new RepeatConsumeProcessor();
         postProcessor.setPrefix(customProperties.getRepeatPrefix());
         postProcessor.setCacheTime(customProperties.getRepeatCacheTime());

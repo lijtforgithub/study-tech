@@ -1,7 +1,16 @@
 rocketmq:
   name-server: localhost:9876
-  test:
-    group: test_spring_group
-    topic: test_spring_topic
+  # 生产者和消费者必须配置一个group 否则不会实例化RocketMQTemplate
   producer:
-    group: ${rocketmq.test.group}
+    group: default-group
+#  consumer:
+#    listeners:
+#      test_group:
+#        test_topic: true
+  test:
+    group: test_group
+    topic: test_topic
+  custom:
+    repeat-enable: true
+    repeat-prefix: mq:repeat
+    repeat-cache-time: 1000
