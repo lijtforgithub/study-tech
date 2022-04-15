@@ -1,0 +1,149 @@
+#!/bin/bash
+source /etc/profile
+echo $ENV_NAME
+  
+  #创建临时存放目录
+BASE_PATH=/tmp/deploy/zyzl-ima-management
+mkdir -pv $BASE_PATH
+
+cat > $BASE_PATH/test.yaml << EOF
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    "initializer.kubernetes.io/lxcfs": "true"
+  name: test
+  labels:
+    app: test
+  namespace: zyzl-ima-management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+        #扁鹊日志配置start
+        - name: filebeat
+          image: artifacts.iflytek.com/zhyl-docker-repo/zhws-common/filebeat:7.9.1
+          command: ["filebeat"]
+          args:
+            - -c
+            - /usr/share/filebeat/config/filebeat.yml
+          securityContext:
+            runAsUser: 0
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 500m
+          volumeMounts:
+            - name: filebeat-configmap-test
+              mountPath: /usr/share/filebeat/config
+            - name: log
+              mountPath: /logs/test
+            - name: data
+              mountPath: /usr/share/filebeat/data
+          #扁鹊日志配置结束
+        - name: test
+          image: artifacts.iflytek.com/zhyl-docker-repo/zyzl40/test:$APP_BUILDNUMBER
+          command: ["java"]
+          args:
+            - -Xms1g
+            - -Xmx1g
+            - -jar
+            - /usr/local/app.jar
+          volumeMounts:
+            - name: log
+              mountPath: /logs/test
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "200m"
+      imagePullSecrets:
+        - name: zyzl-ima-secrets
+      volumes:
+        - name: log
+          hostPath:
+            path: /disk1/logs/test
+        - name: data
+          hostPath:
+            path: /disk1/data/test
+        - name: filebeat-configmap-test
+          configMap:
+            name: filebeat-configmap-test
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-configmap-test
+  namespace: zyzl-ima-management
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+    - type: log
+      paths:
+        - /logs/test/all.log
+      fields_under_root: true
+      fields:
+        business_line: 'ima'
+        topic: 'ima-k8s'
+        platform: 'dev'
+        application: 'zyzl-ima-management'
+      multiline:
+        type: pattern
+        pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}'
+        negate: true
+        match: after
+        max_lines: 500
+        timeout: 5s
+    filebeat.config.modules:
+      path: /usr/share/filebeat/modules.d/*.yml
+      reload.enabled: false
+    output.logstash:
+      hosts: ['172.30.9.37:5044']
+    path:
+      logs: /logs/test/filebeat/filebeat.log
+
+EOF
+#执行k8s部署
+kubectl  delete  --ignore-not-found=true -f $BASE_PATH/test.yaml
+kubectl apply -f $BASE_PATH/test.yaml
+exit 0;
+
