@@ -16,27 +16,28 @@ ls -l | grep "^-" | wc -l
 grep -r key ./
 ```
 
-| 命令 | 说明                      |
-|---|-------------------------|
-| uname -a | OS版本                    |
-| cat /proc/version  | OS                      |
-| runlevel | 运行级别                    |
-| init 3 | 指定运行级别                  |
-| ntpdate ntp.api.bz | 同步服务器时间                 |
-| df -h | 查看磁盘空间                  |
-| df -h . | 查看当前文件夹下的所有文件大小（包含子文件夹） |
-| service network restart | 重启网络                    |
-| netstat -nlp |                         |
-| netstat -tunlp \| grep 端口号                | |
-| ss -tanl |                         |
-| lsof -i:端口号 | lsof -op $$             |
-| service iptables status | 查看状态                    |
-| service iptables stop | 关闭                      |
+| 命令                        | 说明                      |
+|---------------------------|-------------------------|
+| uname -a                  | OS版本                    |
+| ip 4 -a                   | 查看所有IP                  |
+| cat /proc/version         | OS                      |
+| runlevel                  | 运行级别                    |
+| init 3                    | 指定运行级别                  |
+| ntpdate ntp.api.bz        | 同步服务器时间                 |
+| df -h                     | 查看磁盘空间                  |
+| df -h .                   | 查看当前文件夹下的所有文件大小（包含子文件夹） |
+| service network restart   | 重启网络                    |
+| netstat -nlp              |                         |
+| netstat -tunlp \          | grep 端口号                | |
+| ss -tanl                  |                         |
+| lsof -i:端口号               | lsof -op $$             |
+| service iptables status   | 查看状态                    |
+| service iptables stop     | 关闭                      |
 | chkconfig iptables --list | 查看开机启动状态                |
-| chkconfig iptables off | 关闭开机启动                  |
-| chkconfig --list | 开机自动启动的服务               |
-| chkconfig --add 服务名 | 添加开机自动启动服务              |
-| chkconfig --del 服务名 | 删除开机自动启动服务              |
+| chkconfig iptables off    | 关闭开机启动                  |
+| chkconfig --list          | 开机自动启动的服务               |
+| chkconfig --add 服务名       | 添加开机自动启动服务              |
+| chkconfig --del 服务名       | 删除开机自动启动服务              |
 
 ```
 exec 8<> /dev/tcp/wwww.baidu.com/80
