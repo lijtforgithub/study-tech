@@ -1,10 +1,13 @@
 package com.ljt.study.rocketmq.core;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+
+import java.util.Objects;
 
 /**
  * @author jtli3
@@ -29,15 +32,22 @@ class RocketMQContainerPostProcessor implements BeanPostProcessor {
                 AbstractRocketMQListener<?> listener = (AbstractRocketMQListener<?>) mqListener;
                 container.setSuspendCurrentQueueTimeMillis(listener.getSuspendCurrentQueueTimeMillis());
                 container.setDelayLevelWhenNextConsume(listener.getDelayLevelWhenNextConsume());
-                container.getConsumer().setMaxReconsumeTimes(listener.getMaxReconsumeTimes());
+                checkAndSet(container.getConsumer(), listener.getMaxReconsumeTimes());
             } else {
                 container.setSuspendCurrentQueueTimeMillis(customProperties.getSuspendCurrentQueueTimeMillis());
                 container.setDelayLevelWhenNextConsume(customProperties.getDelayLevelWhenNextConsume());
-                container.getConsumer().setMaxReconsumeTimes(customProperties.getMaxReconsumeTimes());
+                checkAndSet(container.getConsumer(), customProperties.getMaxReconsumeTimes());
             }
         }
 
         return bean;
+    }
+
+    private void checkAndSet(DefaultMQPushConsumer consumer, int maxReconsumeTimes) {
+        if (Objects.isNull(consumer) || consumer.getMaxReconsumeTimes() != -1) {
+            return;
+        }
+        consumer.setMaxReconsumeTimes(maxReconsumeTimes);
     }
 
 }

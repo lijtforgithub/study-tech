@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MessageSelector;
+import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 
 import java.util.Objects;
@@ -52,6 +53,11 @@ public class DefaultPushConsumerTest {
 
         // 默认15分钟
         consumer.setConsumeTimeout(5);
+
+        consumer.setMaxReconsumeTimes(5);
+        consumer.setConsumeMessageBatchMaxSize(3);
+        consumer.setSuspendCurrentQueueTimeMillis(TimeUnit.SECONDS.toMillis(5));
+        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
 
         consumer.start();
         log.info("开始消费消息");
