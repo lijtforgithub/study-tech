@@ -24,3 +24,5 @@ BROADCASTING模式下，每个 Consumer 都收到这个 Topic 的全部消息，
 Rocketmq能够保证消息严格顺序，但是Rocketmq需要producer保证顺序消息按顺序发送到同一个queue中，比如购买流程(1)下单(2)支付(3)支付成功，这三个消息需要根据特定规则将这个三个消息按顺序发送到一个queue Producer端确保消息顺序唯一要做的事情就是将消息路由到特定的分区（这里的分区可以理解为不同的队列），在RocketMQ中，通过MessageQueueSelector来实现分区的选择。
 
 RocketMQ是支持顺序消费的。但这个顺序，不是全局顺序，只是分区顺序。要全局顺序只能一个分区。一个queue只会有一个消费者，再加上MessageListenerOrderly即可保证。
+
+- 全局有序 一个producer 一个 queue

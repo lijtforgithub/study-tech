@@ -56,6 +56,11 @@ head -10 | tail -1
 
 route -n
 arp -a
+
+type whereis
+whereis ifconfig
+
+sed -i 's#${user.home}#/var/rocketmq#g' *.xml
 ```
 #### Nginx
 ```
