@@ -34,6 +34,7 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     private Type messageType;
     private MethodParameter methodParameter;
     private MessageContext messageContext;
+    private Integer maxReconsumeTimes;
 
     @Autowired
     private RocketMQCustomProperties customProperties;
@@ -134,7 +135,7 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     }
 
     private boolean before(MessageExt message) {
-        if (Objects.isNull(messageProcessor)) {
+        if (!isExecuteProcessor() || Objects.isNull(messageProcessor)) {
             return true;
         }
 
@@ -147,7 +148,7 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     }
 
     private void after(MessageExt message) {
-        if (Objects.isNull(messageProcessor)) {
+        if (!isExecuteProcessor() || Objects.isNull(messageProcessor)) {
             return;
         }
 
@@ -264,7 +265,23 @@ public abstract class AbstractRocketMQListener<T> implements RocketMQListener<Me
     }
 
     protected int getMaxReconsumeTimes() {
+        if (Objects.isNull(maxReconsumeTimes)) {
+            maxReconsumeTimes = initMaxReconsumeTimes();
+        }
+
+        return maxReconsumeTimes;
+    }
+
+    private int initMaxReconsumeTimes() {
+        RocketMQMessageListener annotation = getClass().getAnnotation(RocketMQMessageListener.class);
+        if (Objects.nonNull(annotation) && annotation.maxReconsumeTimes() != -1) {
+            return annotation.maxReconsumeTimes();
+        }
         return customProperties.getMaxReconsumeTimes();
+    }
+
+    protected boolean isExecuteProcessor() {
+        return true;
     }
 
 }
