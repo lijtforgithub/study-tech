@@ -59,6 +59,8 @@ arp -a
 
 type whereis
 whereis ifconfig
+rpm -qf /usr/sbin/ifconfig
+yum install -y pkg
 
 sed -i 's#${user.home}#/var/rocketmq#g' *.xml
 ```
