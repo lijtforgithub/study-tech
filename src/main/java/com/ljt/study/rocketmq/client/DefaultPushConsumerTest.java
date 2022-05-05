@@ -40,6 +40,9 @@ public class DefaultPushConsumerTest {
     private static void consumeMessage(MessageModel model, MessageSelector selector, String groupName) {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(StringUtils.defaultIfBlank(groupName, CLIENT_GROUP));
         consumer.setNamesrvAddr(NAME_SERVER);
+        /**
+         * 可以订阅多个topic
+         */
         consumer.subscribe(CLIENT_TOPIC, ObjectUtils.defaultIfNull(selector, MessageSelector.byTag("*")));
         if (Objects.nonNull(model)) {
             // 默认 MessageModel.CLUSTERING
@@ -57,7 +60,14 @@ public class DefaultPushConsumerTest {
         consumer.setMaxReconsumeTimes(5);
         consumer.setConsumeMessageBatchMaxSize(3);
         consumer.setSuspendCurrentQueueTimeMillis(TimeUnit.SECONDS.toMillis(5));
-        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
+
+        /**
+         * CONSUME_FROM_LAST_OFFSET：第一次启动从队列最后位置消费，后续再启动接着上次消费的进度开始消费
+         * CONSUME_FROM_FIRST_OFFSET：第一次启动从队列初始位置消费，后续再启动接着上次消费的进度开始消费
+         * CONSUME_FROM_TIMESTAMP：第一次启动从指定时间点位置消费，后续再启动接着上次消费的进度开始消费
+         * 第一次启动是指从来没有消费过的消费者，如果该消费者消费过，那么会在broker端记录该消费者的消费位置，如果该消费者挂了再启动，那么自动从上次消费的进度开始，RemoteBrokerOffsetStore
+         */
+        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
 
         consumer.start();
         log.info("开始消费消息");

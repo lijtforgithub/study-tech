@@ -56,7 +56,7 @@ public class DefaultConsumerTest {
          */
 
         context.setDelayLevelWhenNextConsume(2);
-        return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+        return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
     };
 
     static MessageListenerOrderly orderMessageListener = (msgList, context) -> {
