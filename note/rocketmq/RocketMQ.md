@@ -21,13 +21,13 @@ Producer Group作用如下：标识一类Producer 可以通过运维工具查询
 
 Rocketmq集群有两种消费模式：默认是 CLUSTERING 模式，也就是同一个 Consumer group 里的多个消费者每人消费一部分，各自收到的消息内容不一样。 这种情况下，由 Broker 端存储和控制 Offset 的值，使用 RemoteBrokerOffsetStore 结构。
 BROADCASTING模式下，每个 Consumer 都收到这个 Topic 的全部消息，各个 Consumer 间相互没有干扰， RocketMQ 使用 LocalfileOffsetStore，把 Offset存到本地。
-
 - 保证顺序  
 
 Rocketmq能够保证消息严格顺序，但是Rocketmq需要producer保证顺序消息按顺序发送到同一个queue中，比如购买流程(1)下单(2)支付(3)支付成功，这三个消息需要根据特定规则将这个三个消息按顺序发送到一个queue Producer端确保消息顺序唯一要做的事情就是将消息路由到特定的分区（这里的分区可以理解为不同的队列），在RocketMQ中，通过MessageQueueSelector来实现分区的选择。
 
 RocketMQ是支持顺序消费的。但这个顺序，不是全局顺序，只是分区顺序。要全局顺序只能一个分区。一个queue只会有一个消费者，再加上MessageListenerOrderly即可保证。
 
+- 全局有序 一个producer 一个 queue
 #### CONSUME_FROM_LAST_OFFSET不生效场景
 1. 刚新建不久的一个topic，里面有一些消息曾经发送过，起一个新的consumer group去消费，CONSUME_FROM_LAST_OFFSET可能不生效
 2. 某些测试环境，或某些累计消息量很小的灰度集群，新起的consumer group 去监听任意一个有消息的topic，CONSUME_FROM_LAST_OFFSET可能不生效。
