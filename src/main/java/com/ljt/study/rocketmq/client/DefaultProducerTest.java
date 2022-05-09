@@ -7,11 +7,13 @@ import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -34,8 +36,22 @@ class DefaultProducerTest {
         producer = new DefaultMQProducer(CLIENT_GROUP);
         producer.setNamesrvAddr(NAME_SERVER);
         producer.setSendMsgTimeout((int) TimeUnit.MINUTES.toMillis(1));
+
+        // 默认2次
+        producer.setRetryTimesWhenSendFailed(1);
+        producer.setRetryTimesWhenSendAsyncFailed(1);
+        // 默认false
+        producer.setRetryAnotherBrokerWhenNotStoreOK(true);
+
         // 先start 再send
         producer.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+       if (Objects.nonNull(producer)) {
+           producer.shutdown();
+       }
     }
 
 
@@ -109,15 +125,6 @@ class DefaultProducerTest {
 
         // 同一个topic 其他的group都会消费一次 消费者要在发送之前启动
         DefaultPushConsumerTest.consumeMessage(MessageSelector.bySql(String.format("%s >= %s and %s <= %s", age, 6, age, 8)));
-    }
-
-    @Test
-    void setRetry() {
-        // 默认2次
-        producer.setRetryTimesWhenSendFailed(1);
-        producer.setRetryTimesWhenSendAsyncFailed(1);
-        // 默认false
-        producer.setRetryAnotherBrokerWhenNotStoreOK(true);
     }
 
     @Test

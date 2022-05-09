@@ -2,12 +2,16 @@ package com.ljt.study.rocketmq.client;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
+import org.apache.rocketmq.common.message.MessageExt;
+import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.ljt.study.rocketmq.client.RocketMQUtils.*;
@@ -25,6 +29,7 @@ public class DefaultConsumerTest {
 
     @SneakyThrows
     private static void pushConsumer(boolean isOrder) {
+        // 长轮询 从ProcessQueue获取
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(DEF_GROUP);
         consumer.setNamesrvAddr(NAME_SERVER);
         consumer.subscribe(DEF_TOPIC, "*");
@@ -69,5 +74,22 @@ public class DefaultConsumerTest {
          */
         return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
     };
+
+    @SneakyThrows
+    @Test
+    void pullConsumer() {
+        DefaultLitePullConsumer consumer = new DefaultLitePullConsumer(DEF_GROUP);
+        consumer.setNamesrvAddr(NAME_SERVER);
+        consumer.subscribe(DEF_TOPIC, "*");
+        consumer.start();
+        log.info("开始消费消息");
+
+        // 长轮询 从ProcessQueue获取
+        List<MessageExt> msgList = consumer.poll();
+
+        msgList.forEach(msg -> log.info("{} < {}", new String(msg.getBody()), msg.getReconsumeTimes()));
+
+        System.in.read();
+    }
 
 }
