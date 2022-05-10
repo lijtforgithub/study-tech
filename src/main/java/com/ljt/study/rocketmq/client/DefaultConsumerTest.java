@@ -33,6 +33,7 @@ public class DefaultConsumerTest {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(DEF_GROUP);
         consumer.setNamesrvAddr(NAME_SERVER);
         consumer.subscribe(DEF_TOPIC, "*");
+        consumer.subscribe(CLIENT_TOPIC, "*");
         // 顺序消费重投间隔时间
         consumer.setSuspendCurrentQueueTimeMillis(TimeUnit.SECONDS.toMillis(5));
         // 顺序并行都有效 最大重投次数 不包含第一次接收
@@ -72,7 +73,7 @@ public class DefaultConsumerTest {
          * 默认重新投递无限次 直到消费成功 因为顺序消费 会阻塞后面的消息
          * context.setSuspendCurrentQueueTimeMillis(TimeUnit.SECONDS.toMillis(10)) 设置的间隔时间优先级高于 consumer.setSuspendCurrentQueueTimeMillis(TimeUnit.SECONDS.toMillis(5))
          */
-        return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
+        return ConsumeOrderlyStatus.SUCCESS;
     };
 
     @SneakyThrows
@@ -87,7 +88,7 @@ public class DefaultConsumerTest {
         // 长轮询 从ProcessQueue获取
         List<MessageExt> msgList = consumer.poll();
 
-        msgList.forEach(msg -> log.info("{} < {}", new String(msg.getBody()), msg.getReconsumeTimes()));
+        msgList.forEach(msg -> log.info("{} | {}", new String(msg.getBody()), msg.getReconsumeTimes()));
 
         System.in.read();
     }

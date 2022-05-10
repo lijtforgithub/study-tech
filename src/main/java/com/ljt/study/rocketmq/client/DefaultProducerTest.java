@@ -2,6 +2,7 @@ package com.ljt.study.rocketmq.client;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendCallback;
@@ -37,11 +38,12 @@ class DefaultProducerTest {
         producer.setNamesrvAddr(NAME_SERVER);
         producer.setSendMsgTimeout((int) TimeUnit.MINUTES.toMillis(1));
 
-        // 默认2次
+        // 默认2次 不会选择上次失败的broker，尝试向其他broker发送，最大程度保证消息不丢。超过重投次数，抛出异常，由客户端保证消息不丢。当出现RemotingException、MQClientException和部分MQBrokerException时会重投。
         producer.setRetryTimesWhenSendFailed(1);
+        // 异步发送失败重试次数，异步重试不会选择其他broker，仅在同一个broker上做重试，不保证消息不丢。
         producer.setRetryTimesWhenSendAsyncFailed(1);
-        // 默认false
-        producer.setRetryAnotherBrokerWhenNotStoreOK(true);
+        // 默认false 设置为true容易发送重复 不能打开
+        producer.setRetryAnotherBrokerWhenNotStoreOK(false);
 
         // 先start 再send
         producer.start();
@@ -58,9 +60,12 @@ class DefaultProducerTest {
     @Test
     @SneakyThrows
     void send() {
-        Message msg = new Message(CLIENT_TOPIC, "同步发送消息".getBytes(StandardCharsets.UTF_8));
+        String content = "sync-" + RandomStringUtils.randomAlphabetic(5).toUpperCase();
+        Message msg = new Message(CLIENT_TOPIC, content.getBytes(StandardCharsets.UTF_8));
+        // 默认就是true
+        msg.setWaitStoreMsgOK(true);
         SendResult result = producer.send(msg);
-        log.info("同步发送一条消息：{}", result);
+        log.info("同步发送一条消息：{} \n{}", content, result);
     }
 
     @Test
@@ -76,11 +81,12 @@ class DefaultProducerTest {
     @SneakyThrows
     void sendAsync() {
         CountDownLatch latch = new CountDownLatch(1);
-        Message msg = new Message(CLIENT_TOPIC, "异步发送消息".getBytes(StandardCharsets.UTF_8));
+        String content = "async-" + RandomStringUtils.randomAlphabetic(5).toUpperCase();
+        Message msg = new Message(CLIENT_TOPIC, content.getBytes(StandardCharsets.UTF_8));
         producer.send(msg, new SendCallback() {
             @Override
             public void onSuccess(SendResult result) {
-                log.info("异步发送消息：{}", result);
+                log.info("异步发送结果：{}", result);
                 latch.countDown();
             }
 
@@ -90,7 +96,7 @@ class DefaultProducerTest {
             }
         });
 
-        log.info("异步发送消息");
+        log.info("异步发送消息：{}", content);
         latch.await();
     }
 

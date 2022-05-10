@@ -4,13 +4,22 @@
 3. [https://github.com/apache/rocketmq-externals/tree/master/rocketmq-console](控制台插件)
 #### 配置
 ```
+mkdir -p  /var/rocketmq/{logs,store/{commitlog,consumequeue,index}}
+
 namesrvAddr=127.0.0.1:9876
 brokerIP1=127.0.0.1
 autoCreateTopicEnable=true
 enablePropertyFilter=true
+
+vi runbroker.sh
+JAVA_OPT="${JAVA_OPT} -server -Xms1g -Xmx1g"
+
+docker pull apacherocketmq/rocketmq-dashboard:latest
+docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=192.168.3.101:9876;192.168.3.102:9876" -p 9876:8080 -t apacherocketmq/rocketmq-dashboard:latest
 ```
  - start mqbroker.cmd -c ../conf/broker.conf
  - 只有Push类型的Consumer支持使用自定义属性过滤 
+ - sed -i 's#${user.home}#/apply/rocketmq#g'  *.xml
 #### 清理条件
  1. 周期超过72小时（默认值） 
  2. 磁盘达到85%水位线（默认值）
