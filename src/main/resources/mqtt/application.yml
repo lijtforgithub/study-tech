@@ -1,0 +1,5 @@
+mqtt:
+  server-uri: tcp://localhost:1883
+  user-name: guest
+  password: guest
+  topic: test/#
