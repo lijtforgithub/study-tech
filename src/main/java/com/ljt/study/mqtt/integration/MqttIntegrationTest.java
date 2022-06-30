@@ -19,7 +19,7 @@ class MqttIntegrationTest {
     @Test
     @SneakyThrows
     void send() {
-        mqttGateway.sendToMqtt("test/ox/xo", RandomStringUtils.randomAlphanumeric(10));
+        mqttGateway.sendToMqtt("xxoo", RandomStringUtils.randomAlphanumeric(10));
     }
 
 }

@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
+import org.springframework.integration.mqtt.event.MqttSubscribedEvent;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
@@ -30,7 +32,7 @@ class MqttConsumerConfig {
     @Bean
     public MessageProducer inbound(MqttPahoClientFactory mqttClientFactory) {
         log.info("MqttPahoMessageDrivenChannelAdapter");
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("producer_" + R.nextInt(), mqttClientFactory, mqttConfigProperties.getTopic());
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("consumer_" + R.nextInt(), mqttClientFactory, mqttConfigProperties.getTopic());
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setOutputChannel(mqttInputChannel());
         adapter.setRecoveryInterval(1000);
@@ -48,6 +50,11 @@ class MqttConsumerConfig {
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
         return message -> log.info("收到消息 {}", message.getPayload());
+    }
+
+    @EventListener
+    public void listen(MqttSubscribedEvent event) {
+        log.info("订阅主题成功 {}", event);
     }
 
 }

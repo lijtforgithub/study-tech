@@ -28,7 +28,7 @@ class MqttProducerConfig {
     @Bean
     @ServiceActivator(inputChannel = "mqttOutboundChannel")
     MessageHandler mqttOutbound() {
-        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler("consumer_" + R.nextInt(), mqttClientFactory);
+        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler("producer_" + R.nextInt(), mqttClientFactory);
         messageHandler.setAsync(true);
         messageHandler.setDefaultTopic(mqttConfigProperties.getTopic());
         return messageHandler;

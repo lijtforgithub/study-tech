@@ -1,5 +1,6 @@
 mqtt:
-  server-uri: tcp://localhost:1883
+#  server-uri: tcp://121.37.234.98:1883
+  server-uri: tcp://127.0.0.1:1883
   user-name: guest
   password: guest
-  topic: test/#
+  topic: $queue/xxoo
