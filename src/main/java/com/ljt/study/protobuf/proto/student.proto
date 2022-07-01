@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "com.ljt.study.protobuf.dto";
+option java_outer_classname = "StudentProto";
+
+import "course.proto";
+
+message student {
+
+  string name = 1;
+  int32  age = 2;
+  repeated course course = 3;
+
+}

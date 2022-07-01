@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+//package pck;
+
+option java_package = "com.ljt.study.protobuf.dto";
+option java_outer_classname = "CourseProto";
+
+message course {
+
+  string name = 1;
+  int32  score = 2;
+
+}
