@@ -2,7 +2,22 @@
 如果表有索引，增删改变慢。查询速度：1个或少量查询依然很快；并发大的时候会受到硬盘带宽影响速度。
 > CREATE TABLE IF NOT EXISTS newTabName LIKE tabName  
 > SUBSTRING_INDEX(GROUP_CONCAT(activity_price ORDER BY id DESC), ',', 1)
+
+```sql
+https://gitee.com/bearkang/mysql-optimization
+
+UPDATE mytable 
+    SET myfield = CASE id 
+        WHEN 1 THEN 'value1'
+        WHEN 2 THEN 'value2'
+        WHEN 3 THEN 'value3'
+    END
+WHERE id IN (1, 2, 3);
+```
 ## MYSQL
+#### 存储引擎
+- Innodb：frm是表定义文件，ibd是数据文件
+- Myisam：frm是表定义文件，myd是数据文件，myi是索引文件
 #### 基础层次
 1. 客户端：向数据库发送请求（采用数据库连接池，减少频繁的开关连接）
 2. 服务端
