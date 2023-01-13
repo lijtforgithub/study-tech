@@ -1,6 +1,6 @@
 package com.ljt.study.es;
 
-import com.ljt.study.es.doc.TestCreateDoc;
+import com.ljt.study.es.entity.TestCreateDoc;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

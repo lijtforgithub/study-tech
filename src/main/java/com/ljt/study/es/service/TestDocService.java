@@ -1,8 +1,8 @@
 package com.ljt.study.es.service;
 
 import com.alibaba.fastjson.JSON;
-import com.ljt.study.es.doc.TestDoc;
-import com.ljt.study.es.mapper.TestDocMapper;
+import com.ljt.study.es.entity.TestDoc;
+import com.ljt.study.es.dao.TestDocDao;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -33,12 +33,12 @@ public class TestDocService {
     public static final String PRICE = "price";
 
     @Autowired
-    private TestDocMapper testDocMapper;
+    private TestDocDao testDocDao;
     @Autowired
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     public void save(TestDoc doc) {
-        testDocMapper.save(doc);
+        testDocDao.save(doc);
     }
 
     public void saveList(List<TestDoc> docList) {
@@ -52,7 +52,7 @@ public class TestDocService {
     }
 
     public List<TestDoc> findAll() {
-        Page<TestDoc> page = (Page<TestDoc>) testDocMapper.findAll();
+        Page<TestDoc> page = (Page<TestDoc>) testDocDao.findAll();
         return page.getContent();
     }
 

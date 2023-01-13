@@ -1,4 +1,4 @@
-package com.ljt.study.es.doc;
+package com.ljt.study.es.entity;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

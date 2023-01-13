@@ -1,24 +1,24 @@
 package com.ljt.study.dingtalk.service.impl;
 
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.text.CharSequenceUtil;
 import com.alibaba.fastjson.JSON;
-import com.caes.tickettrack.dingtalk.dto.request.ChatCreateRequestDTO;
-import com.caes.tickettrack.dingtalk.dto.request.ChatSendRequestDTO;
-import com.caes.tickettrack.dingtalk.dto.request.ChatUpdateRequestDTO;
-import com.caes.tickettrack.dingtalk.dto.request.NoticeSendRequestDTO;
-import com.caes.tickettrack.dingtalk.dto.response.BaseResponseDTO;
-import com.caes.tickettrack.dingtalk.dto.response.ChatCreateResponseDTO;
-import com.caes.tickettrack.dingtalk.dto.response.ChatSendResponseDTO;
-import com.caes.tickettrack.dingtalk.dto.response.NoticeSendResponseDTO;
-import com.caes.tickettrack.dingtalk.enums.ApiEnum;
-import com.caes.tickettrack.dingtalk.exception.DingTalkException;
-import com.caes.tickettrack.dingtalk.msg.DingTalkMessage;
-import com.caes.tickettrack.dingtalk.properties.DingTalkProperties;
-import com.caes.tickettrack.dingtalk.service.DingTalkService;
+import com.ljt.study.dingtalk.dto.request.ChatCreateRequestDTO;
+import com.ljt.study.dingtalk.dto.request.ChatSendRequestDTO;
+import com.ljt.study.dingtalk.dto.request.ChatUpdateRequestDTO;
+import com.ljt.study.dingtalk.dto.request.NoticeSendRequestDTO;
+import com.ljt.study.dingtalk.dto.response.BaseResponseDTO;
+import com.ljt.study.dingtalk.dto.response.ChatCreateResponseDTO;
+import com.ljt.study.dingtalk.dto.response.ChatSendResponseDTO;
+import com.ljt.study.dingtalk.dto.response.NoticeSendResponseDTO;
+import com.ljt.study.dingtalk.enums.ApiEnum;
+import com.ljt.study.dingtalk.exception.DingTalkException;
+import com.ljt.study.dingtalk.msg.DingTalkMessage;
+import com.ljt.study.dingtalk.properties.DingTalkProperties;
+import com.ljt.study.dingtalk.service.DingTalkService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -53,11 +53,11 @@ public class DingTalkServiceImpl implements DingTalkService {
 
     @Override
     public boolean sendNotice(List<String> mobileList, DingTalkMessage message) {
-        Assert.notNull(message, () -> new DingTalkException("消息内容为空"));
-        Assert.notEmpty(mobileList, () -> new DingTalkException("手机号为空"));
+        Assert.notNull(message, "消息内容为空");
+        Assert.notEmpty(mobileList, "手机号为空");
 
         String accessToken = accessTokenService.getAccessToken();
-        if (CharSequenceUtil.isBlank(accessToken)) {
+        if (StringUtils.isBlank(accessToken)) {
             log.warn("accessToken为空");
             return false;
         }
@@ -90,29 +90,29 @@ public class DingTalkServiceImpl implements DingTalkService {
     }
 
     private List<String> getUserIds(List<String> mobileList, String accessToken) {
-        return mobileList.stream().filter(CharSequenceUtil::isNotBlank)
+        return mobileList.stream().filter(StringUtils::isNotBlank)
                 .map(mobile -> dingTalkUserService.getUserId(accessToken, mobile))
-                .filter(CharSequenceUtil::isNotBlank)
+                .filter(StringUtils::isNotBlank)
                 .distinct()
                 .collect(Collectors.toList());
     }
 
     @Override
     public String createChat(List<String> mobileList, String ownerMobile, String name) throws DingTalkException {
-        Assert.notBlank(name, () -> new DingTalkException("群名称为空"));
-        Assert.notEmpty(mobileList, () -> new DingTalkException("群成员手机号为空"));
+        Assert.notNull(name, "群名称为空");
+        Assert.notEmpty(mobileList, "群成员手机号为空");
         String accessToken = accessTokenService.getAccessToken();
-        Assert.notBlank(accessToken, () -> new DingTalkException("accessToken为空"));
+        Assert.notNull(accessToken, "accessToken为空");
 
-        if (CharSequenceUtil.isBlank(ownerMobile)) {
+        if (StringUtils.isBlank(ownerMobile)) {
             ownerMobile = mobileList.get(0);
         }
         mobileList.add(ownerMobile);
 
         final String owner = dingTalkUserService.getUserId(accessToken, ownerMobile);
         final List<String> userIds = getUserIds(mobileList, accessToken);
-        Assert.notEmpty(userIds, () -> new DingTalkException("有效用户ID为空"));
-        Assert.isTrue(userIds.size() <= 1000, () -> new DingTalkException("群成员人数上限为1000"));
+        Assert.notEmpty(userIds, "有效用户ID为空");
+        Assert.isTrue(userIds.size() <= 1000, "群成员人数上限为1000");
 
         final ChatCreateRequestDTO requestDTO = new ChatCreateRequestDTO()
                 .setName(name)
@@ -147,10 +147,10 @@ public class DingTalkServiceImpl implements DingTalkService {
 
     @Override
     public void addCharUser(String chatId, List<String> mobileList) throws DingTalkException {
-        Assert.notBlank(chatId, () -> new DingTalkException("群会话ID为空"));
-        Assert.notEmpty(mobileList, () -> new DingTalkException("群成员手机号为空"));
+        Assert.notNull(chatId, "群会话ID为空");
+        Assert.notEmpty(mobileList, "群成员手机号为空");
         String accessToken = accessTokenService.getAccessToken();
-        Assert.notBlank(accessToken, () -> new DingTalkException("accessToken为空"));
+        Assert.notNull(accessToken, "accessToken为空");
 
         final List<String> userIds = getUserIds(mobileList, accessToken);
         final int count = userIds.size() / CHAT_SIZE + 1;
@@ -194,10 +194,10 @@ public class DingTalkServiceImpl implements DingTalkService {
 
     @Override
     public String sendChatMsg(String chatId, DingTalkMessage message) {
-        Assert.notBlank(chatId, () -> new DingTalkException("会话ID为空"));
-        Assert.notNull(message, () -> new DingTalkException("消息内容为空"));
+        Assert.notNull(chatId, "会话ID为空");
+        Assert.notNull(message, "消息内容为空");
         String accessToken = accessTokenService.getAccessToken();
-        Assert.notBlank(accessToken, () -> new DingTalkException("accessToken为空"));
+        Assert.notNull(accessToken, "accessToken为空");
 
         final ChatSendRequestDTO requestDTO = new ChatSendRequestDTO().setChatid(chatId).setMsg(message);
 
@@ -220,7 +220,7 @@ public class DingTalkServiceImpl implements DingTalkService {
     @Override
     public void refreshUser() {
         String accessToken = accessTokenService.getAccessToken();
-        if (CharSequenceUtil.isNotBlank(accessToken)) {
+        if (StringUtils.isNotBlank(accessToken)) {
             dingTalkUserService.refreshUser(accessToken);
         }
     }

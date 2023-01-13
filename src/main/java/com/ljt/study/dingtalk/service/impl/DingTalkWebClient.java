@@ -1,12 +1,17 @@
 package com.ljt.study.dingtalk.service.impl;
 
-import com.caes.tickettrack.dingtalk.properties.DingTalkProperties;
+import com.ljt.study.dingtalk.properties.DingTalkProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

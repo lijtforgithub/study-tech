@@ -1,6 +1,6 @@
 package com.ljt.study.dingtalk.dto.request;
 
-import com.caes.tickettrack.dingtalk.msg.DingTalkMessage;
+import com.ljt.study.dingtalk.msg.DingTalkMessage;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

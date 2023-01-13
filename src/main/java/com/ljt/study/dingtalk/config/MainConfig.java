@@ -1,8 +1,8 @@
 package com.ljt.study.dingtalk.config;
 
-import com.caes.tickettrack.dingtalk.properties.DingTalkProperties;
-import com.caes.tickettrack.dingtalk.service.DingTalkService;
-import com.caes.tickettrack.dingtalk.service.impl.DingTalkWebClient;
+import com.ljt.study.dingtalk.properties.DingTalkProperties;
+import com.ljt.study.dingtalk.service.DingTalkService;
+import com.ljt.study.dingtalk.service.impl.DingTalkWebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

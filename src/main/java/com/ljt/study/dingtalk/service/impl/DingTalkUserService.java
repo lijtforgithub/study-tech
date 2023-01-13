@@ -1,20 +1,21 @@
 package com.ljt.study.dingtalk.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import com.alibaba.fastjson.JSON;
-import com.caes.tickettrack.dingtalk.dto.request.DepartUserRequestDTO;
-import com.caes.tickettrack.dingtalk.dto.request.UserByMobileRequestDTO;
-import com.caes.tickettrack.dingtalk.dto.response.DepartListResponseDTO;
-import com.caes.tickettrack.dingtalk.dto.response.DepartUserResponseDTO;
-import com.caes.tickettrack.dingtalk.dto.response.UserByMobileResponseDTO;
-import com.caes.tickettrack.dingtalk.enums.ApiEnum;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.ljt.study.dingtalk.dto.request.DepartUserRequestDTO;
+import com.ljt.study.dingtalk.dto.request.UserByMobileRequestDTO;
+import com.ljt.study.dingtalk.dto.response.DepartListResponseDTO;
+import com.ljt.study.dingtalk.dto.response.DepartUserResponseDTO;
+import com.ljt.study.dingtalk.dto.response.UserByMobileResponseDTO;
+import com.ljt.study.dingtalk.enums.ApiEnum;
+import jodd.util.CharSequenceUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Objects;
 
@@ -52,12 +53,12 @@ class DingTalkUserService {
         final String errorMsg = "根据手机号【" + mobile + "】获取userId失败";
 
         try {
-            return USER_CACHE.get(CharSequenceUtil.trim(mobile), () -> {
+            return USER_CACHE.get(StringUtils.trim(mobile), () -> {
                 log.info(ApiEnum.USER_BY_MOBILE.getDesc() + mobile);
 
                 final UserByMobileResponseDTO dto = dingTalkWebClient.getWebClient().post()
                         .uri(ApiEnum.USER_BY_MOBILE.getPath(), accessToken)
-                        .bodyValue(new UserByMobileRequestDTO().setMobile(CharSequenceUtil.trim(mobile)))
+                        .bodyValue(new UserByMobileRequestDTO().setMobile(StringUtils.trim(mobile)))
                         .retrieve()
                         .bodyToMono(UserByMobileResponseDTO.class)
                         .doOnError(err -> log.error(ApiEnum.USER_BY_MOBILE.getDesc(), err))
@@ -120,7 +121,7 @@ class DingTalkUserService {
                     if (dto.isSuccess()) {
                         if (Objects.nonNull(dto.getResult())) {
                             DepartUserResponseDTO.Result result = dto.getResult();
-                            if (CollUtil.isNotEmpty(result.getList())) {
+                            if (!CollectionUtils.isEmpty(result.getList())) {
                                 result.getList().forEach(user -> USER_CACHE.put(user.getMobile(), user.getUserid()));
                             }
                             if (Boolean.TRUE.equals(result.getHasMore())) {

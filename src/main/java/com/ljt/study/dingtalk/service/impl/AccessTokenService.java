@@ -1,11 +1,11 @@
 package com.ljt.study.dingtalk.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.caes.tickettrack.dingtalk.dto.response.AccessTokenResponseDTO;
-import com.caes.tickettrack.dingtalk.enums.ApiEnum;
-import com.caes.tickettrack.dingtalk.properties.DingTalkProperties;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.ljt.study.dingtalk.dto.response.AccessTokenResponseDTO;
+import com.ljt.study.dingtalk.enums.ApiEnum;
+import com.ljt.study.dingtalk.properties.DingTalkProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

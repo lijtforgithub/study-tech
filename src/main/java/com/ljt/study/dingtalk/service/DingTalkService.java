@@ -1,7 +1,7 @@
 package com.ljt.study.dingtalk.service;
 
-import com.caes.tickettrack.dingtalk.exception.DingTalkException;
-import com.caes.tickettrack.dingtalk.msg.DingTalkMessage;
+import com.ljt.study.dingtalk.exception.DingTalkException;
+import com.ljt.study.dingtalk.msg.DingTalkMessage;
 
 import java.util.List;
 

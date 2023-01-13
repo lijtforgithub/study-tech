@@ -1,27 +1,23 @@
 - 表很大，性能下降  
 如果表有索引，增删改变慢。查询速度：1个或少量查询依然很快；并发大的时候会受到硬盘带宽影响速度。
-> CREATE TABLE IF NOT EXISTS newTabName LIKE tabName  
-> SUBSTRING_INDEX(GROUP_CONCAT(activity_price ORDER BY id DESC), ',', 1)
-
+- gh-ost
 ```sql
 https://gitee.com/bearkang/mysql-optimization
-
-UPDATE mytable 
-    SET myfield = CASE id 
-        WHEN 1 THEN 'value1'
-        WHEN 2 THEN 'value2'
-        WHEN 3 THEN 'value3'
-    END
-WHERE id IN (1, 2, 3);
 ```
 ## MYSQL
+#### 优化
+- 如果你的事务中需要锁多个行，要把最可能造成锁冲突、最可能影响并发度的锁的申请时机尽量往后放。
+- 可以考虑通过将一行改成逻辑上的多行来减少锁冲突。比如 10 个记录，这样每次冲突概率变成原来的 1/10，可以减少锁等待个数，也就减少了死锁检测的 CPU 消耗。
+- change buffer 只限于用在普通索引的场景下，而不适用于唯一索引。写多读少，效果最好。写入之后马上会做查询，即使满足了条件，将更新先记录在 change buffer，但之后由于马上要访问这个数据页，会立即触发 merge 过程。change buffer 反而起到了副作用。
+- 间隙锁的引入，可能会导致同样的语句锁住更大的范围，这其实是影响了并发度的。隔离级别读提交加 binlog_format=row 的组合。业务不需要可重复读的保证。
+- 如果你的需求并不需要对结果进行排序，那你可以在 SQL 语句末尾增加 order by null。```select id%10 as m, count(*) as c from t1 group by m order by null;```
 #### 存储引擎
 - Innodb：frm是表定义文件，ibd是数据文件
 - Myisam：frm是表定义文件，myd是数据文件，myi是索引文件
 #### 基础层次
 1. 客户端：向数据库发送请求（采用数据库连接池，减少频繁的开关连接）
 2. 服务端
-    1. 连接器: 控制用户的连接
+    1. 连接器: 控制用户的连接 权限验证
     2. 分析器: 词法分析/语法分析（AST 抽象语法树）
     3. 优化器: 优化SQL语句，规定执行流程（可以查看SQL语句的执行计划，可以采用对应的优化点，来加快查询）
     4. 执行器: SQL语句的实际执行组件
@@ -32,6 +28,41 @@ WHERE id IN (1, 2, 3);
 - 优化
     * RBO 基于规则优化
     * CBO 基于成本优化
+#### 常用SQL
+```sql
+-- 在第一条select执行完后，才得到事务的一致性快照（所有select 都是以第一条为时间点）
+START TRANSACTION;
+-- 立即得到事务的一致性快照
+START TRANSACTION WITH consistent snapshot;
+CREATE TABLE IF NOT EXISTS newTabName LIKE tabName
+SUBSTRING_INDEX(GROUP_CONCAT(activity_price ORDER BY id DESC), ',', 1)
+
+-- 批量更新
+UPDATE mytable 
+    SET myfield = CASE id 
+        WHEN 1 THEN 'value1'
+        WHEN 2 THEN 'value2'
+        WHEN 3 THEN 'value3'
+    END
+WHERE id IN (1, 2, 3);
+```
+
+```sql
+-- 磁盘IO
+SHOW VARIABLES LIKE '%innodb_io_capacity%';
+-- 是否刷邻页
+SHOW VARIABLES LIKE '%innodb_flush_neighbors%';
+-- 重新统计索引信息
+ANALYZE TABLE test; 
+-- 重建表
+ALTER TABLE test ENGINE = INNODB;
+-- 大于60s的长事务
+SELECT * FROM information_schema.innodb_trx WHERE TIME_TO_SEC(timediff(now(), trx_started)) > 60;
+-- 死锁检测
+SHOW VARIABLES LIKE 'innodb_deadlock_detect';
+-- 死锁超时时间
+SHOW VARIABLES LIKE 'innodb_lock_wait_timeout';
+```
 #### 窗口函数
 ![](img/窗口函数.png)
 > 函数 OVER ([PARTITION BY 字段名 ORDER BY 字段名 ASC|DESC])  
