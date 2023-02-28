@@ -14,6 +14,11 @@ cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
 ls -l | grep "^-" | wc -l
 查找包含指定key的文件
 grep -r key ./
+同步时间
+yum install ntpdate
+ntpdate ntp.aliyum.com
+clock -w
+hwclock -s
 
 一、防火墙的开启、关闭、禁用命令
 

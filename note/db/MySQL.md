@@ -191,3 +191,55 @@ SELECT NTILE(3) OVER w AS nt, id, category, name, price
 FROM goods
 WINDOW w AS (PARTITION BY category_id ORDER BY price);
 ```
+## 安装
+```shell
+# 上传gz包到/opt
+cd /opt/
+tar -xvf mysql-5.7.40-linux-glibc2.12-x86_64.tar.gz
+ln -s mysql-5.7.40-linux-glibc2.12-x86_64 mysql
+cd mysql
+
+groupadd mysql
+useradd -r -g mysql -s /bin/false mysql
+mkdir data
+chown -R root:root .
+
+bin/mysqld --initialize --user=mysql --basedir=/opt/mysql --datadir=/opt/mysql/data
+bin/mysql_ssl_rsa_setup --datadir=/opt/mysql/data
+
+cd /var/log/
+mkdir mysql
+chown -R mysql:mysql mysql/
+
+# 编辑配配置文件
+vi /etc/my.cnf
+basedir=/opt/mysql
+datadir=/opt/mysql/data
+socket=/var/log/mysql/mysql.sock
+log-error=/var/log/mysql/error.log
+pid-file=/var/log/mysql/mysql.pid
+
+ln -s /var/log/mysql/mysql.sock /tmp/mysql.sock
+
+# 启动服务
+bin/mysqld_safe --user=mysql &
+
+bin/mysql --user=root --password=临时密码 日志里有
+# 修改密码和开房权限
+set password=password('admin');
+grant all privileges on *.* to root@'%' identified by 'admin';
+flush privileges;
+
+# 开放防火墙端口
+firewall-cmd --zone=public --add-port=3306/tcp --permanent
+firewall-cmd --reload
+firewall-cmd --list-ports
+
+# 关闭
+bin/mysqladmin --user=root --password shutdown
+
+# 开机启动
+cp /opt/mysql/support-files/mysql.server /etc/init.d/mysql
+chmod +x /etc/init.d/mysql
+chkconfig --add mysql
+```
