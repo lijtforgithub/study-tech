@@ -126,6 +126,7 @@ mysql -uroot -h127.0.0.1 -p
 tar xf  harbor-offline-installer-v1.10.10.tgz
 修改 harbor.yml (域名 端口 密码 数据路径)
 mkdier -p ../harbor-data/data ../harbor-data/log
+# sudo yum -y install epel-release
 yum install -y docker-compose
 sh install.sh
 

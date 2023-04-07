@@ -1,8 +1,8 @@
 package com.ljt.study.canal;
 
+import cn.hutool.db.meta.JdbcType;
 import com.alibaba.otter.canal.client.CanalConnector;
 import com.alibaba.otter.canal.client.CanalConnectors;
-import com.alibaba.otter.canal.common.utils.AddressUtils;
 import com.alibaba.otter.canal.protocol.CanalEntry.*;
 import com.alibaba.otter.canal.protocol.Message;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +22,11 @@ class CanalClient {
     private static volatile boolean run = true;
 
     public static void main(String[] args) throws InterruptedException {
-        InetSocketAddress address = new InetSocketAddress(AddressUtils.getHostIp(), 11111);
-        CanalConnector connector = CanalConnectors.newSingleConnector(address, "study-canal", "canal", "canal");
+        InetSocketAddress address = new InetSocketAddress("192.168.100.100", 11111);
+        CanalConnector connector = CanalConnectors.newSingleConnector(address, "test", "canal", "canal");
         connector.connect();
-        connector.subscribe("study-canal\\.test1,study-canal\\.test2");
+        // "study-canal\\.test1,study-canal\\.test2"
+        connector.subscribe();
 
         try {
             int batchSize = 1000;
@@ -57,11 +58,11 @@ class CanalClient {
                 continue;
             }
 
-            RowChange rowChange = null;
+            RowChange rowChange;
             try {
                 rowChange = RowChange.parseFrom(entry.getStoreValue());
             } catch (Exception e) {
-                log.error("转换数据异常, data:" + entry.toString(), e);
+                log.error("转换数据异常, data:" + entry, e);
                 return;
             }
 
@@ -86,7 +87,7 @@ class CanalClient {
 
     private static void printColumn(List<Column> columns) {
         for (Column column : columns) {
-            System.out.println(column.getName() + " : " + column.getValue() + "    updated：" + column.getUpdated());
+            System.out.println(String.format("%s[%s => %s]%s => %s", column.getName(), column.getMysqlType(), JdbcType.valueOf(column.getSqlType()), column.getValue(), column.getUpdated()));
         }
     }
 
