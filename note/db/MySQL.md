@@ -59,6 +59,20 @@ WHERE id IN (1, 2, 3);
 ```
 
 ```sql
+-- 慢查询日志 设置之后 断开连接重新连
+SHOW VARIABLES LIKE 'log_output';
+SET GLOBAL log_output = 'TABLE';
+    
+SHOW VARIABLES LIKE 'slow_query_log';
+SET GLOBAL slow_query_log = 'ON';
+
+SHOW GLOBAL VARIABLES LIKE 'long_query_time';
+SET GLOBAL long_query_time = 0;
+
+SELECT l.start_time, l.user_host, l.query_time, l.lock_time, CONVERT(l.sql_text USING utf8) as `sql`, l.thread_id
+FROM mysql.slow_log l
+-- WHERE l.thread_id IN (121, 126)
+ORDER BY start_time DESC LIMIT 50;
 -- 磁盘IO
 SHOW VARIABLES LIKE '%innodb_io_capacity%';
 -- 是否刷邻页
