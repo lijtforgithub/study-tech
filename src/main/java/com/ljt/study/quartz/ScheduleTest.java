@@ -41,7 +41,7 @@ class ScheduleTest {
     @SneakyThrows
     @Test
     void testCron() {
-        CronScheduleBuilder builder = CronScheduleBuilder.cronSchedule("1 1 1 30 * ?");
+        CronScheduleBuilder builder = CronScheduleBuilder.cronSchedule("0 0 0 * 4/2 ? ");
         Trigger trigger = TriggerBuilder.newTrigger().withSchedule(builder).build();
 
         print(trigger.getFireTimeAfter(null));
