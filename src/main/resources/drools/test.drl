@@ -3,9 +3,11 @@ package rules.test
 import com.ljt.study.drools.entity.Test1
 
 rule "test-1"
+no-loop true
 when
     $t:Test1(num < 10)
 then
     $t.setNum(0);
+    update($t)
     System.out.println($t);
 end

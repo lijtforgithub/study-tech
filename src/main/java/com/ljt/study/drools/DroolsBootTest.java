@@ -14,6 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author LiJingTang
@@ -30,14 +31,14 @@ class DroolsBootTest {
 
 
     @Test
-    void test1() {
+    void test1() throws InterruptedException {
         KieSession kieSession = kieBase.newKieSession();
         Test1 t1 = new Test1();
         t1.setNum(2);
         kieSession.insert(t1);
         kieSession.fireAllRules();
-        kieSession.dispose();
-        System.out.println(t1);
+//        kieSession.dispose();
+        TimeUnit.SECONDS.sleep(10);
     }
 
     @Test
