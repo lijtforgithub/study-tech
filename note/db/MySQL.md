@@ -56,6 +56,11 @@ UPDATE mytable
         WHEN 3 THEN 'value3'
     END
 WHERE id IN (1, 2, 3);
+
+-- 统计表字段
+SELECT a.COLUMN_NAME 字段名,  a.COLUMN_TYPE 类型, a.COLUMN_COMMENT 说明
+FROM information_schema.COLUMNS a
+WHERE a.TABLE_SCHEMA = 'base' AND a.TABLE_NAME = 'bus_project';
 ```
 
 ```sql
