@@ -61,6 +61,21 @@ WHERE id IN (1, 2, 3);
 SELECT a.COLUMN_NAME 字段名,  a.COLUMN_TYPE 类型, a.COLUMN_COMMENT 说明
 FROM information_schema.COLUMNS a
 WHERE a.TABLE_SCHEMA = 'base' AND a.TABLE_NAME = 'bus_project';
+
+
+SELECT
+    t1.customer_mobile, t2.*
+FROM
+    ques_questionnaire_2023 t1
+        JOIN (
+        SELECT
+            *
+        FROM
+            sp_send_record_2023
+        WHERE
+                ( questionnaire_uuid, create_time ) IN ( SELECT questionnaire_uuid, MAX( create_time ) FROM sp_send_record_2023 GROUP BY questionnaire_uuid )) t2 ON t1.uuid = t2.questionnaire_uuid
+WHERE
+    t1.customer_mobile LIKE '00%'
 ```
 
 ```sql
@@ -244,7 +259,7 @@ ln -s /var/log/mysql/mysql.sock /tmp/mysql.sock
 bin/mysqld_safe --user=mysql &
 
 bin/mysql --user=root --password=临时密码 日志里有
-# 修改密码和开房权限
+# 修改密码和开放权限
 set password=password('admin');
 grant all privileges on *.* to root@'%' identified by 'admin';
 flush privileges;
