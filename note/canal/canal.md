@@ -1,4 +1,5 @@
 #### 准备
+https://github.com/alibaba/canal/wiki/AdminGuide
 对于自建 MySQL , 需要先开启 Binlog 写入功能，配置 binlog-format 为 ROW 模式，my.cnf 中配置如下
 
 ```shell
@@ -22,13 +23,16 @@ FLUSH PRIVILEGES;
 ```
 
 show grants for 'canal';  
-show master status ;  
-show slave status ;  
+show master status;  
+show slave status;
+
+SHOW BINARY LOGS;  
+PURGE BINARY LOGS TO 'mysql-bin.009000';
 
 #### 配置
 
 - canal.serverMode 启动后在admin修改不可以
-- canal.serverMode = rabbitMQ（配置以服务的canal.properties有效）
+- canal.serverMode = rabbitMQ（配置以server的canal.properties有效）
 
 - canal.instance.master.timestamp
 ```

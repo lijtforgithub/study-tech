@@ -11,7 +11,7 @@ public class Constant {
 
     public static final String LOCAL_HOST = "localhost";
 
-    public static final String DESKTOP = "C:/Users/Administrator/Desktop/";
+    public static final String DESKTOP = "/Users/lijingtang/Downloads/";
 
     public static final String XLSX = ".xlsx";
 
