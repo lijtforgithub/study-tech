@@ -22,6 +22,7 @@ https://gitee.com/bearkang/mysql-optimization
 - 如果你的需求并不需要对结果进行排序，那你可以在 SQL 语句末尾增加 order by null。```select id%10 as m, count(*) as c from t1 group by m order by null;```
 - 更新数据都是先读后写的，而这个读，只能读当前的值，称为“当前读”（current read）。
 - redo log 主要节省的是随机写磁盘的 IO 消耗（转成顺序写），而 change buffer 主要节省的则是随机读磁盘的 IO 消耗。
+- 在数据库设计中，我们非常强调定长存储，因为定长存储的性能更好。
 #### 存储引擎
 - Innodb：frm是表定义文件，ibd是数据文件
 - Myisam：frm是表定义文件，myd是数据文件，myi是索引文件
@@ -107,6 +108,15 @@ SELECT * FROM information_schema.innodb_trx WHERE TIME_TO_SEC(timediff(now(), tr
 SHOW VARIABLES LIKE 'innodb_deadlock_detect';
 -- 死锁超时时间
 SHOW VARIABLES LIKE 'innodb_lock_wait_timeout';
+```
+#### 全文索引
+```sql
+ALTER TABLE 表名 ADD FULLTEXT INDEX 索引名称 (字段1,字段2,字段3) WITH PARSER ngram;
+
+show VARIABLES like 'ngram_token_size';
+my.ini文件下的 [mysqld] 下面加上 ngram_token_size = 2
+
+SELECT * FROM 表名 WHERE MATCH(列名1,列名2) AGAINST(检索内容1 检索内容2);
 ```
 #### 窗口函数
 ![](img/窗口函数.png)
