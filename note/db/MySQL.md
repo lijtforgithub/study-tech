@@ -62,7 +62,13 @@ WHERE id IN (1, 2, 3);
 SELECT a.COLUMN_NAME 字段名,  a.COLUMN_TYPE 类型, a.COLUMN_COMMENT 说明
 FROM information_schema.COLUMNS a
 WHERE a.TABLE_SCHEMA = 'base' AND a.TABLE_NAME = 'bus_project';
-
+-- 查询有指定字段的表
+SELECT
+    TABLE_SCHEMA AS 'Database',
+        TABLE_NAME AS 'Table'
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE
+    COLUMN_NAME = 'area_company_id';
 
 SELECT
     t1.customer_mobile, t2.*
