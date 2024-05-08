@@ -51,14 +51,14 @@ public class DefaultPushConsumerTest {
 
         consumer.registerMessageListener(DefaultConsumerTest.concurrentMessageListener);
 
-        consumer.setConsumeThreadMax(2);
-        consumer.setConsumeThreadMin(1);
+        consumer.setConsumeThreadMax(3);
+        consumer.setConsumeThreadMin(3);
 
         // 默认15分钟
         consumer.setConsumeTimeout(5);
-
-        consumer.setMaxReconsumeTimes(5);
-        consumer.setConsumeMessageBatchMaxSize(3);
+//        consumer.setMaxReconsumeTimes(5);
+        consumer.setPullBatchSize(100);
+        consumer.setConsumeMessageBatchMaxSize(5);
         consumer.setSuspendCurrentQueueTimeMillis(TimeUnit.SECONDS.toMillis(5));
 
         /**

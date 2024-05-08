@@ -71,7 +71,7 @@ class DefaultProducerTest {
     @Test
     @SneakyThrows
     void sendMulti() {
-        List<Message> msgList = IntStream.rangeClosed(1, 3).mapToObj(i -> new Message(CLIENT_TOPIC,
+        List<Message> msgList = IntStream.rangeClosed(1, 200).mapToObj(i -> new Message(CLIENT_TOPIC,
                 String.format("第%s条RocketMQ消息", i).getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
         SendResult result = producer.send(msgList);
         log.info("同步发送{}条消息：{}", msgList.size(), result);

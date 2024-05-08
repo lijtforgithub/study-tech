@@ -51,7 +51,7 @@ public class DefaultConsumerTest {
     }
 
     static MessageListenerConcurrently concurrentMessageListener = (msgList, context) -> {
-        log.info("concurrent ... ");
+        log.info("concurrent ... {}", msgList.size());
         msgList.forEach(msg -> log.info("{} < {}", new String(msg.getBody()), context.getMessageQueue()));
 
         /**

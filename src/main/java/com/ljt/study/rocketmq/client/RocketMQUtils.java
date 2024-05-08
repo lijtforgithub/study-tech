@@ -9,7 +9,7 @@ class RocketMQUtils {
     private RocketMQUtils() {}
 
 //    static final String NAME_SERVER = LOCAL_HOST + ":9876";
-    static final String NAME_SERVER = "192.168.3.101:9876;192.168.3.102:9876";
+    static final String NAME_SERVER = "127.0.0.1:9876";
 
     static final String CLIENT_TOPIC = "test_client_topic";
     static final String CLIENT_GROUP = "test_client_group";
