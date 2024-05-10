@@ -1,5 +1,7 @@
 #### 准备
+https://github.com/alibaba/canal/wiki/%E7%AE%80%E4%BB%8B
 https://github.com/alibaba/canal/wiki/AdminGuide
+
 对于自建 MySQL , 需要先开启 Binlog 写入功能，配置 binlog-format 为 ROW 模式，my.cnf 中配置如下
 
 ```shell
@@ -49,3 +51,14 @@ rabbitmq.deliveryMode = 2
 # mq config
 canal.mq.topic=canal.queue.kangjian
 ```
+
+#### 测试总结
+- h2.mv.db 是保存tsdb相关配置
+- canal.instance.global.spring.xml = classpath:spring/file-instance.xml 位点数据保存在meta.dat
+- 单机模式；多个client（微服务）连接同一个instance；每个client都可以建立连接并消费binlog
+- 集群模式；多个client（微服务）连接同一个instance；只有一个client可以建立连接
+- 如果canal.auto.scan=false 在admin界面上新增instance启动不成功；不会在server的conf下创建instance目录
+- canal.instance.global.mode = spring  
+
+  canal配置方式有两种： ManagerCanalInstanceGenerator： 基于manager管理的配置方式，目前alibaba内部配置使用这种方式。大家可以实现CanalConfigClient，连接各自的管理系统，即可完成接入。
+  SpringCanalInstanceGenerator：基于本地spring xml的配置方式，目前开源版本已经自带该功能所有代码，建议使用

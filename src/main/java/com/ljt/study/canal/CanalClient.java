@@ -22,8 +22,8 @@ class CanalClient {
     private static volatile boolean run = true;
 
     public static void main(String[] args) throws InterruptedException {
-        InetSocketAddress address = new InetSocketAddress("127.0.0.1", 11111);
-        CanalConnector connector = CanalConnectors.newSingleConnector(address, "test01", "root", "admin");
+        CanalConnector connector = CanalConnectors.newSingleConnector(new InetSocketAddress("127.0.0.1", 11111), "standalone-zk", "root", "admin");
+//        CanalConnector connector = CanalConnectors.newClusterConnector("127.0.0.1:2181", "cluster-zk", "root", "admin");
         connector.connect();
         // "study-canal\\.test1,study-canal\\.test2"
         connector.subscribe();

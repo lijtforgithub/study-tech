@@ -1,0 +1,24 @@
+# https://github.com/alibaba/canal/wiki/Canal-Admin-QuickStart
+
+server:
+  port: 8089
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+spring.datasource:
+  address: 127.0.0.1:3306
+  database: canal_manager
+  username: root
+  password: admin
+  driver-class-name: com.mysql.jdbc.Driver
+  url: jdbc:mysql://${spring.datasource.address}/${spring.datasource.database}?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+  hikari:
+    maximum-pool-size: 30
+    minimum-idle: 1
+
+# 和canal.properties里的canal.admin.user和canal.admin.passwd做对应
+canal:
+  adminUser: admin
+  adminPasswd: admin
