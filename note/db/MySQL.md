@@ -2,6 +2,7 @@
 如果表有索引，增删改变慢。查询速度：1个或少量查询依然很快；并发大的时候会受到硬盘带宽影响速度。
 - gh-ost
 ```sql
+mysql -h 127.0.0.1 -P 3306 -u root
 https://gitee.com/bearkang/mysql-optimization
 ```
 ## MYSQL
