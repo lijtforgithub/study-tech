@@ -5,7 +5,19 @@
 mysql -h 127.0.0.1 -P 3306 -u root
 https://gitee.com/bearkang/mysql-optimization
 ```
+- MySQL备份
+
+```sh
+# mysqlback.sh
+/usr/local/mysql/bin/mysqldump -h127.0.0.1 -uadmin -pBAFfsGD5FNv134A --port=3306 --all-databases -F | gzip >> /run/media/root/db-new/backup/$(date +%Y%m%d_%H%M%S).sql.gz
+
+10 01 * * * source /run/media/root/db-new/backup/mysqlback.sh
+```
+
+
+
 ## MYSQL
+
 #### 优化
 - 覆盖索引
 - 最左前缀原则
@@ -24,6 +36,7 @@ https://gitee.com/bearkang/mysql-optimization
 - 更新数据都是先读后写的，而这个读，只能读当前的值，称为“当前读”（current read）。
 - redo log 主要节省的是随机写磁盘的 IO 消耗（转成顺序写），而 change buffer 主要节省的则是随机读磁盘的 IO 消耗。
 - 在数据库设计中，我们非常强调定长存储，因为定长存储的性能更好。
+- select * from table where coloum = '' for update (如果coloum列是唯一索引，查到数据是行锁，查不到是间隙锁；如果coloum列是普通索引，查不查到数据都是间隙锁；如果coloum列没有索引，是表锁)
 #### 存储引擎
 - Innodb：frm是表定义文件，ibd是数据文件
 - Myisam：frm是表定义文件，myd是数据文件，myi是索引文件
