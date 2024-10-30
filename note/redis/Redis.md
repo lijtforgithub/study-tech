@@ -328,6 +328,8 @@ zscan KEY cursor [match pattern] [count count] | 迭代有序集合中的元素�
 
 ## 数据持久化
 
+##### 新版本都是混合模式
+
 #### RDB
 
 将当前数据生成快照保存到硬盘，默认方式。RDB文件是经过压缩的二进制文件。压缩不是针对整个文件，而是对数据库中的字符串达到一定长度（20字节）时才会进行。
@@ -341,26 +343,26 @@ zscan KEY cursor [match pattern] [count count] | 迭代有序集合中的元素�
 
    1. serverCron是Redis服务器的周期性操作函数，默认每隔100ms执行一次；该函数对服务器的状态进行维护。
    2. dirty计数器是Redis服务器维护的一个状态，记录了上一次bgsave/save命令后，服务器进行了多少次增删改；而当bgsave/save执行完成后，归0。  
-      set mykey hello +1 | sadd myset v1 v2 v3 +3
+      set mykey hello +1次 | sadd myset v1 v2 v3 +3次
    3. lastsave时间戳也是Redis服务器维持的一个状态，记录的是上一次成功执行bgsave/save的时间。
 
-   每隔100ms执行serverCron函数，遍历save m n配置的条件，只要有一个条件满足，就进行bgsave。对于每一个条件要满足 当前时间-lastsave > m 和 dirty >= n
+   每隔100ms执行serverCron函数，遍历save m n配置的条件，只要有一个条件满足，就进行bgsave。对于每一个条件要满足 当前时间-lastsave > m 且 dirty >= n
 
-> 主从复制场景，从节点执行全量复制操作，则主节点会执行bgsave，并将rdb文件发送给从节点。执行shutdown命令会自动执行rdb持久化。
+> 主从复制场景，从节点执行全量复制操作，则主节点会执行bgsave，并将rdb文件发送给从节点。执行shutdown命令会自动执行RDB持久化。
 
 - bgsave 执行流程
 
 ![](/Users/lijingtang/workspace/study/study-tech/note/redis/img/bgsave.png)
 
 1. Redis父进程首先判断当前是否在执行save/bgsave/bgrewriteaof的子进程，如果在执行则bgsave命令直接返回。  
-   bgsave/bgrewriteaof子进程不能同时执行，主要是性能方面考虑：两个并发的子进程同时执行大量的磁盘写操作，可能引起严重的性能问题。
+   bgsave/bgrewriteaof子进程不能同时执行，主要是性能方面考虑，两个并发的子进程同时执行大量的磁盘写操作，可能引起严重的性能问题。
 2. 父进程执行fork操作创建子进程，这个过程中父进程是阻塞的，Redis不能执行来自客户端的任何命令。
 3. 父进程fork后，bgsave命令返回Background saving started信息并不再阻塞父进程，并可以相应其他命令。
 4. 子进程创建rdb文件，根据父进程内存快照生成临时快照文件，完成后对原有文件进行原子替换。
 5. 子进程发送信号给父进程表示完成，父进程更新统计信息。
 
 - 启动时加载
-  RDB文件的载入工作是在服务器启动时自动执行的，没有专门的命令。AOF开启时，会优先载入AOF文件来恢复数据；AOF关闭时才会在服务器启动时检测RDB文件并自动载入。  
+  RDB文件的载入工作是在服务器启动时自动执行的，没有专门的命令。 
   服务器载入期间处于阻塞状态，直到载入完成为止。如果文件损坏，日志中打印错误，Redis启动失败。
 
 #### AOF
@@ -425,13 +427,13 @@ AOF记录每条写命令，因此不需要触发；执行流程如下
 
 RDB方式的优点是文件紧凑，体积小，网络传输快，适合全量复制；恢复速度比AOF快很多。对性能的影响相对较小。缺点是数据快照的持久化方式做不到实时，兼容性差。不支持拉链，只有一个dump.rdb。  
 AOF方式的优点是在于支持秒级持久化、兼容性好。缺点是文件大、恢复速度慢，对性能影响大。  
-在统一Redis实例中同时开启AOF和RDB方式的数据持久化方案也是可以的。重启时AOF文件将用于重建原始数据，因为AOF方式能最大限度保证数据的完整性。
+在同一Redis实例中同时开启AOF和RDB方式的数据持久化方案也是可以的。重启时AOF文件将用于重建原始数据，因为AOF方式能最大限度保证数据的完整性。
 
 ## HA部署
 
 单机问题：单点故障、容量有限、连接压力
 
-#### 复制
+#### 主从复制
 
 数据的复制是单向的，只能从主节点到从节点。从节点断开复制后，不会删除已有的数据，只是不再接受主节点新的数据变化。断开复制后，从节点又变回为主节点。
 
@@ -442,7 +444,8 @@ AOF方式的优点是在于支持秒级持久化、兼容性好。缺点是文�
 - 在从节点中选择新的主节点原则是：首先过滤掉不健康的从节点；然后选择优先级最高的从节点（由slave-priority指定）；如果优先级无法区分，则选择复制偏移量最大的从节点；如果仍无法区分，则选择runid最小的从节点。
 
 ```
-sentinel monitor {masterName} {masterIp} {masterPort} {quorum}：sentinel monitor是哨兵最核心的配置
+sentinel monitor {masterName} {masterIp} {masterPort} {quorum}：
+    sentinel monitor是哨兵最核心的配置
     masterName指定了主节点名称，masterIp和masterPort指定了主节点地址，
     quorum是判断主节点客观下线的哨兵数量阈值：当判定主节点下线的哨兵数量达到quorum时，对主节点进行客观下线。建议取值为哨兵数量的一半加1
 info sentinel：获取监控的所有主节点的基本信息
