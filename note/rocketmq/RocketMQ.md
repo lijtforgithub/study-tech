@@ -1,7 +1,8 @@
 ## 安装
 1. 设置 ROCKETMQ_HOME=D:\Soft\RocketMQ-4.9.0
 2. CMD命令框执行进入bin目录下执行 start mqnamesrv.cmd 和 start mqbroker.cmd -n 127.0.0.1:9876
-3. [https://github.com/apache/rocketmq-externals/tree/master/rocketmq-console](控制台插件)
+3. sh bin/mqbroker -n localhost:9876 -c conf/2m-noslave/broker-b.properties  
+4. [https://github.com/apache/rocketmq-externals/tree/master/rocketmq-console](控制台插件)
 #### 配置
 ```
 mkdir -p  /var/rocketmq/{logs,store/{commitlog,consumequeue,index}}
@@ -24,6 +25,8 @@ docker run -d --name rocketmq-dashboard -e "JAVA_OPTS=-Drocketmq.namesrv.addr=19
  1. 周期超过72小时（默认值） 
  2. 磁盘达到85%水位线（默认值）
 #### 使用
+- 主备OR主从  
+默认情况，读写都发生在主节点上。在slaveReadEnable = true的情况下，slave也可以参与读负载，但是默认只有BrokerId=1 的slave才会参与，而且是在主节点消费慢的情况下，由参数whichBrokerWhenConsumeSlowly决定
 - Group作用  
 
 Producer Group作用如下：标识一类Producer 可以通过运维工具查询这个发送消息应用下有多个Producer实例,发送分布式事务消息时，如果Producer中途意外宕机，Broker会主动回调Producer Group内的任意一台机器来确认 事务状态。
