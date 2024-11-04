@@ -1,24 +1,92 @@
-- 表很大，性能下降  
-如果表有索引：增删改变慢；查询1个或少量查询依然很快；并发大的时候会受到硬盘带宽影响速度。
-- gh-ost
-```sql
-mysql -h 127.0.0.1 -P 3306 -u root
-https://gitee.com/bearkang/mysql-optimization
-```
-- MySQL备份
+## 逻辑架构
 
-```sh
-# mysqlback.sh
-/usr/local/mysql/bin/mysqldump -h127.0.0.1 -uadmin -pBAFfsGD5FNv134A --port=3306 --all-databases -F | gzip >> /run/media/root/db-new/backup/$(date +%Y%m%d_%H%M%S).sql.gz
+<img src="img/逻辑架构.png" style="zoom: 33%;" />
 
-10 01 * * * source /run/media/root/db-new/backup/mysqlback.sh
-```
+#### 客户端
+
+向数据库发送请求（采用数据库连接池，减少频繁的开关连接）
+
+### 服务端
+
+Server 层包括连接器、查询缓存、分析器、优化器、执行器等，涵盖 MySQL 的大多数核心服务功能，以及所有的内置函数（如日期、时间、数学和加密函数等），所有跨存储引擎的功能都在这一层实现，比如存储过程、触发器、视图等。
+
+1. 连接器: 控制用户的连接 权限验证  ```mysql -h 127.0.0.1 -P 3306 -u root```
+
+   - 如果用户名密码认证通过，连接器会到权限表里面查出你拥有的权限。之后，这个连接里面的权限判断逻辑，都将依赖于此时读到的权限。
+
+   - MySQL 在执行过程中临时使用的内存是管理在连接对象里面的。这些资源会在连接断开的时候才释放。（mysql_reset_connection >= 5.7）
+
+     ```mysql
+     -- 客户端如果太长时间没动静，连接器就会自动断开连接 28800秒/8小时
+     show variables like 'wait_timeout';
+     ```
+
+     
+
+2. 分析器: 词法分析/语法分析（AST 抽象语法树）
+
+3. 优化器: 优化SQL语句，规定执行流程（可以查看SQL语句的执行计划，可以采用对应的优化点，来加快查询）
+
+   * RBO 基于规则优化
+   * CBO 基于成本优化
+
+4. 执行器: SQL语句的实际执行组件（判断一下对表  有没有执行查询的权限）
+
+存储引擎：不同的存放位置，不同的文件格式
+
+1. InnoDB: 内存
+2. MyISAM: 磁盘
+3. Memory: 内存
+4. Innodb：frm是表定义文件，ibd是数据文件
+5. Myisam：frm是表定义文件，myd是数据文件，myi是索引文件
+
+## 日志
+
+#### InnoDB
+
+1. 重做日志 redo log
+
+   一组 4 个文件，每个文件的大小是 1GB。
+
+   - 保证事务的原子性和持久性
+   - 物理日志 页的物理修改操作
+   - 循环写 空间固定会用完
+   - 保证即使数据库发生异常重启，之前提交的记录都不会丢失，称为**crash-safe**。
+
+2. 回滚日志 undo log
+
+   - 保证事务一致性 
+   - 逻辑日志 回滚到行记录到某个特定版本 根据每行进行记录
+
+#### Server层
+
+1. 归档日志 binlog
+
+   因为最开始 MySQL 里并没有 InnoDB 引擎。MySQL 自带的引擎是 MyISAM，但是 MyISAM 没有 crash-safe 的能力，binlog 日志只能用于归档。只依靠 binlog 是没有 crash-safe 能力的。
+
+   - 逻辑日志 sql语句 两阶段提交保证数据库使用binlog日志恢复的时候和当时的数据库状态一致。简单说，redo log 和 binlog 都可以用于表示事务的提交状态，而两阶段提交就是让这两个状态保持逻辑上的一致。
+   - 追加写入 文件写到一定大小后会切换到下一个，并不会覆盖以前的日志。
+
+   <img src="img/两阶段提交.png" style="zoom:33%;" />
+
+ 第一个成功第二个失败；先写redo log后写binlog恢复时会少一个事务；先写binlog后写redo log恢复时会多一个事务。
+
+    ```mysql
+    -- 设置成 1 表示每次事务的 redo log 都直接持久化到磁盘
+    show variables like 'innodb_flush_log_at_trx_commit';
+    -- 设置成 1 表示每次事务的 binlog 都持久化到磁盘
+    show variables like 'sync_binlog'
+    ```
 
 
 
-## MYSQL
+## 知识点
 
-#### 优化
+- 表很大 性能下降：  如果表有索引：增删改变慢；查询1个或少量查询依然很快；并发大的时候会受到硬盘带宽影响速度。
+- MVCC非锁定读取
+
+## 优化
+
 - 覆盖索引
 - 最左前缀原则
 - 索引下推 ICP
@@ -37,24 +105,8 @@ https://gitee.com/bearkang/mysql-optimization
 - redo log 主要节省的是随机写磁盘的 IO 消耗（转成顺序写），而 change buffer 主要节省的则是随机读磁盘的 IO 消耗。
 - 在数据库设计中，我们非常强调定长存储，因为定长存储的性能更好。
 - select * from table where coloum = '' for update (如果coloum列是唯一索引，查到数据是行锁，查不到是间隙锁；如果coloum列是普通索引，查不查到数据都是间隙锁；如果coloum列没有索引，是表锁)
-#### 存储引擎
-- Innodb：frm是表定义文件，ibd是数据文件
-- Myisam：frm是表定义文件，myd是数据文件，myi是索引文件
-#### 基础层次
-1. 客户端：向数据库发送请求（采用数据库连接池，减少频繁的开关连接）
-2. 服务端
-    1. 连接器: 控制用户的连接 权限验证
-    2. 分析器: 词法分析/语法分析（AST 抽象语法树）
-    3. 优化器: 优化SQL语句，规定执行流程（可以查看SQL语句的执行计划，可以采用对应的优化点，来加快查询）
-    4. 执行器: SQL语句的实际执行组件
-3. 存储引擎：不同的存放位置，不同的文件格式
-    1. InnoDB: 内存
-    2. MyISAM: 磁盘
-    3. Memory: 内存
-- 优化
-    * RBO 基于规则优化
-    * CBO 基于成本优化
-#### 常用SQL
+- https://gitee.com/bearkang/mysql-optimization
+## 常用SQL
 ```sql
 -- 在第一条select执行完后，才得到事务的一致性快照（所有select 都是以第一条为时间点）
 START TRANSACTION;
@@ -129,7 +181,7 @@ SHOW VARIABLES LIKE 'innodb_deadlock_detect';
 -- 死锁超时时间
 SHOW VARIABLES LIKE 'innodb_lock_wait_timeout';
 ```
-#### 全文索引
+## 全文索引
 ```sql
 ALTER TABLE 表名 ADD FULLTEXT INDEX 索引名称 (字段1,字段2,字段3) WITH PARSER ngram;
 
@@ -138,7 +190,7 @@ my.ini文件下的 [mysqld] 下面加上 ngram_token_size = 2
 
 SELECT * FROM 表名 WHERE MATCH(列名1,列名2) AGAINST(检索内容1 检索内容2);
 ```
-#### 窗口函数
+## 窗口函数
 ![](img/窗口函数.png)
 > 函数 OVER ([PARTITION BY 字段名 ORDER BY 字段名 ASC|DESC])  
 > 函数 OVER 窗口名 … WInDOW 窗口名 AS ([PARTITION BY 字段名 ORDER BY 字段名 ASC|DESC])
@@ -307,3 +359,13 @@ cp /opt/mysql/support-files/mysql.server /etc/init.d/mysql
 chmod +x /etc/init.d/mysql
 chkconfig --add mysql
 ```
+
+## 备份
+
+```sh
+# mysqlback.sh
+/usr/local/mysql/bin/mysqldump -h127.0.0.1 -uadmin -pBAFfsGD5FNv134A --port=3306 --all-databases -F | gzip >> /run/media/root/db-new/backup/$(date +%Y%m%d_%H%M%S).sql.gz
+
+10 01 * * * source /run/media/root/db-new/backup/mysqlback.sh
+```
+
