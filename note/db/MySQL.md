@@ -46,7 +46,7 @@ Server 层包括连接器、查询缓存、分析器、优化器、执行器等�
 
 #### 重做日志 redo log
 
-一组 4 个文件，每个文件的大小是 1GB。
+一组 4 个文件，每个文件的大小是 1GB。如果redo log 设置太小，很快就会被写满，write pos 一直追着 CP。看到的现象就是**磁盘压力很小，但是数据库出现间歇性的性能下跌。**
 
 - 保证事务的原子性和持久性
 - 物理日志 页的物理修改操作
@@ -67,16 +67,56 @@ Server 层包括连接器、查询缓存、分析器、优化器、执行器等�
 - 逻辑日志 sql语句 两阶段提交保证数据库使用binlog日志恢复的时候和当时的数据库状态一致。简单说，redo log 和 binlog 都可以用于表示事务的提交状态，而两阶段提交就是让这两个状态保持逻辑上的一致。
 - 追加写入 文件写到一定大小后会切换到下一个，并不会覆盖以前的日志。
 
-   <img src="img/两阶段提交.png" style="zoom:33%;" />
+   <img src="img/两阶段提交.jpg" style="zoom:33%;" />
 
- 第一个成功第二个失败；先写redo log后写binlog恢复时会少一个事务；先写binlog后写redo log恢复时会多一个事务。
+ 不使用两阶段提交的问题：第一个成功第二个失败；先写redo log后写binlog恢复时会少一个事务；先写binlog后写redo log恢复时会多一个事务。
+
+ MySQL 异常重启恢复过程：
+
+1. 如果 redo log 里面的事务是完整的，也就是已经有了 commit 标识，则直接提交；
+2. 如果 redo log 里面的事务只有完整的 prepare，则判断对应的事务 binlog 是否存在并完整： a. 如果是，则提交事务； b. 否则，回滚事务。
 
     ```mysql
-    -- 设置成 1 表示每次事务的 redo log 都直接持久化到磁盘
+    -- 设置成 1 表示每次事务的 redo log 都直接持久化到磁盘 那么 redo log 在 prepare 阶段就要持久化一次
     show variables like 'innodb_flush_log_at_trx_commit';
     -- 设置成 1 表示每次事务的 binlog 都持久化到磁盘
     show variables like 'sync_binlog'
+    
+    -- 用于控制单个线程内 binlog cache 所占内存的大小。如果超过了这个参数规定的大小，就要暂存到磁盘。
+    show variables like 'binlog_cache_size';
     ```
+
+通常我们说 MySQL 的“双 1”配置，指的就是 sync_binlog 和 innodb_flush_log_at_trx_commit 都设置成 1。也就是说，一个事务完整提交前，需要等待两次刷盘，一次是 redo log（prepare 阶段），一次是 binlog。
+
+设置成“非双 1”场景
+
+- 业务高峰期
+- 备库延迟
+- 用备份恢复主库的副本，应用 binlog 的过程
+- 批量导入数据的时候
+
+为什么 binlog cache 是每个线程自己维护的，而 redo log buffer 是全局共用的？MySQL 这么设计的主要原因是，binlog 是不能“被打断的”。一个事务的 binlog 必须连续写，因此要整个事务完成后，再一起写到文件里。
+
+而 redo log 并没有这个要求，中间有生成的日志可以写到 redo log buffer 中。redo log buffer 中的内容还能“搭便车”，其他事务提交的时候可以被一起写到磁盘中。
+
+为什么会有 mixed 格式的 binlog；因为有些 statement 格式的 binlog 可能会导致主备不一致，所以要使用 row 格式。但 row 格式的缺点是，很占空间。比如你用一个 delete 语句删掉 10 万行数据，用 statement 的话就是一个 SQL 语句被记录到 binlog 中，占用几十个字节的空间。MySQL 就取了个折中方案，也就是有了 mixed 格式的 binlog。mixed 格式的意思是，MySQL 自己会判断这条 SQL 语句是否可能引起主备不一致，如果有可能，就用 row 格式，否则就用 statement 格式。
+
+#### 中转日志（relay log）
+
+io_thread 负责与主库建立连接；sql_thread 读取中转日志，解析出日志里的命令，并执行。
+
+### 组提交（group commit）
+
+WAL 机制主要得益于两个方面：
+
+1. redo log 和 binlog 都是顺序写，磁盘的顺序写比随机写速度要快；
+2. 组提交机制，可以大幅度降低磁盘的 IOPS 消耗。
+
+如果你的 MySQL 现在出现了性能瓶颈，而且瓶颈在 IO 上，可以通过哪些方法来提升性能
+
+1. 设置 binlog_group_commit_sync_delay 和 binlog_group_commit_sync_no_delay_count 参数，减少 binlog 的写盘次数。这个方法是基于“额外的故意等待”来实现的，因此可能会增加语句的响应时间，但没有丢失数据的风险。
+2. 将 sync_binlog 设置为大于 1 的值（比较常见是 100~1000）。这样做的风险是，主机掉电时会丢 binlog 日志。
+3. 将 innodb_flush_log_at_trx_commit 设置为 2。这样做的风险是，主机掉电的时候会丢数据。
 
 ## 隔离&事务
 
@@ -177,6 +217,20 @@ lock tables … read/write。与 FTWRL 类似，可以用 unlock tables 主动�
 
 MySQL 的行锁是在引擎层由各个引擎自己实现的。在 InnoDB 事务中，行锁是在需要的时候才加上的，但并不是不需要了就立刻释放，而是要等到事务结束时才释放。这个就是两阶段锁协议。
 
+### 间隙锁
+
+间隙锁的引入，可能会导致同样的语句锁住更大的范围，这其实是影响了并发度的。
+
+### next-key lock
+
+间隙锁和行锁合称 next-key lock，每个 next-key lock 是前开后闭区间。
+
+- 原则 1：加锁的基本单位是 next-key lock。希望你还记得，next-key lock 是前开后闭区间。
+- 原则 2：查找过程中访问到的对象才会加锁。
+- 优化 1：索引上的等值查询，给唯一索引加锁的时候，next-key lock 退化为行锁。
+- 优化 2：索引上的等值查询，向右遍历时且最后一个值不满足等值条件的时候，next-key lock 退化为间隙锁。
+- 一个 bug：唯一索引上的范围查询会访问到不满足条件的第一个值为止。
+
 ### 死锁
 
 ```mysql
@@ -196,9 +250,9 @@ show variables like 'innodb_deadlock_detect';
 
 #### 悲观锁
 
-- 共享锁 lock in share mode
+- 共享锁 lock in share mode（**当前读**）
 
-- 排他锁 for update
+- 排他锁 for update（**当前读**）
 
 ### 测试结论
 
@@ -289,9 +343,46 @@ show index from T;
   2. 在 CPU 消耗方面，倒序方式每次写和读的时候，都需要额外调用一次 reverse 函数，而 hash 字段的方式需要额外调用一次 crc32() 函数。如果只从这两个函数的计算复杂度来看的话，reverse 函数额外消耗的 CPU 资源会更小些。
   3. 从查询效率上看，使用 hash 字段方式的查询性能相对更稳定一些。因为 crc32 算出来的值虽然有冲突的概率，但是概率非常小，可以认为每次查询的平均扫描行数接近 1。而倒序存储方式毕竟还是用的前缀索引的方式，也就是说还是会增加扫描行数。
 
+### count函数
+
+InnoDB 是索引组织表，主键索引树的叶子节点是数据，而普通索引树的叶子节点是主键值。所以，普通索引树比主键索引树小很多。对于 count(*) 这样的操作，遍历哪个索引树得到的结果逻辑上都是一样的。因此，MySQL 优化器会找到最小的那棵树来遍历。**在保证逻辑正确的前提下，尽量减少扫描的数据量，是数据库系统设计的通用法则之一。**
+
+count() 是一个聚合函数，对于返回的结果集，一行行地判断，如果 count 函数的参数不是 NULL，累计值就加 1，否则不加。最后返回累计值。是server层处理。
+
+- **对于 count(主键 id) 来说**，InnoDB 引擎会遍历整张表，把每一行的 id 值都取出来，返回给 server 层。server 层拿到 id 后，判断是不可能为空的，就按行累加。
+
+- **对于 count(1) 来说**，InnoDB 引擎遍历整张表，但不取值。server 层对于返回的每一行，放一个数字“1”进去，判断是不可能为空的，按行累加。
+
+单看这两个用法的差别的话，你能对比出来，count(1) 执行得要比 count(主键 id) 快。因为从引擎返回 id 会涉及到解析数据行，以及拷贝字段值的操作。
+
+- **对于 count(字段) 来说**：
+
+  1. 如果这个“字段”是定义为 not null 的话，一行行地从记录里面读出这个字段，判断不能为 null，按行累加；
+
+  2. 如果这个“字段”定义允许为 null，那么执行的时候，判断到有可能是 null，还要把值取出来再判断一下，不是 null 才累加。
+
+**但是 count(\*) 是例外**，并不会把全部字段取出来，而是专门做了优化，不取值。
+
+### 排序
+
+- 全字段排序
+- rowid 排序
+
+```mysql
+-- MySQL 为排序开辟的内存（sort_buffer）的大小。如果要排序的数据量小于 sort_buffer_size，排序就在内存中完成。但如果排序数据量太大，内存放不下，则不得不利用磁盘临时文件辅助排序。
+show variables like 'sort_buffer_size';
+-- MySQL 中专门控制用于排序的行数据的长度的一个参数。它的意思是，如果单行的长度超过这个值，MySQL 就认为单行太大，要换一个算法。
+show variables like 'max_length_for_sort_data';
+```
+
+如果内存够，就要多利用内存，尽量减少磁盘访问。对于 InnoDB 表来说，rowid 排序会要求回表多造成磁盘读，因此不会被优先选择。
+
+如果排序字段有索引；那查询出来的数据就是有序的。
+
 ## 知识点
 
 - 表很大 性能下降：  如果表有索引：增删改变慢；查询1个或少量查询依然很快；并发大的时候会受到硬盘带宽影响速度。
+- MySQL 是边读边发的，这就意味着，如果客户端接收得慢，会导致 MySQL 服务端由于结果发不出去，这个事务的执行时间变长。```show variables like 'net_buffer_length';```
 
 ## 优化
 
@@ -303,7 +394,7 @@ show index from T;
 
 - 最左前缀原则
 
-- 覆盖索引
+- 覆盖索引（索引上的信息足够满足查询请求，不需要再回到主键索引上去取数据。）
 
 - 索引下推 ICP
 
@@ -311,11 +402,15 @@ show index from T;
 
 - force index（观察执行计划，诱导优化器使用合适的索引。）
 
-- 关联表 关联字段要有索引 且类型一致
+- 关联表 关联字段要有索引 且类型一致；小表驱动大表
 
-- 对索引字段做函数操作，可能会破坏索引值的有序性，因此优化器就决定放弃走树搜索功能。
+- 条件字段函数操作（可能会破坏索引值的有序性，因此优化器就决定放弃走树搜索功能）条件值在代码层面处理好。
 
-- MRR 因为大多数的数据都是按照主键递增顺序插入得到的，所以我们可以认为，如果按照主键的递增顺序查询的话，对磁盘的读比较接近顺序读，能够提升读性能。
+- 隐式类型转换（在 MySQL 中，字符串和数字做比较的话，是将字符串转换成数字。）所以字符串类型一定使用字符串作为条件。
+
+- 隐式字符编码转换
+
+- MRR 因为大多数的数据都是按照主键递增顺序插入得到的，按照主键的递增顺序查询的话，对磁盘的读比较接近顺序读，能够提升读性能。
 
 - 索引合并（同一张表两个条件都有索引；OR索引取并集；AND索引取交集）
 
@@ -332,6 +427,10 @@ show index from T;
 - 怎么删除表的前 10000 行。在一个连接中循环执行 20 次 delete from T limit 500。（第一种方式单个语句占用时间长，锁的时间也比较长；而且大事务还会导致主从延迟。
 
   第三种方式 在 20 个连接中同时执行会人为造成锁冲突。）
+
+- 字段 b 定义的是 varchar(10)。```select * from T where b='1234567890abcd'```;[服务层做过滤；MySQL没有做优化。](https://learn.lianglianglee.com/%e4%b8%93%e6%a0%8f/MySQL%e5%ae%9e%e6%88%9845%e8%ae%b2/19%20%20%e4%b8%ba%e4%bb%80%e4%b9%88%e6%88%91%e5%8f%aa%e6%9f%a5%e4%b8%80%e8%a1%8c%e7%9a%84%e8%af%ad%e5%8f%a5%ef%bc%8c%e4%b9%9f%e6%89%a7%e8%a1%8c%e8%bf%99%e4%b9%88%e6%85%a2%ef%bc%9f.md)
+
+- MySQL 5.6 版本开始引入的 Online DDL。重建表的时候，InnoDB 不会把整张表占满，每个页留了 1⁄16 给后续的更新用。其实重建表之后不是“最”紧凑的。
 
 - https://gitee.com/bearkang/mysql-optimization
 ## 常用SQL
@@ -394,12 +493,20 @@ ORDER BY start_time DESC LIMIT 50;
 SHOW VARIABLES LIKE '%innodb_io_capacity%';
 -- 是否刷邻页
 SHOW VARIABLES LIKE '%innodb_flush_neighbors%';
+-- 内存的数据页
+SHOW VARIABLES LIKE '%innodb_buffer_pool_size%';
 -- 重新统计索引信息
 ANALYZE TABLE test; 
--- 重建表 回收空间
+-- 重建表 回收表空间
 ALTER TABLE test ENGINE = INNODB;
 -- 大于60s的长事务
 SELECT * FROM information_schema.innodb_trx WHERE TIME_TO_SEC(timediff(now(), trx_started)) > 60;
+
+show processlist;
+select * from information_schema.processlist;
+show variables like 'performance_schema';
+select * from sys.schema_table_lock_waits ;
+
 ```
 ## 全文索引
 ```sql
@@ -410,7 +517,49 @@ my.ini文件下的 [mysqld] 下面加上 ngram_token_size = 2
 
 SELECT * FROM 表名 WHERE MATCH(列名1,列名2) AGAINST(检索内容1 检索内容2);
 ```
+## HA方案
+
+### 主从-读写分离
+
+<img src="./img/一主多从.jpg" style="zoom:50%;" />
+
+一主多从；主从延迟的现象解决方案
+
+- 强制走主库方案
+- ~~配合半同步复制 semi-sync 方案~~
+- 等主库位点方案
+- 等 GTID 方案
+
+### 双主-主备单写
+
+<img src="./img/主备架构.jpg" style="zoom:50%;" />
+
+中间都处于 readonly 状态，这时系统处于不可写状态。在满足数据可靠性的前提下，MySQL 高可用系统的可用性，是依赖于主备延迟的。延迟的时间越小，在主库故障的时候，服务恢复需要的时间就越短，可用性就越高。
+
+主备切换的可用性优先策略会导致数据不一致。因此，大多数情况下，我都建议你使用可靠性优先策略。毕竟对数据服务来说的话，数据的可靠性一般还是要优于可用性的。
+
+双主单写主备循环复制问题
+
+1. 规定两个库的 server id 必须不同，如果相同，则它们之间不能设定为主备关系；不能三节点
+
+2. 一个备库接到 binlog 并在重放的过程中，生成与原 binlog 的 server id 相同的新的 binlog；
+
+3. 每个库在收到从自己的主库发过来的日志后，先判断 server id，如果跟自己的相同，表示这个日志是自己生成的，就直接丢弃这个日志。
+
+### 主备延迟
+
+#### 常见原因
+
+1. 备机性能差
+2. 备库压力大（备库提供一些读能力。或者一些运营后台需要的分析语句）
+3. 大事务
+
+解决方案
+
+1. 备库并行复制能力
+
 ## 窗口函数
+
 ![](img/窗口函数.png)
 > 函数 OVER ([PARTITION BY 字段名 ORDER BY 字段名 ASC|DESC])  
 > 函数 OVER 窗口名 … WInDOW 窗口名 AS ([PARTITION BY 字段名 ORDER BY 字段名 ASC|DESC])
@@ -592,3 +741,5 @@ chkconfig --add mysql
 ## 工具
 
 - Percona 的 pt-kill
+- gh-ost
+- MariaDB 的[Flashback](https://mariadb.com/kb/en/library/flashback/)恢复数据
