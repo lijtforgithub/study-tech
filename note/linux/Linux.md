@@ -1,4 +1,9 @@
 ## Linux
+
+47.103.86.114 node01 
+47.122.0.148 node02 
+root/!Plijt0828
+
 总核数 = 物理CPU个数 * 每颗物理CPU的核数  
 总逻辑CPU数 = 物理CPU个数 * 每颗物理CPU的核数 * 超线程数
 ```
@@ -40,31 +45,55 @@ hwclock -s
 
 （3）查看开放的端口：firewall-cmd --list-ports
 
-（4）开启防火墙端口：firewall-cmd --zone=public --add-port=9200/tcp --permanent
+firewall-cmd --zone=public --add-port=9200/tcp --permanent
+firewall-cmd --zone=public --remove-port=80/tcp --permanent
 ```
 
-| 命令                                               | 说明                      |
-|--------------------------------------------------|-------------------------|
-| uname -a                                         | OS版本                    |
-| ip 4 -a                                          | 查看所有IP                  |
-| cat /proc/version                                | OS                      |
-| runlevel                                         | 运行级别                    |
-| init 3 / systemctl set-default multi-user.target | 指定运行级别                  |
-| ntpdate ntp.api.bz                               | 同步服务器时间                 |
-| df -h                                            | 查看磁盘空间                  |
+| 命令                                             | 说明                                           |
+| ------------------------------------------------ | ---------------------------------------------- |
+| uname -a                                         | OS版本                                         |
+| ip 4 -a                                          | 查看所有IP                                     |
+| cat /proc/version                                | OS                                             |
+| runlevel                                         | 运行级别                                       |
+| init 3 / systemctl set-default multi-user.target | 指定运行级别                                   |
+| ntpdate ntp.api.bz                               | 同步服务器时间                                 |
+| df -h                                            | 查看磁盘空间                                   |
 | df -h .                                          | 查看当前文件夹下的所有文件大小（包含子文件夹） |
-| service network restart                          | 重启网络                    |
-| netstat -nlp                                     |                         |
-| netstat -tunlp \                                 | grep 端口号                | |
-| ss -tanl                                         |                         |
-| lsof -i:端口号                                      | lsof -op $$             |
-| service iptables status                          | 查看状态                    |
-| service iptables stop                            | 关闭                      |
-| chkconfig iptables --list                        | 查看开机启动状态                |
-| chkconfig iptables off                           | 关闭开机启动                  |
-| chkconfig --list                                 | 开机自动启动的服务               |
-| chkconfig --add 服务名                              | 添加开机自动启动服务              |
-| chkconfig --del 服务名                              | 删除开机自动启动服务              |
+| service network restart                          | 重启网络                                       |
+| netstat -nlp                                     |                                                |
+| netstat -tunlp \                                 | grep 端口号                                    |
+| ss -tanl                                         |                                                |
+| lsof -i:端口号                                   | lsof -op $$                                    |
+| service iptables status                          | 查看状态                                       |
+| service iptables stop                            | 关闭                                           |
+| chkconfig iptables --list                        | 查看开机启动状态                               |
+| chkconfig iptables off                           | 关闭开机启动                                   |
+| chkconfig --list                                 | 开机自动启动的服务                             |
+| chkconfig --add 服务名                           | 添加开机自动启动服务                           |
+| chkconfig --del 服务名                           | 删除开机自动启动服务                           |
+| scp -r ./hadoop/ root@node01:`pwd`               | 下发文件                                       |
+
+```shell
+useradd hadoop
+passwd -S hadoop
+passwd hadoop
+id hadoop
+groups hadoop
+
+groupadd hpGroup
+usermod -a -G hpGroup hadoop
+
+cat /etc/group | grep hpGroup
+getent group hpGroup
+
+useradd -g hpGroup h1
+# 附加用户组
+useradd -G hpGroup h2
+userdel h1
+groupdel hpGroup
+```
+
+
 
 ```
 exec 8<> /dev/tcp/wwww.baidu.com/80
@@ -102,6 +131,7 @@ nginx -t
 ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa  
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys  
 chmod 0600 ~/.ssh/authorized_keys
+ssh-copy-id
 ```
 ## CMD
 | 命令 | 说明 |
