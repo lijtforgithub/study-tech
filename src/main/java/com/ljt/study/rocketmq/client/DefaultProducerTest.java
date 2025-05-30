@@ -138,10 +138,31 @@ class DefaultProducerTest {
     void sendWithQueue() {
 //        producer.setDefaultTopicQueueNums();
         // 一个topic(逻辑单位)默认4个queue(物理单位保证消息FIFO)
-        producer.send(new Message(CLIENT_TOPIC, "指定队列消息".getBytes(StandardCharsets.UTF_8)), (mqs, msg, arg) -> {
-            mqs.forEach(q -> log.info(q.toString()));
-            return mqs.get(Integer.parseInt(String.valueOf(arg)));
-        }, "0");
+//        producer.send(new Message(CLIENT_TOPIC, "指定队列消息".getBytes(StandardCharsets.UTF_8)), (mqs, msg, arg) -> {
+//            mqs.forEach(q -> log.info(q.toString()));
+//            return mqs.get(Integer.parseInt(String.valueOf(arg)));
+//        }, "0");
+
+        for (int i = 1; i < 6; i++) {
+            producer.send(new Message(CLIENT_TOPIC, ("0" + i).getBytes(StandardCharsets.UTF_8)), (mqs, msg, arg) -> {
+                mqs.forEach(q -> log.info(q.toString()));
+                return mqs.get(0);
+            }, "0");
+
+            producer.send(new Message(CLIENT_TOPIC, ("1" + i).getBytes(StandardCharsets.UTF_8)), (mqs, msg, arg) -> {
+                mqs.forEach(q -> log.info(q.toString()));
+                return mqs.get(1);
+            }, "1");
+            producer.send(new Message(CLIENT_TOPIC, ("2" + i).getBytes(StandardCharsets.UTF_8)), (mqs, msg, arg) -> {
+                mqs.forEach(q -> log.info(q.toString()));
+                return mqs.get(2);
+            }, "2");
+
+            producer.send(new Message(CLIENT_TOPIC, ("3" + i).getBytes(StandardCharsets.UTF_8)), (mqs, msg, arg) -> {
+                mqs.forEach(q -> log.info(q.toString()));
+                return mqs.get(3);
+            }, "3");
+        }
     }
 
     @Test

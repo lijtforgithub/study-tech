@@ -75,7 +75,7 @@ help @sorted-set
 1. 怎么做CP
 
    全局配置 min-slaves-to-write
-   write命令
+   默认异步 可以通过**`WAIT`** 命令阻塞当前客户端，直到指定数量的从节点确认接收写操作。
 
 2. 二进制安全（hbase也是）
 
@@ -139,7 +139,7 @@ rename KEY NEW_KEY | 修改 key 的名称
 renamenx KEY NEW_KEY | 仅当 newkey 不存在时，将 key 改名为 newkey
 type KEY | 返回 key 所储存的值的类型
 strlen KEY | 二进制安全 同一个中字；客户端编码不同 长度不同 
-object encoding KEY | 执行过incr 命令类型之后 会变成int 防止下次在判断类型 
+object encoding KEY | 执行过incr 命令类型之后 数值会变成int类型 防止下次在判断类型 
 #### string
 1. bitmap 用来做统计 占用空间少
 1. 统计活跃用户
@@ -315,7 +315,7 @@ zscan KEY cursor [match pattern] [count count] | 迭代有序集合中的元素�
 ### 删除策略
 
 1. 惰性删除：当读/写一个已经过期的key时，会触发惰性删除策略，直接删除掉这个过期key。
-2. 主动删除：由于惰性删除策略无法保证冷数据被及时删掉，所以Redis会定期主动淘汰一批已过期的key。当前已用内存超过maxmemory限定时，触发主动清理策略。
+2. 定期删除：由于惰性删除策略无法保证冷数据被及时删掉，Redis 周期性（默认每秒 10 次）随机扫描部分过期 Key，从过期字典中随机抽取 `20` 个 Key（可配置）。删除其中已过期的 Key。如果过期 Key 比例超过 `25%`，则重复执行。当前已用内存超过maxmemory限定时，触发内存回收策略。
 
 ### 内存回收策略
 
