@@ -39,7 +39,7 @@ hwclock -s
 
 二、使用firewall-cmd配置端口
 
-（1）查看防火墙状态：firewall-cmd --state
+（1）查看防火墙状态：ex
 
 （2）重新加载配置：firewall-cmd --reload
 
@@ -72,6 +72,10 @@ firewall-cmd --zone=public --remove-port=80/tcp --permanent
 | chkconfig --add 服务名                           | 添加开机自动启动服务                           |
 | chkconfig --del 服务名                           | 删除开机自动启动服务                           |
 | scp -r ./hadoop/ root@node01:`pwd`               | 下发文件                                       |
+| telnet                                           |                                                |
+| Tcpdump -i any host                              |                                                |
+
+
 
 ```shell
 useradd hadoop

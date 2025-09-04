@@ -27,6 +27,10 @@
     可执行程序就一份在目录，但是内存中存在未来的多个实例需要各自的配置文件，持久化目录等资源。
     service redis_6379 start/stop/status 服务目录 /etc/init.d/
 15. ps -ef | grep redis
+
+本机意外的ip能访问需要修改配置文件.conf
+bind 0.0.0.0
+protected-mode no
 ```
 
 #### 启动&配置

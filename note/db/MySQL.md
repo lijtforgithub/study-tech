@@ -107,7 +107,7 @@ io_thread 负责与主库建立连接；sql_thread 读取中转日志，解析�
 
 ### 组提交（group commit）
 
-WAL 机制主要得益于两个方面：
+WAL （Write-Ahead Logging，预写式日志）机制主要得益于两个方面：
 
 1. redo log 和 binlog 都是顺序写，磁盘的顺序写比随机写速度要快；
 2. 组提交机制，可以大幅度降低磁盘的 IOPS 消耗。
@@ -413,7 +413,7 @@ MyISAM 引擎的自增值保存在数据文件中。InnoDB 引擎的自增值，
 
 ## 优化
 
-- 数据库设计阶段，强调定长存储，性能更好。
+- 数据库设计阶段，数值类型范围更小的类型、字符串定长存储，性能更好；数据量大又要求精度和和效率可以把数值放大后用bigint存储。pk_ uk_ idx_
 
 - 自增主键可以让主键索引尽量地保持递增顺序插入，避免了页分裂，因此索引更紧凑。（在 MySQL 8.0 版本，将自增值的变更记录在了 redo log 中，重启的时候依靠 redo log 恢复重启之前的值）
 
@@ -425,7 +425,7 @@ MyISAM 引擎的自增值保存在数据文件中。InnoDB 引擎的自增值，
 
 - 覆盖索引（索引上的信息足够满足查询请求，不需要再回到主键索引上去取数据。）
 
-- 索引条件下推 ICP（复合索引中的非前导列条件、范围查询后的其他列条件、索引覆盖扫描无法完全满足查询时）
+- 索引条件下推 ICP（复合索引中的非前导列条件、范围查询后的其他列条件、索引覆盖扫描无法完全满足查询时）对于复合索引，不仅可以利用索引中的列来快速定位记录，还可以在不读取整行数据的情况下进一步筛选出符合条件的记录。
 
 - MRR （扫描得到的行ID进行排序）因为大多数的数据都是按照主键递增顺序插入得到的，按照主键的递增顺序查询的话，对磁盘的读比较接近顺序读，能够提升读性能。
 
@@ -462,6 +462,8 @@ MyISAM 引擎的自增值保存在数据文件中。InnoDB 引擎的自增值，
 - MySQL 5.6 版本开始引入的 Online DDL。重建表的时候，InnoDB 不会把整张表占满，每个页留了 1⁄16 给后续的更新用。其实重建表之后不是“最”紧凑的。
 
 - https://gitee.com/bearkang/mysql-optimization
+
+- Oracle使用B*树，非叶子节点也有指针。B+树叶子节点是单向链表；MySQL实现上使用的双向链表。
 ## 常用SQL
 ```sql
 CREATE TABLE IF NOT EXISTS newTabName LIKE tabName;
@@ -794,3 +796,11 @@ chkconfig --add mysql
 - gh-ost
 - MariaDB 的[Flashback](https://mariadb.com/kb/en/library/flashback/)恢复数据
 - 词法分析器ANTLR和Calcite
+
+### HikariCP
+
+HikariCP 为什么快呢？主要有三个方面
+
+- 它使用 FastList 替代 ArrayList，通过初始化的默认值，减少了越界检查的操作；
+- 优化并精简了字节码，通过使用 Javassist，减少了动态代理的性能损耗，比如使用 invokestatic 指令代替 invokevirtual 指令；
+- 实现了无锁的 ConcurrentBag，减少了并发场景下的锁竞争。

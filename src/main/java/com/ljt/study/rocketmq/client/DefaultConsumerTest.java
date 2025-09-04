@@ -67,12 +67,16 @@ public class DefaultConsumerTest {
 
     static MessageListenerOrderly orderMessageListener = (msgList, context) -> {
         log.info("order ... ");
-        msgList.forEach(msg -> log.info("{} < {}", new String(msg.getBody()), context.getMessageQueue()));
+        msgList.forEach(msg -> log.info("[{}] {} < {}", msg.getMsgId(), new String(msg.getBody()), context.getMessageQueue()));
         /**
          * 顺序消费 ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT
          * 默认重新投递无限次 直到消费成功 因为顺序消费 会阻塞后面的消息
          * context.setSuspendCurrentQueueTimeMillis(TimeUnit.SECONDS.toMillis(10)) 设置的间隔时间优先级高于 consumer.setSuspendCurrentQueueTimeMillis(TimeUnit.SECONDS.toMillis(5))
          */
+
+//        if (msgList.size() > 1) {
+//            return ConsumeOrderlyStatus.SUSPEND_CURRENT_QUEUE_A_MOMENT;
+//        }
         return ConsumeOrderlyStatus.SUCCESS;
     };
 
