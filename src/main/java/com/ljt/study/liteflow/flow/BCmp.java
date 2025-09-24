@@ -13,7 +13,15 @@ import org.springframework.stereotype.Component;
 public class BCmp extends NodeComponent {
 
     @Override
+    public boolean isAccess() {
+        return true;
+    }
+
+    @Override
     public void process() throws Exception {
+        if (1 == 1) {
+            return;
+        }
         log.info("Bb");
     }
 

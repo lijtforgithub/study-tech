@@ -2,6 +2,7 @@ package com.ljt.study.liteflow;
 
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -11,6 +12,7 @@ import javax.annotation.Resource;
  * @author LiJingTang
  * @date 2023-05-12 15:24
  */
+@Slf4j
 @SpringBootTest
 class LiteflowBootTest {
 
@@ -20,6 +22,7 @@ class LiteflowBootTest {
     @Test
     void test () {
         LiteflowResponse response = flowExecutor.execute2Resp("test", "arg");
+        log.info("{}", response.getExecuteStepStrWithTime());
     }
 
 }

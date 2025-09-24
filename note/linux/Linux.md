@@ -49,31 +49,31 @@ firewall-cmd --zone=public --add-port=9200/tcp --permanent
 firewall-cmd --zone=public --remove-port=80/tcp --permanent
 ```
 
-| 命令                                             | 说明                                           |
-| ------------------------------------------------ | ---------------------------------------------- |
-| uname -a                                         | OS版本                                         |
-| ip 4 -a                                          | 查看所有IP                                     |
-| cat /proc/version                                | OS                                             |
-| runlevel                                         | 运行级别                                       |
-| init 3 / systemctl set-default multi-user.target | 指定运行级别                                   |
-| ntpdate ntp.api.bz                               | 同步服务器时间                                 |
-| df -h                                            | 查看磁盘空间                                   |
-| df -h .                                          | 查看当前文件夹下的所有文件大小（包含子文件夹） |
-| service network restart                          | 重启网络                                       |
-| netstat -nlp                                     |                                                |
-| netstat -tunlp \                                 | grep 端口号                                    |
-| ss -tanl                                         |                                                |
-| lsof -i:端口号                                   | lsof -op $$                                    |
-| service iptables status                          | 查看状态                                       |
-| service iptables stop                            | 关闭                                           |
-| chkconfig iptables --list                        | 查看开机启动状态                               |
-| chkconfig iptables off                           | 关闭开机启动                                   |
-| chkconfig --list                                 | 开机自动启动的服务                             |
-| chkconfig --add 服务名                           | 添加开机自动启动服务                           |
-| chkconfig --del 服务名                           | 删除开机自动启动服务                           |
-| scp -r ./hadoop/ root@node01:`pwd`               | 下发文件                                       |
-| telnet                                           |                                                |
-| Tcpdump -i any host                              |                                                |
+| 命令                                                        | 说明                                           |
+| ----------------------------------------------------------- | ---------------------------------------------- |
+| uname -a                                                    | OS版本                                         |
+| ip 4 -a                                                     | 查看所有IP                                     |
+| cat /proc/version                                           | OS                                             |
+| runlevel                                                    | 运行级别                                       |
+| init 3 / systemctl set-default multi-user.target            | 指定运行级别                                   |
+| ntpdate ntp.api.bz                                          | 同步服务器时间                                 |
+| df -h                                                       | 查看磁盘空间                                   |
+| df -h .                                                     | 查看当前文件夹下的所有文件大小（包含子文件夹） |
+| service network restart                                     | 重启网络                                       |
+| netstat -nlp                                                |                                                |
+| netstat -tunlp \                                            | grep 端口号                                    |
+| ss -tanl                                                    |                                                |
+| lsof -i:端口号                                              | lsof -op $$                                    |
+| service iptables status                                     | 查看状态                                       |
+| service iptables stop                                       | 关闭                                           |
+| chkconfig iptables --list                                   | 查看开机启动状态                               |
+| chkconfig iptables off                                      | 关闭开机启动                                   |
+| chkconfig --list                                            | 开机自动启动的服务                             |
+| chkconfig --add 服务名                                      | 添加开机自动启动服务                           |
+| chkconfig --del 服务名                                      | 删除开机自动启动服务                           |
+| scp -P 指定目的机器的ssh端口 -r ./hadoop/ root@node01:`pwd` | 下发文件 注意pwd 有``                          |
+| telnet                                                      |                                                |
+| Tcpdump -i any host                                         |                                                |
 
 
 
